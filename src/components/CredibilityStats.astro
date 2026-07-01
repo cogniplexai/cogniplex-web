@@ -1,0 +1,126 @@
+---
+import { marketProof } from '@/data/site';
+---
+
+<section class="block dark">
+  <div class="wrap">
+    <div class="block-hd fade-in">
+      <p class="eyebrow">Por qué ahora</p>
+      <h2 class="sec-h">La oportunidad es real y, por primera vez, está al alcance de la pyme</h2>
+      <p class="sec-lead">
+        No lo decimos solo nosotros. El contexto de mercado indica una oportunidad concreta de
+        aplicar IA a la gestión que antes solo capturaban las grandes empresas.
+      </p>
+    </div>
+
+    <div class="grid-3 stats fade-in">
+      {
+        marketProof.map((s) => (
+          <div class="stat">
+            <p class="stat-q">{s.stat}</p>
+            <p class="stat-src">{s.source}</p>
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="cred-note fade-in">
+      <span class="tag">Ejemplo ilustrativo</span>
+      <p>
+        Una asesoría con un equipo reducido automatiza la elaboración de propuestas: pasa de
+        enviar unas pocas ofertas a la semana a multiplicar su capacidad, sin contratar más
+        personal y sin perder su criterio profesional.
+      </p>
+    </div>
+
+    <div class="cred-cases fade-in">
+      <p class="cred-line">
+        <strong>Nuestro objetivo en cada proyecto es que la solución se pague sola:</strong>
+        que el valor que genera supere con holgura lo que cuesta. Toda transformación parte de una
+        hipótesis de impacto, una línea base y un seguimiento.
+      </p>
+      <div class="placeholder-metrics" role="note">
+        <span class="ph-tag">[PLACEHOLDER — métricas de casos reales]</span>
+        <p>
+          Aquí irán resultados verificables de clientes (horas liberadas, tiempo de ciclo, errores
+          reducidos, velocidad de decisión), documentados con permiso. No publicamos cifras sin
+          validar.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .stat {
+    background: var(--navy-2);
+    border: 1px solid var(--navy-line);
+    border-radius: var(--radius);
+    padding: 28px;
+  }
+  .stat-q {
+    font-family: var(--head);
+    font-weight: 600;
+    font-size: 18px;
+    color: #fff;
+    line-height: 1.4;
+    margin-bottom: 16px;
+  }
+  .stat-src {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--on-navy-2);
+  }
+  .cred-note {
+    background: rgba(0, 128, 128, 0.16);
+    border-left: 3px solid var(--teal-2);
+    border-radius: 4px;
+    padding: 24px 28px;
+    margin: 40px 0 32px;
+  }
+  .cred-note .tag {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--teal-2);
+    display: block;
+    margin-bottom: 8px;
+  }
+  .cred-note p {
+    font-size: 16px;
+    color: #d7dee6;
+    line-height: 1.65;
+  }
+  .cred-line {
+    font-size: 17px;
+    color: var(--on-navy-2);
+    line-height: 1.75;
+    max-width: 760px;
+    margin-bottom: 24px;
+  }
+  .cred-line strong {
+    color: #fff;
+    font-weight: 600;
+  }
+  .placeholder-metrics {
+    border: 1px dashed var(--navy-line);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    max-width: 760px;
+  }
+  .ph-tag {
+    font-family: var(--head);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: var(--teal-2);
+    display: block;
+    margin-bottom: 8px;
+  }
+  .placeholder-metrics p {
+    font-size: 14.5px;
+    color: var(--on-navy-2);
+    line-height: 1.6;
+  }
+</style>

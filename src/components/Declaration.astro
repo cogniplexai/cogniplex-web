@@ -1,0 +1,29 @@
+---
+/**
+ * Declaración de posicionamiento (estilo editorial).
+ * El texto principal va en el slot; se resalta con el color de marca.
+ */
+interface Props {
+  dark?: boolean;
+}
+const { dark = false } = Astro.props;
+---
+
+<section class:list={['declaration', { dark }]}>
+  <div class="wrap">
+    <p class="declaration-text fade-in"><slot /></p>
+  </div>
+</section>
+
+<style>
+  .declaration.dark {
+    background: var(--navy);
+    border-top-color: var(--navy-line);
+  }
+  .declaration.dark :global(.declaration-text) {
+    color: #fff;
+  }
+  .declaration.dark :global(.declaration-text span) {
+    color: var(--on-navy-2);
+  }
+</style>

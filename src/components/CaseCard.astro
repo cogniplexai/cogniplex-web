@@ -1,0 +1,100 @@
+---
+interface Props {
+  title: string;
+  sector: string;
+  area: string;
+  summary: string;
+  metric?: string;
+  metricLabel?: string;
+  placeholder?: boolean;
+}
+const { title, sector, area, summary, metric, metricLabel, placeholder = true } = Astro.props;
+---
+
+<article class="case-card fade-in">
+  <div class="case-tags">
+    <span class="case-tag">{sector}</span>
+    <span class="case-tag">{area}</span>
+  </div>
+  <h3 class="case-title">{title}</h3>
+  <p class="case-summary">{summary}</p>
+  {
+    metric && (
+      <div class="case-metric">
+        <span class="case-metric-value">{metric}</span>
+        <span class="case-metric-label">{metricLabel}</span>
+      </div>
+    )
+  }
+  {placeholder && <span class="case-ph">[PLACEHOLDER — caso pendiente de validar]</span>}
+</article>
+
+<style>
+  .case-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    height: 100%;
+  }
+  .case-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .case-tag {
+    font-family: var(--head);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    color: var(--teal-deep);
+    background: var(--teal-soft);
+    border-radius: 20px;
+    padding: 4px 12px;
+  }
+  .case-title {
+    font-family: var(--head);
+    font-weight: 700;
+    font-size: 21px;
+    color: var(--tx);
+    line-height: 1.2;
+  }
+  .case-summary {
+    font-size: 15.5px;
+    color: var(--tx-2);
+    line-height: 1.65;
+  }
+  .case-metric {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--line);
+    padding-top: 16px;
+    margin-top: auto;
+  }
+  .case-metric-value {
+    font-family: var(--head);
+    font-weight: 800;
+    font-size: 30px;
+    color: var(--teal);
+    line-height: 1;
+  }
+  .case-metric-label {
+    font-size: 13.5px;
+    color: var(--tx-3);
+    margin-top: 6px;
+  }
+  .case-ph {
+    font-family: var(--head);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    color: var(--granate);
+    background: rgba(128, 0, 0, 0.07);
+    border-radius: 5px;
+    padding: 4px 8px;
+    align-self: flex-start;
+  }
+</style>

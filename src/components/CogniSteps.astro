@@ -1,0 +1,129 @@
+---
+import { cogniSteps } from '@/data/cogni';
+
+interface Props {
+  eyebrow?: string;
+  title?: string;
+  lead?: string;
+  dark?: boolean;
+  detailed?: boolean; // muestra la descripción larga de cada paso
+}
+const {
+  eyebrow = 'Método COGNI',
+  title = 'Una ruta de transformación, no un acto de fe',
+  lead = 'COGNI convierte la transformación en un método repetible y creíble. Cada ciclo deja la empresa más preparada para el siguiente.',
+  dark = false,
+  detailed = false,
+} = Astro.props;
+---
+
+<section class:list={['block', 'cogni', { dark }]}>
+  <div class="wrap">
+    <div class="block-hd fade-in">
+      <p class="eyebrow">{eyebrow}</p>
+      <h2 class="sec-h">{title}</h2>
+      <p class="sec-lead">{lead}</p>
+    </div>
+
+    <ol class="cogni-steps fade-in" class:list={[{ detailed }]}>
+      {
+        cogniSteps.map((s) => (
+          <li class="cogni-step">
+            <div class="cogni-letter" aria-hidden="true">{s.letter}</div>
+            <div class="cogni-body">
+              <h3>{s.name}</h3>
+              <p class="cogni-short">{s.short}</p>
+              {detailed && <p class="cogni-desc">{s.description}</p>}
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .cogni-steps {
+    list-style: none;
+    counter-reset: none;
+    margin-top: 8px;
+  }
+  /* Vista resumida: 5 columnas en fila (timeline) */
+  .cogni-steps:not(.detailed) {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 24px;
+  }
+  .cogni-letter {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--head);
+    font-weight: 800;
+    font-size: 22px;
+    color: #fff;
+    background: var(--teal);
+    margin-bottom: 18px;
+    flex-shrink: 0;
+  }
+  .cogni-step h3 {
+    font-family: var(--head);
+    font-weight: 700;
+    font-size: 19px;
+    color: var(--tx);
+    margin-bottom: 8px;
+  }
+  .cogni-short {
+    font-size: 15px;
+    color: var(--tx-2);
+    line-height: 1.6;
+  }
+  .cogni-desc {
+    font-size: 15px;
+    color: var(--tx-2);
+    line-height: 1.7;
+    margin-top: 10px;
+  }
+  /* Vista detallada: filas con letra a la izquierda */
+  .cogni-steps.detailed .cogni-step {
+    display: grid;
+    grid-template-columns: 72px 1fr;
+    gap: 24px;
+    padding: 28px 0;
+    border-top: 1px solid var(--line);
+    align-items: start;
+  }
+  .cogni-steps.detailed .cogni-desc {
+    max-width: 720px;
+  }
+
+  /* Dark variant */
+  .cogni.dark .cogni-step h3 {
+    color: #fff;
+  }
+  .cogni.dark .cogni-short,
+  .cogni.dark .cogni-desc {
+    color: var(--on-navy-2);
+  }
+  .cogni.dark .cogni-steps.detailed .cogni-step {
+    border-top-color: var(--navy-line);
+  }
+
+  @media (max-width: 900px) {
+    .cogni-steps:not(.detailed) {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  @media (max-width: 560px) {
+    .cogni-steps:not(.detailed) {
+      grid-template-columns: 1fr;
+    }
+    .cogni-steps.detailed .cogni-step {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+  }
+</style>

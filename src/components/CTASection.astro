@@ -1,0 +1,62 @@
+---
+import { brand } from '@/config/brand';
+import NodeMotif from '@/components/NodeMotif.astro';
+
+interface Props {
+  title?: string;
+  lead?: string;
+  eyebrow?: string;
+}
+const {
+  eyebrow = 'Empieza por aquí',
+  title = 'Convierte la incertidumbre en una hoja de ruta',
+  lead = 'El Diagnóstico Empresa Aumentada identifica dónde la IA, los datos y la automatización pueden generar valor real en tu empresa, y en qué orden abordarlo.',
+} = Astro.props;
+---
+
+<section class="cta-final dark">
+  <div class="motif-bg" aria-hidden="true"><NodeMotif tone="light" /></div>
+  <div class="wrap cta-in fade-in">
+    <p class="eyebrow">{eyebrow}</p>
+    <h2 class="sec-h">{title}</h2>
+    <p class="sec-lead">{lead}</p>
+    <div class="cta-actions">
+      <a href={brand.cta.href} class="btn btn-primary">{brand.cta.label}</a>
+      <a href="/contacto" class="btn btn-light-ghost">Hablar con un experto</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cta-final {
+    padding: 100px 0;
+    position: relative;
+    overflow: hidden;
+    border-top: 1px solid var(--navy-line);
+  }
+  .motif-bg {
+    position: absolute;
+    right: -40px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 460px;
+    max-width: 55%;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  .cta-in {
+    position: relative;
+    max-width: 720px;
+  }
+  .cta-actions {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 34px;
+  }
+  @media (max-width: 700px) {
+    .motif-bg {
+      display: none;
+    }
+  }
+</style>

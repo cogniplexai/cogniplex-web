@@ -1,0 +1,92 @@
+---
+import type { Pillar } from '@/data/pillars';
+
+interface Props {
+  pillar: Pillar;
+}
+const { pillar } = Astro.props;
+const href = `/servicios/${pillar.slug}`;
+---
+
+<article class="pillar-card fade-in">
+  <div class="pillar-top">
+    <span class="pillar-num">{String(pillar.order).padStart(2, '0')}</span>
+    <h3 class="pillar-name">{pillar.name}</h3>
+    <p class="pillar-obj">{pillar.objective}</p>
+  </div>
+  <ul class="pillar-services">
+    {pillar.services.map((s) => <li>{s.name}</li>)}
+  </ul>
+  <a href={href} class="arrow-link">
+    {pillar.entryLabel}
+    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"
+      ><path d="M4 10h11M11 6l4 4-4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg
+    >
+  </a>
+</article>
+
+<style>
+  .pillar-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+  }
+  .pillar-card:hover {
+    border-color: var(--teal-line);
+    transform: translateY(-3px);
+    box-shadow: 0 20px 44px -30px rgba(0, 80, 80, 0.4);
+  }
+  .pillar-num {
+    font-family: var(--head);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 1px;
+    color: var(--teal);
+  }
+  .pillar-name {
+    font-family: var(--head);
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--tx);
+    margin: 8px 0 10px;
+    line-height: 1.15;
+  }
+  .pillar-obj {
+    font-size: 15.5px;
+    color: var(--tx-2);
+    line-height: 1.6;
+  }
+  .pillar-services {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-top: 1px solid var(--line);
+    padding-top: 18px;
+    margin-top: auto;
+  }
+  .pillar-services li {
+    font-size: 14.5px;
+    color: var(--tx-2);
+    padding-left: 18px;
+    position: relative;
+  }
+  .pillar-services li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 8px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--teal-5);
+  }
+  .arrow-link svg {
+    width: 18px;
+    height: 18px;
+  }
+</style>

@@ -1,0 +1,94 @@
+---
+import type { Service } from '@/data/pillars';
+
+interface Props {
+  service: Service;
+}
+const { service } = Astro.props;
+---
+
+<article class="service-card fade-in">
+  <header class="service-hd">
+    <span class="service-code">{service.code}</span>
+    <h3 class="service-name">{service.name}</h3>
+  </header>
+  <p class="service-promise">{service.promise}</p>
+  <dl class="service-meta">
+    <div>
+      <dt>Para quién</dt>
+      <dd>{service.buyer}</dd>
+    </div>
+    <div>
+      <dt>Entregables</dt>
+      <dd>{service.deliverables}</dd>
+    </div>
+    <div>
+      <dt>Modelo</dt>
+      <dd>{service.model}</dd>
+    </div>
+  </dl>
+</article>
+
+<style>
+  .service-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 30px;
+    transition: border-color 0.25s, box-shadow 0.25s;
+  }
+  .service-card:hover {
+    border-color: var(--teal-line);
+    box-shadow: 0 18px 40px -30px rgba(0, 80, 80, 0.35);
+  }
+  .service-hd {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .service-code {
+    font-family: var(--head);
+    font-weight: 700;
+    font-size: 13px;
+    color: #fff;
+    background: var(--teal);
+    border-radius: 5px;
+    padding: 3px 8px;
+    flex-shrink: 0;
+  }
+  .service-name {
+    font-family: var(--head);
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--tx);
+    line-height: 1.2;
+  }
+  .service-promise {
+    font-size: 15.5px;
+    color: var(--tx-2);
+    line-height: 1.65;
+    margin-bottom: 20px;
+  }
+  .service-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border-top: 1px solid var(--line);
+    padding-top: 18px;
+  }
+  .service-meta dt {
+    font-family: var(--head);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--teal-deep);
+    margin-bottom: 3px;
+  }
+  .service-meta dd {
+    font-size: 14.5px;
+    color: var(--tx-2);
+    line-height: 1.55;
+  }
+</style>

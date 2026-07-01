@@ -1,0 +1,91 @@
+---
+interface Item {
+  q: string;
+  a: string;
+}
+interface Props {
+  items: Item[];
+  eyebrow?: string;
+  title?: string;
+  centered?: boolean;
+}
+const {
+  items,
+  eyebrow = 'Preguntas frecuentes',
+  title = 'Lo que suele preguntarse la dirección antes de empezar',
+  centered = true,
+} = Astro.props;
+---
+
+<section class="block faq-section">
+  <div class="wrap">
+    <div class:list={['block-hd', 'fade-in', { centered }]}>
+      <p class="eyebrow">{eyebrow}</p>
+      <h2 class="sec-h">{title}</h2>
+    </div>
+    <div class="faq-list fade-in">
+      {
+        items.map((item) => (
+          <details>
+            <summary>{item.q}</summary>
+            <p class="faq-a">{item.a}</p>
+          </details>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .block-hd.centered {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .faq-list {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  details {
+    border-bottom: 1px solid var(--line);
+  }
+  summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 24px 0;
+    font-family: var(--head);
+    font-weight: 600;
+    font-size: 18px;
+    color: var(--tx);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: color 0.2s;
+  }
+  summary:hover {
+    color: var(--teal-deep);
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  summary::before {
+    content: '';
+    flex-shrink: 0;
+    width: 0;
+    height: 0;
+    border-left: 9px solid var(--teal);
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    transition: transform 0.22s;
+  }
+  details[open] summary::before {
+    transform: rotate(90deg);
+  }
+  .faq-a {
+    padding: 0 0 26px 25px;
+    font-size: 16px;
+    color: var(--tx-2);
+    line-height: 1.7;
+    max-width: 680px;
+  }
+</style>

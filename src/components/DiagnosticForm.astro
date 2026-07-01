@@ -1,0 +1,219 @@
+---
+import { brand } from '@/config/brand';
+
+interface Props {
+  compact?: boolean;
+}
+const { compact = false } = Astro.props;
+---
+
+<form
+  class="cform"
+  action={brand.formEndpoint}
+  method="POST"
+  data-form="diagnostico"
+>
+  <div class="f-row">
+    <div class="f-field">
+      <label class="f-label" for="fn">Nombre y apellidos</label>
+      <input class="f-input" type="text" id="fn" name="nombre" placeholder="Tu nombre" required />
+    </div>
+    <div class="f-field">
+      <label class="f-label" for="frole">Cargo</label>
+      <input class="f-input" type="text" id="frole" name="cargo" placeholder="CEO, gerente, dirección…" />
+    </div>
+  </div>
+
+  <div class="f-row">
+    <div class="f-field">
+      <label class="f-label" for="fe">Email</label>
+      <input class="f-input" type="email" id="fe" name="email" placeholder="tu@empresa.com" required />
+    </div>
+    <div class="f-field">
+      <label class="f-label" for="fc">Empresa</label>
+      <input class="f-input" type="text" id="fc" name="empresa" placeholder="Nombre de tu empresa" />
+    </div>
+  </div>
+
+  {
+    !compact && (
+      <div class="f-field">
+        <label class="f-label" for="fsize">Tamaño aproximado</label>
+        <select class="f-input" id="fsize" name="tamano">
+          <option value="">Selecciona…</option>
+          <option>Menos de 20 empleados</option>
+          <option>20–50 empleados</option>
+          <option>50–150 empleados</option>
+          <option>150–500 empleados</option>
+          <option>Más de 500 empleados</option>
+        </select>
+      </div>
+    )
+  }
+
+  <div class="f-field">
+    <label class="f-label" for="fm">¿Qué reto de negocio quieres resolver?</label>
+    <textarea
+      class="f-input"
+      id="fm"
+      name="reto"
+      placeholder="Cuéntanos brevemente dónde el crecimiento os está exigiendo más estructura, qué decisiones llegan tarde o qué tareas consumen tiempo cualificado…"
+      required></textarea>
+  </div>
+
+  <label class="f-consent">
+    <input type="checkbox" name="consent" required />
+    <span>He leído y acepto la <a href="/privacidad">Política de privacidad</a>.</span>
+  </label>
+
+  <button type="submit" class="btn btn-primary f-submit">{brand.cta.label}</button>
+</form>
+
+<script>
+  document.querySelectorAll<HTMLFormElement>('form.cform').forEach((form) => {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+      if (!btn) return;
+      const original = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Enviando…';
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { Accept: 'application/json' },
+        });
+        if (res.ok) {
+          form.innerHTML =
+            '<div class="form-ok-box"><h3>¡Gracias!</h3><p>Hemos recibido tu solicitud. Te contactaremos en menos de 24 horas laborables para agendar tu diagnóstico.</p></div>';
+        } else {
+          const data = await res.json().catch(() => ({}));
+          const msg =
+            data?.errors?.[0]?.message ||
+            'No se pudo enviar. Inténtalo de nuevo o escríbenos directamente.';
+          showMsg(form, msg);
+          btn.disabled = false;
+          btn.textContent = original;
+        }
+      } catch {
+        showMsg(form, 'No se pudo enviar. Revisa tu conexión o escríbenos directamente.');
+        btn.disabled = false;
+        btn.textContent = original;
+      }
+    });
+  });
+
+  function showMsg(form: HTMLFormElement, text: string) {
+    let el = form.querySelector<HTMLDivElement>('.form-msg');
+    if (!el) {
+      el = document.createElement('div');
+      el.className = 'form-msg';
+      const submit = form.querySelector('button[type="submit"]');
+      form.insertBefore(el, submit);
+    }
+    el.textContent = text;
+  }
+</script>
+
+<style>
+  .cform {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .f-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .f-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .f-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--on-navy-2);
+  }
+  .f-input {
+    background: var(--navy-2);
+    border: 1px solid var(--navy-line);
+    border-radius: 8px;
+    color: #fff;
+    padding: 13px 15px;
+    font-family: var(--sans);
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .f-input::placeholder {
+    color: #6b7a8c;
+  }
+  .f-input:focus {
+    border-color: var(--teal-2);
+  }
+  select.f-input {
+    appearance: none;
+  }
+  textarea.f-input {
+    resize: vertical;
+    min-height: 120px;
+  }
+  .f-consent {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 14px;
+    color: var(--on-navy-2);
+    line-height: 1.5;
+  }
+  .f-consent input {
+    margin-top: 3px;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    accent-color: var(--teal);
+  }
+  .f-consent a {
+    color: var(--teal-2);
+  }
+  .f-submit {
+    align-self: flex-start;
+    margin-top: 4px;
+  }
+  :global(.form-msg) {
+    font-size: 15px;
+    line-height: 1.6;
+    padding: 14px 16px;
+    border-radius: 8px;
+    background: rgba(255, 90, 90, 0.12);
+    color: #ffd2d2;
+    border: 1px solid rgba(255, 90, 90, 0.4);
+  }
+  :global(.form-ok-box) {
+    background: var(--navy-2);
+    border: 1px solid var(--navy-line);
+    border-radius: var(--radius);
+    padding: 32px 30px;
+  }
+  :global(.form-ok-box h3) {
+    font-family: var(--head);
+    font-weight: 700;
+    font-size: 22px;
+    color: #fff;
+    margin-bottom: 8px;
+  }
+  :global(.form-ok-box p) {
+    color: var(--on-navy-2);
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  @media (max-width: 560px) {
+    .f-row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

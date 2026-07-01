@@ -1,0 +1,62 @@
+---
+import { tensionPoints } from '@/data/site';
+
+interface Props {
+  eyebrow?: string;
+  title?: string;
+  lead?: string;
+}
+const {
+  eyebrow = 'El punto de partida',
+  title = 'Crecer se ha vuelto más exigente de lo que debería',
+  lead = 'Muchas pymes sienten a la vez cuatro tensiones. No es falta de esfuerzo: es que la forma de crecer de siempre ha tocado techo.',
+} = Astro.props;
+---
+
+<section class="block">
+  <div class="wrap">
+    <div class="block-hd fade-in">
+      <p class="eyebrow">{eyebrow}</p>
+      <h2 class="sec-h">{title}</h2>
+      <p class="sec-lead">{lead}</p>
+    </div>
+    <div class="grid-4 tension fade-in">
+      {
+        tensionPoints.map((t) => (
+          <div class="tension-item">
+            <span class="tension-dot" aria-hidden="true" />
+            <h3>{t.title}</h3>
+            <p>{t.text}</p>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .tension-item {
+    padding-top: 22px;
+    border-top: 2px solid var(--line-2);
+  }
+  .tension-dot {
+    display: block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--teal);
+    margin-bottom: 16px;
+  }
+  .tension-item h3 {
+    font-family: var(--head);
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--tx);
+    margin-bottom: 8px;
+  }
+  .tension-item p {
+    font-size: 15px;
+    color: var(--tx-2);
+    line-height: 1.6;
+  }
+</style>

@@ -1,0 +1,72 @@
+---
+import { resultsByArea } from '@/data/site';
+
+interface Props {
+  dark?: boolean;
+}
+const { dark = false } = Astro.props;
+---
+
+<section class:list={['block', 'results', { dark }]}>
+  <div class="wrap">
+    <div class="block-hd fade-in">
+      <p class="eyebrow">Resultados por área</p>
+      <h2 class="sec-h">Qué cambia en cada parte de tu empresa</h2>
+      <p class="sec-lead">
+        Una empresa aumentada por IA no es una empresa con muchos pilotos. Es una empresa en la
+        que la inteligencia amplía —de forma medible— la capacidad de las personas.
+      </p>
+    </div>
+    <div class="results-list fade-in">
+      {
+        resultsByArea.map((r) => (
+          <div class="result-row">
+            <div class="result-area">{r.area}</div>
+            <p class="result-text">{r.text}</p>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .results-list {
+    border-top: 1px solid var(--line);
+  }
+  .result-row {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 32px;
+    padding: 24px 0;
+    border-bottom: 1px solid var(--line);
+    align-items: baseline;
+  }
+  .result-area {
+    font-family: var(--head);
+    font-weight: 700;
+    font-size: 19px;
+    color: var(--teal-deep);
+  }
+  .result-text {
+    font-size: 16.5px;
+    color: var(--tx-2);
+    line-height: 1.65;
+  }
+  .results.dark .results-list,
+  .results.dark .result-row {
+    border-color: var(--navy-line);
+  }
+  .results.dark .result-area {
+    color: var(--teal-2);
+  }
+  .results.dark .result-text {
+    color: var(--on-navy-2);
+  }
+  @media (max-width: 700px) {
+    .result-row {
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
+  }
+</style>
