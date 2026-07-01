@@ -1,0 +1,60 @@
+---
+// Banner de cookies mínimo: solo almacenamiento técnico + fuentes de terceros.
+---
+<div id="cookie-banner" class="cookie-banner" hidden>
+  <div class="wrap cb-in">
+    <p>
+      Usamos almacenamiento técnico necesario y servicios de terceros (como Google Fonts). No
+      usamos cookies de seguimiento ni de publicidad. Más información en la
+      <a href="/cookies">Política de cookies</a>.
+    </p>
+    <button id="cookie-accept" class="btn btn-primary">Aceptar</button>
+  </div>
+</div>
+
+<script>
+  const banner = document.getElementById('cookie-banner');
+  if (banner && !localStorage.getItem('cgx-cookies')) banner.hidden = false;
+  document.getElementById('cookie-accept')?.addEventListener('click', () => {
+    localStorage.setItem('cgx-cookies', '1');
+    if (banner) banner.hidden = true;
+  });
+</script>
+
+<style>
+  .cookie-banner {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 200;
+    background: var(--navy);
+    border-top: 1px solid var(--navy-line);
+  }
+  .cb-in {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .cookie-banner p {
+    font-size: 14px;
+    color: var(--on-navy-2);
+    margin: 0;
+    max-width: 760px;
+    line-height: 1.5;
+  }
+  .cookie-banner a {
+    color: var(--teal-2);
+  }
+  .cookie-banner .btn {
+    flex-shrink: 0;
+    padding: 11px 22px;
+  }
+  .cookie-banner[hidden] {
+    display: none;
+  }
+</style>

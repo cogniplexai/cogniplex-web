@@ -1,0 +1,75 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+interface Props {
+  title: string;
+  updated: string;
+  path: string;
+}
+const { title, updated, path } = Astro.props;
+---
+
+<BaseLayout title={title} path={path} description={`${title} de Cogniplex.`}>
+  <article class="legal">
+    <div class="wrap legal-wrap">
+      <h1>{title}</h1>
+      <p class="legal-updated">Última actualización: {updated}</p>
+      <div class="legal-body">
+        <slot />
+      </div>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .legal {
+    padding: calc(var(--nav-h) + 56px) 0 80px;
+  }
+  .legal-wrap {
+    max-width: 760px;
+  }
+  .legal h1 {
+    font-family: var(--head);
+    font-weight: 800;
+    font-size: clamp(30px, 4vw, 40px);
+    letter-spacing: -0.8px;
+    color: var(--tx);
+  }
+  .legal-updated {
+    font-size: 14px;
+    color: var(--tx-3);
+    margin: 12px 0 36px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--line);
+  }
+  .legal-body :global(h2) {
+    font-family: var(--head);
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--tx);
+    margin: 34px 0 12px;
+  }
+  .legal-body :global(p),
+  .legal-body :global(li) {
+    font-size: 16px;
+    color: var(--tx-2);
+    line-height: 1.7;
+    margin-bottom: 14px;
+  }
+  .legal-body :global(ul) {
+    padding-left: 22px;
+    margin-bottom: 14px;
+  }
+  .legal-body :global(li) {
+    list-style: disc;
+    margin-bottom: 8px;
+  }
+  .legal-body :global(a) {
+    color: var(--teal-deep);
+    text-decoration: underline;
+  }
+  .legal-body :global(.ph) {
+    color: var(--granate);
+    font-weight: 600;
+  }
+</style>

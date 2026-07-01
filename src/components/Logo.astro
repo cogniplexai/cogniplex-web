@@ -1,0 +1,72 @@
+---
+/**
+ * Logo Cogniplex: conglomerado de círculos teal (símbolo) + wordmark.
+ * variant: 'full' (símbolo + nombre) | 'symbol' | 'wordmark'
+ */
+import { brand } from '@/config/brand';
+
+interface Props {
+  variant?: 'full' | 'symbol' | 'wordmark';
+  size?: number; // alto del símbolo en px
+  onDark?: boolean; // wordmark en blanco
+  class?: string;
+}
+const { variant = 'full', size = 34, onDark = false, class: cls = '' } = Astro.props;
+const showSymbol = variant === 'full' || variant === 'symbol';
+const showWord = variant === 'full' || variant === 'wordmark';
+---
+
+<span class={`logo ${cls}`} aria-label={brand.name}>
+  {showSymbol && (
+    <svg
+      class="logo-symbol"
+      width={size}
+      height={size}
+      viewBox="-5 -5 210 210"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      role="img"
+    >
+      <circle cx="133.10" cy="72.31" r="18.30" fill="#3f8a8a" />
+      <circle cx="66.29" cy="126.41" r="18.73" fill="#3e8a89" />
+      <circle cx="101.88" cy="115.50" r="14.74" fill="#196b6a" />
+      <circle cx="143.52" cy="111.23" r="18.33" fill="#418c8c" />
+      <circle cx="76.35" cy="74.52" r="23.55" fill="#338180" />
+      <circle cx="113.16" cy="162.03" r="16.49" fill="#5ba2a1" />
+      <circle cx="148.62" cy="144.90" r="11.86" fill="#5fa5a4" />
+      <circle cx="134.70" cy="39.11" r="7.65" fill="#64a9a9" />
+      <circle cx="66.76" cy="31.07" r="10.29" fill="#6db1b0" />
+      <circle cx="100.85" cy="48.56" r="7.75" fill="#4a9493" />
+      <circle cx="20.58" cy="80.51" r="7.66" fill="#75b7b6" />
+      <circle cx="38.57" cy="97.52" r="7.85" fill="#589f9f" />
+      <circle cx="59.54" cy="163.54" r="9.52" fill="#6cafaf" />
+      <circle cx="167.11" cy="67.06" r="9.17" fill="#6bafae" />
+      <circle cx="19.96" cy="111.09" r="7.76" fill="#73b5b5" />
+      <circle cx="99.35" cy="19.77" r="8.13" fill="#72b5b5" />
+      <circle cx="81.80" cy="162.55" r="7.76" fill="#5da4a3" />
+    </svg>
+  )}
+  {showWord && <span class={`logo-word ${onDark ? 'on-dark' : ''}`}>{brand.name}</span>}
+</span>
+
+<style>
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+  }
+  .logo-symbol {
+    flex-shrink: 0;
+  }
+  .logo-word {
+    font-family: var(--head);
+    font-weight: 700;
+    font-size: 1.28em;
+    letter-spacing: -0.6px;
+    color: var(--tx);
+    line-height: 1;
+  }
+  .logo-word.on-dark {
+    color: #fff;
+  }
+</style>

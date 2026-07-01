@@ -1,0 +1,184 @@
+---
+import { brand } from '@/config/brand';
+import Logo from '@/components/Logo.astro';
+
+interface Props {
+  transparent?: boolean;
+}
+const { transparent = false } = Astro.props;
+const current = Astro.url.pathname.replace(/\/$/, '') || '/';
+const isActive = (href: string) => current === href || current.startsWith(href + '/');
+---
+
+<nav id="site-nav" class={transparent ? 'transparent' : 'opaque'} aria-label="Principal">
+  <div class="wrap nav-in">
+    <a href="/" class="nav-logo" aria-label={`${brand.name} — inicio`}>
+      <Logo size={30} />
+    </a>
+
+    <button
+      id="nav-toggle"
+      class="nav-toggle"
+      aria-label="Abrir menú"
+      aria-expanded="false"
+      aria-controls="nav-menu"
+    >
+      <span></span><span></span><span></span>
+    </button>
+
+    <div id="nav-menu" class="nav-menu">
+      <ul class="nav-links">
+        {
+          brand.nav.map((item) => (
+            <li>
+              <a href={item.href} class={isActive(item.href) ? 'active' : ''}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <a href={brand.cta.href} class="nav-cta">{brand.cta.labelShort}</a>
+    </div>
+  </div>
+</nav>
+
+<style>
+  #site-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    min-height: var(--nav-h);
+    z-index: 100;
+    transition: background 0.25s, border-color 0.25s, box-shadow 0.25s;
+    border-bottom: 1px solid transparent;
+  }
+  /* Sobre hero oscuro */
+  #site-nav.transparent {
+    background: transparent;
+  }
+  #site-nav.transparent :global(.logo-word),
+  #site-nav.transparent .nav-links a {
+    color: rgba(255, 255, 255, 0.86);
+  }
+  #site-nav.transparent .nav-links a:hover,
+  #site-nav.transparent .nav-links a.active {
+    color: #fff;
+  }
+  /* Opaca por defecto (páginas interiores) */
+  #site-nav.opaque,
+  #site-nav.solid {
+    background: rgba(244, 246, 247, 0.88);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom-color: var(--line);
+  }
+
+  .nav-in {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: var(--nav-h);
+  }
+  .nav-menu {
+    display: flex;
+    align-items: center;
+    gap: 34px;
+  }
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+  }
+  .nav-links a {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--tx-2);
+    transition: color 0.2s;
+  }
+  .nav-links a:hover,
+  .nav-links a.active {
+    color: var(--teal-deep);
+  }
+  .nav-cta {
+    font-family: var(--head);
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    background: var(--teal);
+    padding: 10px 18px;
+    border-radius: 8px;
+    transition: background 0.2s;
+  }
+  .nav-cta:hover {
+    background: var(--teal-deep);
+  }
+
+  .nav-toggle {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: 0;
+    padding: 8px;
+  }
+  .nav-toggle span {
+    width: 24px;
+    height: 2px;
+    background: var(--tx);
+    transition: background 0.2s;
+  }
+  #site-nav.transparent .nav-toggle span {
+    background: #fff;
+  }
+
+  @media (max-width: 900px) {
+    .nav-toggle {
+      display: flex;
+    }
+    .nav-menu {
+      position: absolute;
+      top: var(--nav-h);
+      left: 0;
+      right: 0;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      padding: 12px 22px 22px;
+      box-shadow: 0 18px 40px -30px rgba(0, 0, 0, 0.4);
+      display: none;
+    }
+    #site-nav.open .nav-menu {
+      display: flex;
+    }
+    /* En móvil el menú siempre es sobre fondo claro */
+    #site-nav.transparent.open {
+      background: rgba(244, 246, 247, 0.96);
+      backdrop-filter: blur(12px);
+    }
+    #site-nav.transparent.open :global(.logo-word) {
+      color: var(--tx);
+    }
+    #site-nav.transparent.open .nav-toggle span {
+      background: var(--tx);
+    }
+    .nav-links {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+    }
+    #site-nav .nav-menu .nav-links a {
+      display: block;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--line);
+      color: var(--tx);
+    }
+    .nav-cta {
+      margin-top: 16px;
+      text-align: center;
+    }
+  }
+</style>

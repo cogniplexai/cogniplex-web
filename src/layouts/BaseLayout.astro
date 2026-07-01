@@ -1,0 +1,123 @@
+---
+import '@/styles/global.css';
+import { brand } from '@/config/brand';
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+import CookieBanner from '@/components/CookieBanner.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** Ruta canónica relativa, ej. '/servicios'. */
+  path?: string;
+  /** Cabecera transparente sobre hero oscuro (home/landings). */
+  transparentNav?: boolean;
+}
+const {
+  title,
+  description = brand.description,
+  path = Astro.url.pathname,
+  transparentNav = false,
+} = Astro.props;
+
+const fullTitle = title ? `${title} · ${brand.name}` : `${brand.name} — ${brand.claim}`;
+const canonical = new URL(path, brand.url).href;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content="es_ES" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'Organization',
+        name: brand.name,
+        url: brand.url,
+        email: brand.email,
+        description: brand.description,
+        slogan: brand.claim,
+      })}
+    />
+  </head>
+  <body>
+    <a href="#main" class="skip-link">Saltar al contenido</a>
+    <Header transparent={transparentNav} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+    <CookieBanner />
+
+    <script>
+      // Cabecera: sólida al hacer scroll.
+      const nav = document.getElementById('site-nav');
+      if (nav) {
+        const setNav = () => nav.classList.toggle('solid', window.scrollY > 16);
+        setNav();
+        window.addEventListener('scroll', setNav, { passive: true });
+      }
+
+      // Menú móvil.
+      const toggle = document.getElementById('nav-toggle');
+      const menu = document.getElementById('nav-menu');
+      toggle?.addEventListener('click', () => {
+        const open = nav?.classList.toggle('open');
+        toggle.setAttribute('aria-expanded', String(!!open));
+      });
+
+      // Fade-in discreto al entrar en viewport.
+      const io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              e.target.classList.add('visible');
+              io.unobserve(e.target);
+            }
+          });
+        },
+        { threshold: 0.14 }
+      );
+      document.querySelectorAll('.fade-in').forEach((el) => io.observe(el));
+    </script>
+
+    <style>
+      .skip-link {
+        position: absolute;
+        left: -999px;
+        top: 0;
+        z-index: 300;
+        background: var(--teal);
+        color: #fff;
+        padding: 10px 16px;
+        border-radius: 0 0 8px 0;
+        font-weight: 600;
+      }
+      .skip-link:focus {
+        left: 0;
+      }
+    </style>
+  </body>
+</html>
