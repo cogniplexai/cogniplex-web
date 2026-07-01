@@ -1,0 +1,38 @@
+---
+import LegalLayout from '@/layouts/LegalLayout.astro';
+import { brand } from '@/config/brand';
+---
+
+<LegalLayout title="Política de cookies" updated="julio de 2026" path="/cookies">
+  <h2>1. Qué son las cookies</h2>
+  <p>
+    Una cookie es un pequeño archivo que se almacena en tu dispositivo al visitar una web. Este
+    sitio hace un uso mínimo de almacenamiento y no utiliza cookies de seguimiento ni de publicidad.
+  </p>
+
+  <h2>2. Qué usamos en este sitio</h2>
+  <ul>
+    <li>
+      <strong>Almacenamiento técnico necesario:</strong> recordamos localmente que has aceptado este
+      aviso (<code>localStorage</code>), para no volver a mostrártelo.
+    </li>
+    <li>
+      <strong>Fuentes de terceros:</strong> cargamos tipografías desde Google Fonts, lo que implica
+      una conexión a servidores de Google. No instalamos cookies de análisis ni publicitarias.
+    </li>
+  </ul>
+
+  <h2>3. Cómo gestionarlas</h2>
+  <p>
+    Puedes borrar el almacenamiento local y bloquear cookies desde la configuración de tu navegador.
+    El sitio seguirá funcionando con normalidad.
+  </p>
+
+  <h2>4. Contacto</h2>
+  <p>
+    Para cualquier duda sobre esta política, escríbenos a
+    <a href={`mailto:${brand.email}`}>{brand.email}</a>.
+  </p>
+
+  <p><em class="ph">Texto orientativo. Revísalo si añades servicios de terceros con cookies.</em></p>
+</LegalLayout>

@@ -1,0 +1,123 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Hero from '@/components/Hero.astro';
+import CTASection from '@/components/CTASection.astro';
+import { solutions } from '@/data/solutions';
+
+export function getStaticPaths() {
+  return solutions.map((sol) => ({ params: { slug: sol.slug }, props: { sol } }));
+}
+
+const { sol } = Astro.props;
+---
+
+<BaseLayout title={sol.metaTitle} description={sol.metaDescription} path={`/soluciones/${sol.slug}`}>
+  <Hero variant="interior" eyebrow={sol.eyebrow} title={sol.h1} lead={sol.lead} />
+
+  <!-- Señales / dolor -->
+  <section class="block">
+    <div class="wrap">
+      <div class="sol-cols">
+        <div class="block-hd fade-in" style="margin-bottom:0">
+          <p class="eyebrow">¿Te suena?</p>
+          <h2 class="sec-h">Señales de que es el momento</h2>
+        </div>
+        <ul class="pains fade-in">
+          {sol.pains.map((p) => <li>{p}</li>)}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Enfoque -->
+  <section class="block soft">
+    <div class="wrap">
+      <div class="block-hd fade-in">
+        <p class="eyebrow">Cómo lo abordamos</p>
+        <h2 class="sec-h">Nuestro enfoque</h2>
+        <p class="sec-lead">
+          Siempre desde el negocio: primero el resultado y el proceso, después la tecnología.
+        </p>
+      </div>
+      <div class="grid-3">
+        {
+          sol.approach.map((a) => (
+            <div class="approach fade-in">
+              <span class="approach-dot" aria-hidden="true" />
+              <h3>{a.title}</h3>
+              <p>{a.text}</p>
+            </div>
+          ))
+        }
+      </div>
+      <p class="lead-note fade-in" style="margin-top:34px">
+        Esta capacidad forma parte del pilar
+        <a class="arrow-link" href={sol.relatedPillar.href}>{sol.relatedPillar.name}</a>
+      </p>
+    </div>
+  </section>
+
+  <CTASection
+    eyebrow="El siguiente paso"
+    title="Empieza por entender dónde está tu valor"
+    lead="El Diagnóstico Empresa Aumentada prioriza esta y otras oportunidades en una hoja de ruta accionable."
+  />
+</BaseLayout>
+
+<style>
+  .sol-cols {
+    display: grid;
+    grid-template-columns: 0.8fr 1.2fr;
+    gap: 48px;
+    align-items: start;
+  }
+  .pains li {
+    position: relative;
+    padding: 16px 0 16px 30px;
+    border-bottom: 1px solid var(--line);
+    font-size: 16.5px;
+    color: var(--tx);
+    line-height: 1.55;
+  }
+  .pains li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 22px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--teal-soft);
+    border: 2px solid var(--teal);
+  }
+  .approach {
+    padding-top: 20px;
+    border-top: 2px solid var(--line-2);
+  }
+  .approach-dot {
+    display: block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--teal);
+    margin-bottom: 14px;
+  }
+  .approach h3 {
+    font-family: var(--head);
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--tx);
+    margin-bottom: 8px;
+  }
+  .approach p {
+    font-size: 15px;
+    color: var(--tx-2);
+    line-height: 1.6;
+  }
+  @media (max-width: 820px) {
+    .sol-cols {
+      grid-template-columns: 1fr;
+      gap: 28px;
+    }
+  }
+</style>

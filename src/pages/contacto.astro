@@ -1,0 +1,97 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import DiagnosticForm from '@/components/DiagnosticForm.astro';
+import { brand } from '@/config/brand';
+---
+
+<BaseLayout
+  title="Contacto"
+  description="Habla con Cogniplex. Cuéntanos tu reto de negocio y detectamos dónde la IA puede ayudarte."
+  path="/contacto"
+>
+  <section class="block dark contact-hero">
+    <div class="wrap">
+      <div class="contact-grid">
+        <div class="fade-in">
+          <p class="eyebrow">Contacto</p>
+          <h1 class="sec-h">Hablemos de tu empresa, no de tecnología</h1>
+          <p class="sec-lead">
+            Cuéntanos tu reto. En una primera conversación detectamos dónde la IA puede ayudarte y te
+            decimos con franqueza si podemos aportar. Sin compromiso y sin jerga.
+          </p>
+
+          <div class="c-detail">
+            <div class="c-detail-l">Email</div>
+            <div class="c-detail-v"><a href={`mailto:${brand.email}`}>{brand.email}</a></div>
+          </div>
+          <div class="c-detail">
+            <div class="c-detail-l">Dónde estamos</div>
+            <div class="c-detail-v">{brand.location}</div>
+          </div>
+          <div class="c-detail">
+            <div class="c-detail-l">LinkedIn</div>
+            <div class="c-detail-v"><a href={brand.social.linkedin} target="_blank" rel="noopener">/cogniplex</a></div>
+          </div>
+
+          <div class="c-cta-note">
+            ¿Prefieres ir al grano? Solicita directamente tu
+            <a href="/diagnostico">Diagnóstico Empresa Aumentada</a>.
+          </div>
+        </div>
+
+        <div class="fade-in">
+          <DiagnosticForm />
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .contact-hero {
+    padding-top: calc(var(--nav-h) + 72px);
+    border-top: 0;
+  }
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: start;
+  }
+  .c-detail {
+    margin-top: 24px;
+  }
+  .c-detail-l {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--on-navy-2);
+    margin-bottom: 4px;
+  }
+  .c-detail-v {
+    font-size: 16px;
+    color: var(--on-navy);
+  }
+  .c-detail-v a:hover {
+    color: var(--teal-2);
+  }
+  .c-cta-note {
+    margin-top: 34px;
+    padding-top: 22px;
+    border-top: 1px solid var(--navy-line);
+    font-size: 15px;
+    color: var(--on-navy-2);
+    line-height: 1.6;
+  }
+  .c-cta-note a {
+    color: var(--teal-2);
+    font-weight: 600;
+  }
+  @media (max-width: 900px) {
+    .contact-grid {
+      grid-template-columns: 1fr;
+      gap: 44px;
+    }
+  }
+</style>

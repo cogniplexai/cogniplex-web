@@ -1,0 +1,211 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Hero from '@/components/Hero.astro';
+import DiagnosticForm from '@/components/DiagnosticForm.astro';
+import FAQ from '@/components/FAQ.astro';
+import { brand } from '@/config/brand';
+
+const includes = [
+  { t: 'Entrevistas con dirección', d: 'Conversaciones con las personas que conocen los procesos, los datos y las decisiones clave.' },
+  { t: 'Mapa de oportunidades', d: 'Dónde la IA, los datos y la automatización pueden generar valor de negocio de forma viable.' },
+  { t: 'Evaluación de madurez', d: 'Punto de partida real en datos, procesos, personas y gobierno.' },
+  { t: 'Matriz impacto-esfuerzo', d: 'Casos de uso priorizados por valor y viabilidad, no por novedad técnica.' },
+  { t: 'Hipótesis de ROI', d: 'Una primera estimación de retorno con línea base y forma de medirlo.' },
+  { t: 'Roadmap de 90-180 días', d: 'Dos o tres iniciativas de alto valor y una recomendación de gobierno.' },
+];
+
+const steps = [
+  { n: '1', t: 'Sesión inicial', d: 'Una conversación breve para entender tu tensión de negocio y confirmar el encaje.' },
+  { n: '2', t: 'Inmersión', d: 'Entrevistas y análisis de procesos, datos y puntos de dolor con las personas clave.' },
+  { n: '3', t: 'Priorización', d: 'Convertimos los hallazgos en oportunidades priorizadas por impacto y esfuerzo.' },
+  { n: '4', t: 'Entrega y decisión', d: 'Presentamos el mapa, el roadmap y la recomendación. Tú decides el siguiente paso.' },
+];
+
+const faqDiag = [
+  { q: '¿El diagnóstico tiene coste?', a: 'Sí. Es un producto de alcance cerrado con entregables claros: es útil por sí mismo aunque no continúes con nosotros. No regalamos diagnósticos profundos porque son propiedad intelectual y la base de una relación de calidad.' },
+  { q: '¿Cuánto dura?', a: 'Depende del tamaño y la complejidad, pero está diseñado para entregar prioridades y una hoja de ruta en pocas semanas, no en meses.' },
+  { q: '¿Qué necesito tener preparado?', a: 'Nada especial. Partimos de donde estés. Necesitamos acceso a las personas que conocen los procesos y disposición de la dirección para participar.' },
+  { q: '¿Y después del diagnóstico?', a: 'Tú decides. El diagnóstico deja un roadmap accionable; podemos acompañarte en la ejecución (dirección fractional, transformación, formación, evolución) o puedes ejecutarlo por tu cuenta.' },
+];
+---
+
+<BaseLayout
+  title="Solicitar Diagnóstico Empresa Aumentada"
+  description="El Diagnóstico Empresa Aumentada convierte la incertidumbre en prioridades y una hoja de ruta de 90-180 días. El punto de entrada de Cogniplex."
+  path="/diagnostico"
+>
+  <Hero
+    variant="interior"
+    eyebrow="El punto de entrada"
+    title={`Diagnóstico <span class="em">Empresa Aumentada</span>`}
+    lead="Convierte una preocupación difusa en prioridades claras y una hoja de ruta accionable. Empezar por el diagnóstico —y no por la herramienta— crea foco, credibilidad y una inversión que se puede medir."
+    primaryCta={{ label: 'Solicitar mi diagnóstico', href: '#solicitar' }}
+    secondaryCta={{ label: 'Ver qué incluye', href: '#incluye' }}
+  />
+
+  <!-- Qué incluye -->
+  <section class="block" id="incluye">
+    <div class="wrap">
+      <div class="block-hd fade-in">
+        <p class="eyebrow">Qué incluye</p>
+        <h2 class="sec-h">Entregables claros, no una presentación bonita</h2>
+      </div>
+      <div class="incl-grid">
+        {
+          includes.map((i) => (
+            <div class="incl fade-in">
+              <span class="incl-dot" aria-hidden="true" />
+              <h3>{i.t}</h3>
+              <p>{i.d}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Cómo funciona -->
+  <section class="block soft">
+    <div class="wrap">
+      <div class="block-hd fade-in">
+        <p class="eyebrow">Cómo funciona</p>
+        <h2 class="sec-h">Cuatro pasos, sin fricción para tu equipo</h2>
+      </div>
+      <div class="grid-4 steps">
+        {
+          steps.map((s) => (
+            <div class="dstep fade-in">
+              <span class="dstep-n">{s.n}</span>
+              <h3>{s.t}</h3>
+              <p>{s.d}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Formulario -->
+  <section class="block dark" id="solicitar">
+    <div class="wrap">
+      <div class="diag-grid">
+        <div class="fade-in">
+          <p class="eyebrow">Solicítalo</p>
+          <h2 class="sec-h">{brand.cta.label}</h2>
+          <p class="sec-lead">
+            Cuéntanos tu situación. Te contactamos en menos de 24 horas laborables para agendar la
+            sesión inicial y confirmar el encaje con franqueza.
+          </p>
+          <div class="diag-contact">
+            <div class="c-detail">
+              <div class="c-detail-l">Email</div>
+              <div class="c-detail-v"><a href={`mailto:${brand.email}`}>{brand.email}</a></div>
+            </div>
+            <div class="c-detail">
+              <div class="c-detail-l">Dónde estamos</div>
+              <div class="c-detail-v">{brand.location}</div>
+            </div>
+          </div>
+        </div>
+        <div class="fade-in">
+          <DiagnosticForm />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <FAQ items={faqDiag} title="Preguntas sobre el diagnóstico" eyebrow="Antes de solicitarlo" centered={false} />
+</BaseLayout>
+
+<style>
+  .incl-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+  }
+  .incl {
+    padding-top: 20px;
+    border-top: 2px solid var(--line-2);
+  }
+  .incl-dot {
+    display: block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--teal);
+    margin-bottom: 14px;
+  }
+  .incl h3 {
+    font-family: var(--head);
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--tx);
+    margin-bottom: 8px;
+  }
+  .incl p {
+    font-size: 15px;
+    color: var(--tx-2);
+    line-height: 1.6;
+  }
+  .dstep-n {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1px solid var(--teal-line);
+    font-family: var(--head);
+    font-weight: 700;
+    color: var(--teal-deep);
+    margin-bottom: 16px;
+  }
+  .dstep h3 {
+    font-family: var(--head);
+    font-weight: 700;
+    font-size: 17px;
+    color: var(--tx);
+    margin-bottom: 8px;
+  }
+  .dstep p {
+    font-size: 15px;
+    color: var(--tx-2);
+    line-height: 1.6;
+  }
+  .diag-grid {
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: 60px;
+    align-items: start;
+  }
+  .diag-contact {
+    margin-top: 30px;
+  }
+  .c-detail {
+    margin-top: 22px;
+  }
+  .c-detail-l {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--on-navy-2);
+    margin-bottom: 4px;
+  }
+  .c-detail-v {
+    font-size: 16px;
+    color: var(--on-navy);
+  }
+  .c-detail-v a:hover {
+    color: var(--teal-2);
+  }
+  @media (max-width: 900px) {
+    .incl-grid {
+      grid-template-columns: 1fr;
+    }
+    .diag-grid {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+  }
+</style>

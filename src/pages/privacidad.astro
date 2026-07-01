@@ -1,0 +1,48 @@
+---
+import LegalLayout from '@/layouts/LegalLayout.astro';
+import { brand } from '@/config/brand';
+---
+
+<LegalLayout title="Política de privacidad" updated="julio de 2026" path="/privacidad">
+  <h2>1. Responsable del tratamiento</h2>
+  <p>
+    El responsable del tratamiento de los datos recogidos a través de este sitio es
+    <span class="ph">[PLACEHOLDER — Cogniplex SL, NIF y domicilio]</span>. Puedes contactar en
+    <a href={`mailto:${brand.email}`}>{brand.email}</a>.
+  </p>
+
+  <h2>2. Qué datos tratamos y con qué finalidad</h2>
+  <p>
+    Tratamos los datos que nos facilitas voluntariamente a través del formulario de contacto o
+    solicitud de diagnóstico (nombre, cargo, email, empresa y el mensaje que nos envíes), con la
+    finalidad de atender tu solicitud y, en su caso, mantener la relación comercial.
+  </p>
+
+  <h2>3. Base jurídica</h2>
+  <p>
+    La base legal es tu consentimiento al enviar el formulario y el interés legítimo de {brand.name}
+    en responder a tu solicitud.
+  </p>
+
+  <h2>4. Conservación</h2>
+  <p>
+    Conservamos tus datos durante el tiempo necesario para atender tu solicitud y, si procede,
+    mientras dure la relación comercial, salvo que solicites su supresión.
+  </p>
+
+  <h2>5. Destinatarios</h2>
+  <p>
+    Los envíos del formulario se gestionan a través del proveedor <span class="ph">[PLACEHOLDER —
+    Formspree u otro]</span>, que actúa como encargado del tratamiento. No cedemos tus datos a
+    terceros salvo obligación legal.
+  </p>
+
+  <h2>6. Derechos</h2>
+  <p>
+    Puedes ejercer tus derechos de acceso, rectificación, supresión, oposición, limitación y
+    portabilidad escribiendo a <a href={`mailto:${brand.email}`}>{brand.email}</a>. También puedes
+    reclamar ante la Agencia Española de Protección de Datos (AEPD).
+  </p>
+
+  <p><em class="ph">Texto orientativo. Debe revisarlo un profesional y completar los datos marcados.</em></p>
+</LegalLayout>

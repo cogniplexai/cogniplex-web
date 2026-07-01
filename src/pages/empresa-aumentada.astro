@@ -1,0 +1,144 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Hero from '@/components/Hero.astro';
+import Declaration from '@/components/Declaration.astro';
+import CogniSteps from '@/components/CogniSteps.astro';
+import ResultsByArea from '@/components/ResultsByArea.astro';
+import CTASection from '@/components/CTASection.astro';
+
+const valueShift = [
+  { layer: 'Tecnología', cheap: 'Interfaces, CRUD, prototipos y automatizaciones comunes.', value: 'Arquitectura, integración, seguridad, gobernanza y calidad.' },
+  { layer: 'Procesos', cheap: 'Digitalizar una tarea aislada.', value: 'Rediseñar un flujo completo y eliminar fricción de extremo a extremo.' },
+  { layer: 'Datos', cheap: 'Conectar fuentes y visualizar información.', value: 'Datos confiables, semántica compartida, trazabilidad y decisiones accionables.' },
+  { layer: 'Conocimiento', cheap: 'Generar respuestas genéricas.', value: 'Capturar experiencia tácita y reglas de negocio que te diferencian.' },
+  { layer: 'Personas', cheap: 'Dar acceso a una herramienta.', value: 'Crear hábitos, habilidades, roles y confianza.' },
+  { layer: 'Dirección', cheap: 'Probar casos de uso sueltos.', value: 'Priorizar inversiones, gobernar riesgos y convertir iniciativas en resultados.' },
+];
+---
+
+<BaseLayout
+  title="Empresa aumentada por IA"
+  description="Qué es una empresa aumentada por IA y cómo cambia procesos, personas, datos y decisiones. El Método COGNI de Cogniplex."
+  path="/empresa-aumentada"
+>
+  <Hero
+    variant="interior"
+    eyebrow="La categoría"
+    title={`Cuando construir es barato, el criterio para decidir <span class="em">qué construir</span> es el activo escaso.`}
+    lead="Las herramientas de IA abaratan el desarrollo. El valor se desplaza a la comprensión del negocio, los procesos, los datos, el conocimiento y la adopción. Ahí trabaja Cogniplex."
+  />
+
+  <Declaration>
+    Una empresa aumentada por IA no es una empresa con muchos pilotos. <span
+      >Es una empresa en la que la inteligencia amplía de forma medible la capacidad de las
+      personas, acelera decisiones, reduce el trabajo repetitivo, protege el conocimiento y facilita
+      el crecimiento sin una escalada equivalente de costes.</span
+    >
+  </Declaration>
+
+  <!-- Dónde se concentra el valor -->
+  <section class="block soft">
+    <div class="wrap">
+      <div class="block-hd fade-in">
+        <p class="eyebrow">Por qué ahora</p>
+        <h2 class="sec-h">Dónde se concentra el valor empresarial</h2>
+        <p class="sec-lead">
+          A medida que construir software se vuelve accesible, el valor deja de residir en escribir
+          código. Esto es lo que se abarata y lo que gana valor en cada capa.
+        </p>
+      </div>
+      <div class="vtable fade-in">
+        <div class="vrow vhead">
+          <span>Capa</span><span>Lo que se abarata</span><span>Lo que gana valor</span>
+        </div>
+        {
+          valueShift.map((r) => (
+            <div class="vrow">
+              <span class="vlayer">{r.layer}</span>
+              <span class="vcheap">{r.cheap}</span>
+              <span class="vvalue">{r.value}</span>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <div id="metodo-cogni"></div>
+  <CogniSteps detailed title="Método COGNI: cómo entregamos una transformación" />
+
+  <ResultsByArea dark />
+
+  <CTASection
+    eyebrow="El primer paso"
+    title="¿Empezamos por entender dónde está tu valor?"
+    lead="El Diagnóstico Empresa Aumentada convierte una preocupación difusa en prioridades y una hoja de ruta de 90-180 días."
+  />
+</BaseLayout>
+
+<style>
+  .vtable {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .vrow {
+    display: grid;
+    grid-template-columns: 160px 1fr 1.2fr;
+    gap: 20px;
+    padding: 18px 24px;
+    border-top: 1px solid var(--line);
+    align-items: baseline;
+  }
+  .vrow:first-child {
+    border-top: 0;
+  }
+  .vhead {
+    background: var(--navy);
+    color: #fff;
+    font-family: var(--head);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .vhead span {
+    color: #fff;
+  }
+  .vlayer {
+    font-family: var(--head);
+    font-weight: 700;
+    color: var(--teal-deep);
+    font-size: 16px;
+  }
+  .vcheap {
+    color: var(--tx-3);
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  .vvalue {
+    color: var(--tx);
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  @media (max-width: 760px) {
+    .vrow {
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
+    .vhead {
+      display: none;
+    }
+    .vcheap::before {
+      content: 'Se abarata: ';
+      color: var(--tx-3);
+      font-weight: 600;
+    }
+    .vvalue::before {
+      content: 'Gana valor: ';
+      color: var(--teal-deep);
+      font-weight: 600;
+    }
+  }
+</style>

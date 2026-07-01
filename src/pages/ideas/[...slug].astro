@@ -1,0 +1,135 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import CTASection from '@/components/CTASection.astro';
+
+export async function getStaticPaths() {
+  const posts = (await getCollection('ideas')).filter((p) => !p.data.draft);
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const fmt = (d: Date) =>
+  d.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+---
+
+<BaseLayout title={post.data.title} description={post.data.description} path={`/ideas/${post.id}`}>
+  <article class="post">
+    <div class="wrap post-wrap">
+      <a href="/ideas" class="post-back">← Ideas</a>
+      <span class="post-pillar">{post.data.pillar}</span>
+      <h1 class="post-h1">{post.data.title}</h1>
+      <p class="post-lead">{post.data.description}</p>
+      <time class="post-date" datetime={post.data.pubDate.toISOString()}>{fmt(post.data.pubDate)}</time>
+      <div class="post-body">
+        <Content />
+      </div>
+    </div>
+  </article>
+
+  <CTASection />
+</BaseLayout>
+
+<style>
+  .post {
+    padding: calc(var(--nav-h) + 60px) 0 80px;
+  }
+  .post-wrap {
+    max-width: 760px;
+  }
+  .post-back {
+    font-family: var(--head);
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--teal-deep);
+  }
+  .post-pillar {
+    display: inline-block;
+    font-family: var(--head);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--teal-deep);
+    background: var(--teal-soft);
+    border-radius: 20px;
+    padding: 4px 12px;
+    margin: 24px 0 16px;
+  }
+  .post-h1 {
+    font-family: var(--head);
+    font-weight: 800;
+    font-size: clamp(30px, 4.4vw, 44px);
+    line-height: 1.1;
+    letter-spacing: -1px;
+    color: var(--tx);
+    margin-bottom: 16px;
+  }
+  .post-lead {
+    font-size: 19px;
+    color: var(--tx-2);
+    line-height: 1.6;
+  }
+  .post-date {
+    display: block;
+    font-size: 13px;
+    color: var(--tx-3);
+    margin: 18px 0 40px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--line);
+  }
+  .post-body :global(h2) {
+    font-family: var(--head);
+    font-weight: 700;
+    font-size: 26px;
+    color: var(--tx);
+    margin: 40px 0 14px;
+    letter-spacing: -0.4px;
+  }
+  .post-body :global(p) {
+    font-size: 17.5px;
+    color: var(--tx-2);
+    line-height: 1.75;
+    margin-bottom: 20px;
+  }
+  .post-body :global(ul) {
+    margin: 0 0 20px;
+    padding-left: 4px;
+  }
+  .post-body :global(li) {
+    position: relative;
+    padding-left: 22px;
+    margin-bottom: 10px;
+    font-size: 17px;
+    color: var(--tx-2);
+    line-height: 1.65;
+    list-style: none;
+  }
+  .post-body :global(li)::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 10px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--teal-5);
+  }
+  .post-body :global(blockquote) {
+    border-left: 3px solid var(--teal);
+    padding: 6px 0 6px 22px;
+    margin: 28px 0;
+    font-family: var(--head);
+    font-weight: 600;
+    font-size: 21px;
+    color: var(--tx);
+    line-height: 1.4;
+  }
+  .post-body :global(em) {
+    color: var(--tx-3);
+    font-size: 15px;
+  }
+  .post-body :global(a) {
+    color: var(--teal-deep);
+    text-decoration: underline;
+  }
+</style>

@@ -1,0 +1,120 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Hero from '@/components/Hero.astro';
+import CaseCard from '@/components/CaseCard.astro';
+import CTASection from '@/components/CTASection.astro';
+import { outcomes } from '@/data/site';
+
+const casos = (await getCollection('casos')).sort((a, b) => a.data.order - b.data.order);
+---
+
+<BaseLayout
+  title="Casos de impacto"
+  description="Resultados de negocio explicados desde el problema, el proceso y el resultado. Casos de transformación de pymes con Cogniplex."
+  path="/casos"
+>
+  <Hero
+    variant="interior"
+    eyebrow="Casos de impacto"
+    title={`Resultados explicados desde el <span class="em">problema</span>, no desde la herramienta.`}
+    lead="Nuestros casos se cuentan desde la situación de partida, el proceso rediseñado y el resultado medible. El cliente no compra agentes ni dashboards: compra capacidad, control, velocidad y aprendizaje."
+  />
+
+  <section class="block">
+    <div class="wrap">
+      <div class="ph-banner fade-in" role="note">
+        <strong>Nota:</strong> los casos siguientes son ilustrativos y están marcados como
+        <code>[PLACEHOLDER]</code>. Se sustituirán por casos reales documentados con permiso del
+        cliente y métricas verificables. No publicamos cifras sin validar.
+      </div>
+      <div class="cases-grid">
+        {
+          casos.map((c) => (
+            <a href={`#`} class="case-link" aria-label={c.data.title}>
+              <CaseCard
+                title={c.data.title}
+                sector={c.data.sector}
+                area={c.data.area}
+                summary={c.data.summary}
+                metric={c.data.metric}
+                metricLabel={c.data.metricLabel}
+                placeholder={c.data.placeholder}
+              />
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Qué compra el cliente -->
+  <section class="block soft">
+    <div class="wrap">
+      <div class="block-hd fade-in">
+        <p class="eyebrow">Cómo medimos el impacto</p>
+        <h2 class="sec-h">Cuatro resultados que buscamos en cada proyecto</h2>
+      </div>
+      <div class="grid-4">
+        {
+          outcomes.map((o) => (
+            <div class="outcome fade-in">
+              <h3>{o.name}</h3>
+              <p>{o.text}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <CTASection />
+</BaseLayout>
+
+<style>
+  .ph-banner {
+    background: rgba(128, 0, 0, 0.06);
+    border: 1px solid rgba(128, 0, 0, 0.18);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    font-size: 14.5px;
+    color: var(--tx-2);
+    line-height: 1.6;
+    margin-bottom: 32px;
+  }
+  .ph-banner code {
+    font-size: 13px;
+    color: var(--granate);
+  }
+  .cases-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .case-link {
+    display: block;
+  }
+  .outcome {
+    padding: 24px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+  .outcome h3 {
+    font-family: var(--head);
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--teal-deep);
+    margin-bottom: 8px;
+  }
+  .outcome p {
+    font-size: 15px;
+    color: var(--tx-2);
+    line-height: 1.6;
+  }
+  @media (max-width: 900px) {
+    .cases-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

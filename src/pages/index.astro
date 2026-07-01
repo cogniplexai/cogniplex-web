@@ -1,0 +1,94 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Hero from '@/components/Hero.astro';
+import TensionBlock from '@/components/TensionBlock.astro';
+import Declaration from '@/components/Declaration.astro';
+import CogniSteps from '@/components/CogniSteps.astro';
+import ResultsByArea from '@/components/ResultsByArea.astro';
+import PillarGrid from '@/components/PillarGrid.astro';
+import CredibilityStats from '@/components/CredibilityStats.astro';
+import FAQ from '@/components/FAQ.astro';
+import CTASection from '@/components/CTASection.astro';
+import { outcomes, faqHome } from '@/data/site';
+---
+
+<BaseLayout transparentNav path="/">
+  <Hero
+    variant="home"
+    eyebrow="Empresa aumentada por IA"
+    title={`La ventaja competitiva de las grandes empresas, <span class="em">ahora al alcance de tu pyme</span>.`}
+    lead="Diseñamos e implantamos la combinación de estrategia, datos, IA y cambio organizativo que permite a tu empresa operar con más capacidad, control y velocidad."
+    secondaryCta={{ label: 'Ver el Método COGNI', href: '/empresa-aumentada#metodo-cogni' }}
+  />
+
+  <TensionBlock />
+
+  <Declaration>
+    Crecer ya no depende solo de contratar más. <span
+      >Depende de multiplicar la capacidad de las personas que ya tienes — con estrategia, datos e
+      IA trabajando dentro de tus procesos, no al margen de ellos.</span
+    >
+  </Declaration>
+
+  <!-- Qué es una empresa aumentada -->
+  <section class="block soft">
+    <div class="wrap">
+      <div class="block-hd fade-in">
+        <p class="eyebrow">Qué es una empresa aumentada por IA</p>
+        <h2 class="sec-h">No es una empresa con muchos pilotos. Es una empresa que trabaja, decide y evoluciona mejor</h2>
+        <p class="sec-lead">
+          La inteligencia artificial amplía —de forma medible— la capacidad de las personas,
+          acelera decisiones, reduce trabajo repetitivo, protege el conocimiento y facilita el
+          crecimiento sin una escalada equivalente de costes.
+        </p>
+      </div>
+      <div class="grid-4 outcomes fade-in">
+        {
+          outcomes.map((o) => (
+            <div class="outcome">
+              <h3>{o.name}</h3>
+              <p>{o.text}</p>
+            </div>
+          ))
+        }
+      </div>
+      <p class="lead-note fade-in" style="margin-top:32px">
+        <strong>La IA no es el producto. La transformación empresarial es el producto.</strong> La
+        IA es el medio más potente para conseguirla. <a class="arrow-link" href="/empresa-aumentada">Cómo cambia tu empresa</a>
+      </p>
+    </div>
+  </section>
+
+  <CogniSteps />
+
+  <ResultsByArea />
+
+  <PillarGrid />
+
+  <CredibilityStats />
+
+  <FAQ items={faqHome} />
+
+  <CTASection />
+</BaseLayout>
+
+<style>
+  .outcomes .outcome {
+    padding: 26px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+  .outcome h3 {
+    font-family: var(--head);
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--teal-deep);
+    margin-bottom: 8px;
+  }
+  .outcome p {
+    font-size: 15px;
+    color: var(--tx-2);
+    line-height: 1.6;
+  }
+</style>
