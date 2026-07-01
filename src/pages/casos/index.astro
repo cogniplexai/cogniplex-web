@@ -31,17 +31,15 @@ const casos = (await getCollection('casos')).sort((a, b) => a.data.order - b.dat
       <div class="cases-grid">
         {
           casos.map((c) => (
-            <a href={`#`} class="case-link" aria-label={c.data.title}>
-              <CaseCard
-                title={c.data.title}
-                sector={c.data.sector}
-                area={c.data.area}
-                summary={c.data.summary}
-                metric={c.data.metric}
-                metricLabel={c.data.metricLabel}
-                placeholder={c.data.placeholder}
-              />
-            </a>
+            <CaseCard
+              title={c.data.title}
+              sector={c.data.sector}
+              area={c.data.area}
+              summary={c.data.summary}
+              metric={c.data.metric}
+              metricLabel={c.data.metricLabel}
+              placeholder={c.data.placeholder}
+            />
           ))
         }
       </div>
@@ -90,9 +88,6 @@ const casos = (await getCollection('casos')).sort((a, b) => a.data.order - b.dat
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 24px;
-  }
-  .case-link {
-    display: block;
   }
   .outcome {
     padding: 24px;
