@@ -109,24 +109,28 @@ import { journey } from '@/data/site';
     color: var(--tx-3);
   }
   .pillar-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 24px;
+  }
+  .pillar-grid :global(.pillar-card) {
+    flex: 0 1 calc(33.333% - 16px);
   }
   @media (max-width: 980px) {
     .journey {
       grid-template-columns: 1fr 1fr;
     }
-    .pillar-grid {
-      grid-template-columns: 1fr 1fr;
+    .pillar-grid :global(.pillar-card) {
+      flex-basis: calc(50% - 12px);
     }
   }
   @media (max-width: 680px) {
     .journey {
       grid-template-columns: 1fr;
     }
-    .pillar-grid {
-      grid-template-columns: 1fr;
+    .pillar-grid :global(.pillar-card) {
+      flex-basis: 100%;
     }
   }
 </style>

@@ -66,10 +66,16 @@ const others = pillars.filter((p) => p.slug !== pillar.slug);
 </BaseLayout>
 
 <style>
+  /* Flex centrado: las filas incompletas (nº de servicios impar) quedan
+     centradas manteniendo el tamaño de tarjeta, en vez de una sola a la izquierda. */
   .services-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 24px;
+  }
+  .services-grid :global(.service-card) {
+    flex: 0 1 calc(50% - 12px);
   }
   .others {
     display: grid;
@@ -108,8 +114,8 @@ const others = pillars.filter((p) => p.slug !== pillar.slug);
     line-height: 1.5;
   }
   @media (max-width: 900px) {
-    .services-grid {
-      grid-template-columns: 1fr;
+    .services-grid :global(.service-card) {
+      flex-basis: 100%;
     }
     .others {
       grid-template-columns: 1fr 1fr;
