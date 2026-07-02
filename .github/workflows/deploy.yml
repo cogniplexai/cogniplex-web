@@ -44,3 +44,6 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          # El primer deploy tras recrear el sitio tardó ~11 min; damos margen.
+          timeout: 900000
