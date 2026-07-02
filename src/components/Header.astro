@@ -69,10 +69,36 @@ const isActive = (href: string) => current === href || current.startsWith(href +
   /* Opaca por defecto (páginas interiores) */
   #site-nav.opaque,
   #site-nav.solid {
-    background: rgba(244, 246, 247, 0.88);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(244, 246, 247, 0.94);
+    backdrop-filter: blur(14px) saturate(1.1);
+    -webkit-backdrop-filter: blur(14px) saturate(1.1);
     border-bottom-color: var(--line);
+    box-shadow: 0 8px 30px -24px rgba(11, 31, 51, 0.5);
+  }
+
+  /* Al hacer scroll sobre el hero, la nav transparente pasa a fondo claro:
+     el fondo y el texto deben volverse los "sólidos" (si no, quedaría texto
+     blanco sobre fondo claro e ilegible). Selector compuesto para ganar
+     especificidad a las reglas .transparent. */
+  #site-nav.transparent.solid {
+    background: rgba(244, 246, 247, 0.94);
+    backdrop-filter: blur(14px) saturate(1.1);
+    -webkit-backdrop-filter: blur(14px) saturate(1.1);
+    border-bottom-color: var(--line);
+    box-shadow: 0 8px 30px -24px rgba(11, 31, 51, 0.5);
+  }
+  #site-nav.transparent.solid :global(.logo-word) {
+    color: var(--tx);
+  }
+  #site-nav.transparent.solid .nav-links a {
+    color: var(--tx-2);
+  }
+  #site-nav.transparent.solid .nav-links a:hover,
+  #site-nav.transparent.solid .nav-links a.active {
+    color: var(--teal-deep);
+  }
+  #site-nav.transparent.solid .nav-toggle span {
+    background: var(--tx);
   }
 
   .nav-in {
