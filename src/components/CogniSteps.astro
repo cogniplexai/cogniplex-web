@@ -68,6 +68,33 @@ const {
     background: var(--teal);
     margin-bottom: 18px;
     flex-shrink: 0;
+    box-shadow: 0 10px 24px -12px rgba(0, 128, 128, 0.6);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .cogni-letter {
+      animation: cogni-float 5.5s ease-in-out infinite;
+    }
+    .cogni-step:nth-child(2) .cogni-letter {
+      animation-delay: 0.7s;
+    }
+    .cogni-step:nth-child(3) .cogni-letter {
+      animation-delay: 1.4s;
+    }
+    .cogni-step:nth-child(4) .cogni-letter {
+      animation-delay: 2.1s;
+    }
+    .cogni-step:nth-child(5) .cogni-letter {
+      animation-delay: 2.8s;
+    }
+  }
+  @keyframes cogni-float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-7px);
+    }
   }
   .cogni-step h3 {
     font-family: var(--head);

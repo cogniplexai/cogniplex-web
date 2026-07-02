@@ -1,0 +1,150 @@
+---
+/**
+ * Red de nodos animada (canvas): círculos teal que derivan lentamente y se
+ * conectan cuando se acercan. Es la traducción dinámica del símbolo Cogniplex.
+ * - Respeta prefers-reduced-motion (dibuja un fotograma estático).
+ * - Se pausa fuera del viewport y con la pestaña oculta.
+ * density: 'hero' (más densa) | 'soft' (sutil, para CTA/interiores)
+ */
+interface Props {
+  density?: 'hero' | 'soft';
+  class?: string;
+}
+const { density = 'hero', class: cls = '' } = Astro.props;
+---
+
+<canvas class={`anodes ${cls}`} data-density={density} aria-hidden="true"></canvas>
+
+<script>
+  type Node = { x: number; y: number; vx: number; vy: number; r: number; c: string };
+
+  function initNodes(canvas: HTMLCanvasElement) {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const palette = ['#5cc6c6', '#3f8a8a', '#75b7b6', '#338180', '#6db1b0'];
+    const maxNodes = canvas.dataset.density === 'soft' ? 26 : 46;
+    const linkDist = canvas.dataset.density === 'soft' ? 130 : 155;
+
+    let w = 0,
+      h = 0,
+      dpr = 1,
+      nodes: Node[] = [],
+      raf = 0,
+      running = true;
+
+    function build() {
+      const count = Math.max(10, Math.min(maxNodes, Math.floor((w * h) / 17000)));
+      nodes = Array.from({ length: count }, (_, i) => ({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.22,
+        vy: (Math.random() - 0.5) * 0.22,
+        r: 1.6 + Math.random() * 3.6,
+        c: palette[i % palette.length],
+      }));
+    }
+
+    function resize() {
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const rect = canvas.getBoundingClientRect();
+      w = rect.width;
+      h = rect.height;
+      canvas.width = Math.max(1, Math.floor(w * dpr));
+      canvas.height = Math.max(1, Math.floor(h * dpr));
+      ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
+      build();
+    }
+
+    function draw() {
+      ctx!.clearRect(0, 0, w, h);
+      // enlaces
+      for (let i = 0; i < nodes.length; i++) {
+        const a = nodes[i];
+        for (let j = i + 1; j < nodes.length; j++) {
+          const b = nodes[j];
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          const d = Math.hypot(dx, dy);
+          if (d < linkDist) {
+            ctx!.globalAlpha = (1 - d / linkDist) * 0.2;
+            ctx!.strokeStyle = '#5cc6c6';
+            ctx!.lineWidth = 1;
+            ctx!.beginPath();
+            ctx!.moveTo(a.x, a.y);
+            ctx!.lineTo(b.x, b.y);
+            ctx!.stroke();
+          }
+        }
+      }
+      // nodos
+      for (const n of nodes) {
+        ctx!.globalAlpha = 0.9;
+        ctx!.fillStyle = n.c;
+        ctx!.beginPath();
+        ctx!.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+        ctx!.fill();
+        if (!reduce) {
+          n.x += n.vx;
+          n.y += n.vy;
+          if (n.x < -24) n.x = w + 24;
+          if (n.x > w + 24) n.x = -24;
+          if (n.y < -24) n.y = h + 24;
+          if (n.y > h + 24) n.y = -24;
+        }
+      }
+      ctx!.globalAlpha = 1;
+      if (!reduce && running) raf = requestAnimationFrame(draw);
+    }
+
+    resize();
+    draw();
+
+    let resizeT: number;
+    window.addEventListener('resize', () => {
+      window.clearTimeout(resizeT);
+      resizeT = window.setTimeout(() => {
+        resize();
+        if (reduce) draw();
+      }, 150);
+    });
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          running = e.isIntersecting;
+          if (running && !reduce) {
+            cancelAnimationFrame(raf);
+            raf = requestAnimationFrame(draw);
+          }
+        });
+      },
+      { threshold: 0 }
+    );
+    io.observe(canvas);
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        running = false;
+        cancelAnimationFrame(raf);
+      } else if (!reduce) {
+        running = true;
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(draw);
+      }
+    });
+  }
+
+  document.querySelectorAll<HTMLCanvasElement>('canvas.anodes').forEach(initNodes);
+</script>
+
+<style>
+  .anodes {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    pointer-events: none;
+  }
+</style>

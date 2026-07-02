@@ -1,6 +1,6 @@
 ---
 import { brand } from '@/config/brand';
-import NodeMotif from '@/components/NodeMotif.astro';
+import AnimatedNodes from '@/components/AnimatedNodes.astro';
 
 interface Props {
   title?: string;
@@ -15,7 +15,7 @@ const {
 ---
 
 <section class="cta-final dark">
-  <div class="motif-bg" aria-hidden="true"><NodeMotif tone="light" /></div>
+  <div class="cta-anim" aria-hidden="true"><AnimatedNodes density="soft" /></div>
   <div class="wrap cta-in fade-in">
     <p class="eyebrow">{eyebrow}</p>
     <h2 class="sec-h">{title}</h2>
@@ -34,14 +34,10 @@ const {
     overflow: hidden;
     border-top: 1px solid var(--navy-line);
   }
-  .motif-bg {
+  .cta-anim {
     position: absolute;
-    right: -40px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 460px;
-    max-width: 55%;
-    opacity: 0.5;
+    inset: 0;
+    opacity: 0.7;
     pointer-events: none;
   }
   .cta-in {
@@ -53,10 +49,5 @@ const {
     gap: 14px;
     flex-wrap: wrap;
     margin-top: 34px;
-  }
-  @media (max-width: 700px) {
-    .motif-bg {
-      display: none;
-    }
   }
 </style>

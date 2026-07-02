@@ -1,11 +1,12 @@
 ---
 /**
  * Hero. variant:
- *  - 'home': full-bleed con foto editorial + overlay oscuro (para la portada).
- *  - 'interior': cabecera compacta sobre navy para páginas internas.
+ *  - 'home': portada a pantalla con red de nodos animada sobre navy.
+ *  - 'interior': cabecera compacta con nodos animados sutiles.
+ * photo: superpone la foto editorial (opcional, desactivada por defecto).
  */
 import { brand } from '@/config/brand';
-import NodeMotif from '@/components/NodeMotif.astro';
+import AnimatedNodes from '@/components/AnimatedNodes.astro';
 
 interface Props {
   variant?: 'home' | 'interior';
@@ -23,12 +24,16 @@ const {
   lead,
   primaryCta = { label: brand.cta.label, href: brand.cta.href },
   secondaryCta,
-  photo = variant === 'home',
+  photo = false,
 } = Astro.props;
 ---
 
 <section class={`hero hero-${variant}`} class:list={[{ 'has-photo': photo }]}>
-  {!photo && <div class="motif-bg" aria-hidden="true"><NodeMotif tone="light" /></div>}
+  <div class="hero-anim" aria-hidden="true">
+    <AnimatedNodes density={variant === 'home' ? 'hero' : 'soft'} />
+  </div>
+  <div class="hero-glow" aria-hidden="true"></div>
+
   <div class="wrap hero-content">
     {eyebrow && <p class="eyebrow">{eyebrow}</p>}
     <h1 set:html={title} />
@@ -55,19 +60,22 @@ const {
 <style>
   .hero {
     position: relative;
-    background: var(--navy);
+    background:
+      radial-gradient(120% 120% at 80% 0%, #123049 0%, var(--navy) 55%),
+      var(--navy);
     color: #fff;
     overflow: hidden;
   }
   .hero-home {
-    min-height: 90vh;
+    min-height: 92vh;
     display: flex;
     align-items: center;
     padding: calc(var(--nav-h) + 84px) 0 92px;
   }
   .hero-interior {
-    padding: calc(var(--nav-h) + 72px) 0 76px;
+    padding: calc(var(--nav-h) + 76px) 0 82px;
   }
+  /* Foto opcional por encima del navy (si photo=true) */
   .hero.has-photo::after {
     content: '';
     position: absolute;
@@ -75,22 +83,31 @@ const {
     z-index: 0;
     background-image: linear-gradient(
         110deg,
-        rgba(9, 20, 34, 0.92) 0%,
-        rgba(9, 20, 34, 0.82) 45%,
-        rgba(9, 20, 34, 0.62) 100%
+        rgba(9, 20, 34, 0.94) 0%,
+        rgba(9, 20, 34, 0.84) 45%,
+        rgba(9, 20, 34, 0.66) 100%
       ),
       url('/hero.jpg');
     background-size: cover;
     background-position: center;
   }
-  .motif-bg {
+  .hero-anim {
     position: absolute;
-    right: -30px;
-    top: 46%;
-    transform: translateY(-50%);
-    width: 480px;
-    max-width: 48%;
-    opacity: 0.5;
+    inset: 0;
+    z-index: 0;
+    opacity: 0.9;
+  }
+  /* Halo teal para dar profundidad detrás del texto */
+  .hero-glow {
+    position: absolute;
+    z-index: 0;
+    right: -8%;
+    top: 8%;
+    width: 640px;
+    height: 640px;
+    max-width: 70%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 128, 128, 0.28) 0%, rgba(0, 128, 128, 0) 68%);
     pointer-events: none;
   }
   .hero-content {
@@ -135,8 +152,9 @@ const {
       min-height: auto;
       padding: calc(var(--nav-h) + 56px) 0 64px;
     }
-    .motif-bg {
-      display: none;
+    .hero-glow {
+      width: 380px;
+      height: 380px;
     }
   }
 </style>
