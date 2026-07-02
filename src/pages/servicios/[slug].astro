@@ -23,7 +23,7 @@ const others = pillars.filter((p) => p.slug !== pillar.slug);
 >
   <Hero
     variant="interior"
-    eyebrow={`Pilar ${pillar.order} · ${pillar.kicker}`}
+    eyebrow={`Práctica ${pillar.order} · ${pillar.kicker}`}
     title={pillar.name}
     lead={pillar.intro}
     secondaryCta={{ label: 'Ver todos los servicios', href: '/servicios' }}
@@ -32,7 +32,7 @@ const others = pillars.filter((p) => p.slug !== pillar.slug);
   <section class="block">
     <div class="wrap">
       <div class="block-hd fade-in">
-        <p class="eyebrow">Objetivo del pilar</p>
+        <p class="eyebrow">Objetivo de la práctica</p>
         <h2 class="sec-h">{pillar.objective}</h2>
       </div>
       <div class="services-grid">
@@ -41,12 +41,12 @@ const others = pillars.filter((p) => p.slug !== pillar.slug);
     </div>
   </section>
 
-  <!-- Otros pilares -->
+  <!-- Otras prácticas -->
   <section class="block soft">
     <div class="wrap">
       <div class="block-hd fade-in">
         <p class="eyebrow">Sigue el recorrido</p>
-        <h2 class="sec-h">Otros pilares</h2>
+        <h2 class="sec-h">Otras prácticas</h2>
       </div>
       <div class="others">
         {

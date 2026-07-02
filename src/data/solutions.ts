@@ -1,6 +1,6 @@
 /**
  * Páginas por intención (SEO). Capturan demanda activa por problema y
- * conducen al Diagnóstico y a los pilares de servicio correspondientes.
+ * conducen al Diagnóstico y a las prácticas de servicio correspondientes.
  */
 export interface Solution {
   slug: string;
