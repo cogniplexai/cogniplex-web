@@ -26,7 +26,7 @@ export const solutions: Solution[] = [
     pains: [
       'Probáis herramientas de IA sin una visión de prioridades ni de riesgos.',
       'Nadie con autoridad y criterio dirige la agenda de IA de la empresa.',
-      'Los pilotos se dispersan y no se convierten en impacto de negocio.',
+      'Las iniciativas de IA se quedan dispersas y no se convierten en impacto de negocio.',
       'No podéis contratar un equipo interno de IA a tiempo completo.',
     ],
     approach: [
