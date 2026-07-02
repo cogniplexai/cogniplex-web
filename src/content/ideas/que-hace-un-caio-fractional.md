@@ -6,9 +6,9 @@ pillar: Dirección y ROI
 draft: false
 ---
 
-La mayoría de pymes necesita dirección de IA **antes** de poder justificar un Chief AI Officer a
-tiempo completo. Ahí encaja la figura fractional: dirección senior, a tiempo parcial, responsable
-de convertir la IA en una agenda de negocio priorizada y gobernada.
+La mayoría de las empresas necesita dirección de IA **antes** de poder justificar un Chief AI
+Officer a tiempo completo. Ahí encaja la figura fractional: dirección senior, a tiempo parcial,
+responsable de convertir la IA en una agenda de negocio priorizada y gobernada.
 
 ## Qué hace
 

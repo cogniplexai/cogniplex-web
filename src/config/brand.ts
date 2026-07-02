@@ -11,7 +11,7 @@ export const brand = {
   claim: 'Diseñamos empresas aumentadas por IA.',
   /** Descripción por defecto para SEO. */
   description:
-    'Cogniplex es una firma boutique de transformación empresarial impulsada por IA. Ayudamos a tu pyme a crecer sin multiplicar su estructura: estrategia, datos, IA y adopción.',
+    'Cogniplex es una firma boutique de transformación empresarial impulsada por IA. Ayudamos a tu empresa a crecer sin multiplicar su estructura: estrategia, datos, IA y adopción.',
   /** Dominio de producción (sin barra final). */
   url: 'https://cogniplex.es',
   /** Email de contacto principal. */

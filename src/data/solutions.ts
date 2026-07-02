@@ -22,7 +22,7 @@ export const solutions: Solution[] = [
       'Dirección de IA senior a tiempo parcial para tu pyme: CAIO y CDO fractional. Prioriza, gobierna y convierte la IA en resultados sin asumir una estructura completa.',
     eyebrow: 'Dirección de IA externa',
     h1: 'Dirección de IA senior <span class="em">sin asumir una estructura completa</span>',
-    lead: 'Muchas pymes necesitan dirección de IA antes de poder justificar un Chief AI Officer a tiempo completo. El modelo fractional te da esa dirección senior, a tiempo parcial y responsable de resultados.',
+    lead: 'Muchas empresas necesitan dirección de IA antes de poder justificar un Chief AI Officer a tiempo completo. El modelo fractional te da esa dirección senior, a tiempo parcial y responsable de resultados.',
     pains: [
       'Probáis herramientas de IA sin una visión de prioridades ni de riesgos.',
       'Nadie con autoridad y criterio dirige la agenda de IA de la empresa.',

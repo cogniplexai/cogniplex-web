@@ -6,7 +6,7 @@ pillar: Empresa aumentada
 draft: false
 ---
 
-Muchas pymes ya han probado IA. Han abierto ChatGPT, han montado algún automatismo, quizá han
+Muchas empresas ya han probado IA. Han abierto ChatGPT, han montado algún automatismo, quizá han
 encargado un chatbot. Y sin embargo, la forma de operar de la empresa apenas ha cambiado. El motivo
 es sencillo: **acumular pilotos no es lo mismo que transformar una empresa.**
 
