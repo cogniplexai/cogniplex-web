@@ -1,0 +1,96 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Hero from '@/components/Hero.astro';
+import TensionBlock from '@/components/TensionBlock.astro';
+import Declaration from '@/components/Declaration.astro';
+import CogniSteps from '@/components/CogniSteps.astro';
+import ResultsByArea from '@/components/ResultsByArea.astro';
+import PillarGrid from '@/components/PillarGrid.astro';
+import CredibilityStats from '@/components/CredibilityStats.astro';
+import FAQ from '@/components/FAQ.astro';
+import CTASection from '@/components/CTASection.astro';
+import { siteFor } from '@/data/site';
+
+const { outcomes, faqHome } = siteFor('en');
+---
+
+<BaseLayout transparentNav path="/">
+  <Hero
+    variant="home"
+    eyebrow="Strategy · Data · AI · Adoption"
+    title={`We design <span class="em">AI-augmented companies</span>.`}
+    lead="We help your company operate with more capability, more control and more speed, without multiplying its structure."
+    secondaryCta={{ label: 'How we work', href: '/en/empresa-aumentada#como-trabajamos' }}
+  />
+
+  <TensionBlock />
+
+  <Declaration>
+    Growing no longer depends only on hiring more. <span
+      >It depends on multiplying the capability of the people you already have — with strategy,
+      data and AI working inside your processes, not alongside them.</span
+    >
+  </Declaration>
+
+  <!-- What an AI-augmented company is -->
+  <section class="block soft">
+    <div class="wrap">
+      <div class="block-hd fade-in">
+        <p class="eyebrow">What an AI-augmented company is</p>
+        <h2 class="sec-h">A company that works, decides and evolves better</h2>
+        <p class="sec-lead">
+          Artificial intelligence measurably amplifies people's capability, accelerates decisions,
+          reduces repetitive work, protects knowledge and enables growth without an equivalent
+          escalation in costs.
+        </p>
+      </div>
+      <div class="grid-4 outcomes fade-in">
+        {
+          outcomes.map((o) => (
+            <div class="outcome">
+              <h3>{o.name}</h3>
+              <p>{o.text}</p>
+            </div>
+          ))
+        }
+      </div>
+      <p class="lead-note fade-in" style="margin-top:32px">
+        <strong>AI is not the product. Business transformation is the product.</strong> AI is the
+        most powerful means to achieve it. <a class="arrow-link" href="/en/empresa-aumentada">How your company changes</a>
+      </p>
+    </div>
+  </section>
+
+  <CogniSteps />
+
+  <ResultsByArea />
+
+  <PillarGrid />
+
+  <CredibilityStats />
+
+  <FAQ items={faqHome} />
+
+  <CTASection />
+</BaseLayout>
+
+<style>
+  .outcomes .outcome {
+    padding: 26px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+  .outcome h3 {
+    font-family: var(--head);
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--teal-deep);
+    margin-bottom: 8px;
+  }
+  .outcome p {
+    font-size: 15px;
+    color: var(--tx-2);
+    line-height: 1.6;
+  }
+</style>

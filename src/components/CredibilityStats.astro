@@ -1,17 +1,39 @@
 ---
-import { marketProof } from '@/data/site';
+import { siteFor } from '@/data/site';
+import { asLocale } from '@/i18n';
+
+const locale = asLocale(Astro.currentLocale);
+const { marketProof } = siteFor(locale);
+const copy =
+  locale === 'en'
+    ? {
+        eyebrow: 'Why now',
+        title: 'The opportunity is real. The difference lies in how you capture it.',
+        lead: 'It is not just us saying it: the market context points to a concrete opportunity to apply AI to how the business is run. The advantage will not go to whoever tries more tools, but to whoever turns it into real capability first.',
+        exampleTag: 'Illustrative example',
+        example:
+          'An advisory firm with a small team automates proposal drafting: it goes from sending a handful of offers a week to multiplying its capacity, without hiring more people and without losing its professional judgement.',
+        credStrong: 'Our goal in every project is for the solution to pay for itself:',
+        cred: 'for the value it creates to comfortably exceed what it costs. Every transformation starts from an impact hypothesis, a baseline and follow-up. We only publish verifiable results documented with the client’s permission.',
+      }
+    : {
+        eyebrow: 'Por qué ahora',
+        title: 'La oportunidad es real. La diferencia está en cómo se captura.',
+        lead: 'No lo decimos solo nosotros: el contexto de mercado señala una oportunidad concreta de aplicar la IA a la gestión del negocio. La ventaja no será de quien pruebe más herramientas, sino de quien la convierta antes en capacidad real.',
+        exampleTag: 'Ejemplo ilustrativo',
+        example:
+          'Una asesoría con un equipo reducido automatiza la elaboración de propuestas: pasa de enviar unas pocas ofertas a la semana a multiplicar su capacidad, sin contratar más personal y sin perder su criterio profesional.',
+        credStrong: 'Nuestro objetivo en cada proyecto es que la solución se pague sola:',
+        cred: 'que el valor que genera supere con holgura lo que cuesta. Toda transformación parte de una hipótesis de impacto, una línea base y un seguimiento. Solo publicamos resultados verificables y documentados con permiso del cliente.',
+      };
 ---
 
 <section class="block dark">
   <div class="wrap">
     <div class="block-hd fade-in">
-      <p class="eyebrow">Por qué ahora</p>
-      <h2 class="sec-h">La oportunidad es real. La diferencia está en cómo se captura.</h2>
-      <p class="sec-lead">
-        No lo decimos solo nosotros: el contexto de mercado señala una oportunidad concreta de
-        aplicar la IA a la gestión del negocio. La ventaja no será de quien pruebe más
-        herramientas, sino de quien la convierta antes en capacidad real.
-      </p>
+      <p class="eyebrow">{copy.eyebrow}</p>
+      <h2 class="sec-h">{copy.title}</h2>
+      <p class="sec-lead">{copy.lead}</p>
     </div>
 
     <div class="grid-3 stats fade-in">
@@ -26,20 +48,14 @@ import { marketProof } from '@/data/site';
     </div>
 
     <div class="cred-note fade-in">
-      <span class="tag">Ejemplo ilustrativo</span>
-      <p>
-        Una asesoría con un equipo reducido automatiza la elaboración de propuestas: pasa de
-        enviar unas pocas ofertas a la semana a multiplicar su capacidad, sin contratar más
-        personal y sin perder su criterio profesional.
-      </p>
+      <span class="tag">{copy.exampleTag}</span>
+      <p>{copy.example}</p>
     </div>
 
     <div class="cred-cases fade-in">
       <p class="cred-line">
-        <strong>Nuestro objetivo en cada proyecto es que la solución se pague sola:</strong>
-        que el valor que genera supere con holgura lo que cuesta. Toda transformación parte de una
-        hipótesis de impacto, una línea base y un seguimiento. Solo publicamos resultados
-        verificables y documentados con permiso del cliente.
+        <strong>{copy.credStrong}</strong>
+        {copy.cred}
       </p>
     </div>
   </div>

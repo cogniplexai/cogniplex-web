@@ -1,4 +1,10 @@
-/** Método COGNI — el activo narrativo y operativo central de Cogniplex. */
+/**
+ * Método COGNI — el activo narrativo y operativo central de Cogniplex.
+ * En la web el método se descubre (no se anuncia por su nombre): las letras
+ * C·O·G·N·I aparecen como elemento visual de las cinco etapas.
+ */
+import type { Locale } from '@/i18n';
+
 export interface CogniStep {
   letter: string;
   name: string;
@@ -6,7 +12,7 @@ export interface CogniStep {
   description: string;
 }
 
-export const cogniSteps: CogniStep[] = [
+const es: CogniStep[] = [
   {
     letter: 'C',
     name: 'Comprender',
@@ -43,3 +49,51 @@ export const cogniSteps: CogniStep[] = [
       'Revisamos KPIs, costes, adopción, calidad y oportunidades emergentes. Cada ciclo genera un backlog mejor priorizado y una empresa más preparada para el siguiente cambio.',
   },
 ];
+
+/**
+ * Versión inglesa: se conservan las letras C·O·G·N·I (marca registrada del
+ * método) con nombres ingleses que respetan cada inicial.
+ */
+const en: CogniStep[] = [
+  {
+    letter: 'C',
+    name: 'Comprehend',
+    short: 'Understand the operating reality before designing solutions.',
+    description:
+      'We analyse goals, processes, people, systems, data, constraints, risks and pain points. The result is a shared reading of where value exists and what is not worth doing yet.',
+  },
+  {
+    letter: 'O',
+    name: 'Organise',
+    short: 'Turn understanding into priorities and architecture.',
+    description:
+      'We define the roadmap, the use cases, the design decisions, the governance, the owners, the critical data and the indicators that will tell whether the transformation is working.',
+  },
+  {
+    letter: 'G',
+    name: 'Generate',
+    short: 'Build the capabilities needed, with value visible early.',
+    description:
+      'Automation, assistants, agents, knowledge platforms, integrations, data and reporting. The priority is to deliver value early while maintaining security and quality.',
+  },
+  {
+    letter: 'N',
+    name: 'Normalise',
+    short: 'Integrate the new capability into daily work.',
+    description:
+      'We train teams, adjust procedures, define roles and enable champions. A solution is not considered implemented until it is used with quality and confidence.',
+  },
+  {
+    letter: 'I',
+    name: 'Improve',
+    short: 'Measure, learn and expand in continuous improvement cycles.',
+    description:
+      'We review KPIs, costs, adoption, quality and emerging opportunities. Each cycle produces a better-prioritised backlog and a company more prepared for the next change.',
+  },
+];
+
+export const cogniByLocale = { es, en } as const;
+export const cogniFor = (locale: Locale = 'es') => cogniByLocale[locale];
+
+/** Compatibilidad con imports existentes (español). */
+export const cogniSteps = es;

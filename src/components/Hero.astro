@@ -5,8 +5,11 @@
  *  - 'interior': cabecera compacta con nodos animados sutiles.
  * photo: superpone la foto editorial (opcional, desactivada por defecto).
  */
-import { brand } from '@/config/brand';
+import { brandFor } from '@/config/brand';
+import { asLocale } from '@/i18n';
 import AnimatedNodes from '@/components/AnimatedNodes.astro';
+
+const brand = brandFor(asLocale(Astro.currentLocale));
 
 interface Props {
   variant?: 'home' | 'interior';

@@ -1,5 +1,6 @@
 ---
-import { brand } from '@/config/brand';
+import { brandFor } from '@/config/brand';
+import { asLocale } from '@/i18n';
 import AnimatedNodes from '@/components/AnimatedNodes.astro';
 
 interface Props {
@@ -7,11 +8,25 @@ interface Props {
   lead?: string;
   eyebrow?: string;
 }
-const {
-  eyebrow = 'Empieza por aquí',
-  title = 'Convierte la incertidumbre en una hoja de ruta',
-  lead = 'El Diagnóstico Empresa Aumentada identifica dónde la IA, los datos y la automatización pueden generar valor real en tu empresa, y en qué orden abordarlo.',
-} = Astro.props;
+const locale = asLocale(Astro.currentLocale);
+const brand = brandFor(locale);
+const defaults =
+  locale === 'en'
+    ? {
+        eyebrow: 'Start here',
+        title: 'Turn uncertainty into a roadmap',
+        lead: 'The Augmented Company Assessment identifies where AI, data and automation can create real value in your company, and in what order to tackle it.',
+        talk: 'Talk to an expert',
+        contactHref: '/en/contacto',
+      }
+    : {
+        eyebrow: 'Empieza por aquí',
+        title: 'Convierte la incertidumbre en una hoja de ruta',
+        lead: 'El Diagnóstico Empresa Aumentada identifica dónde la IA, los datos y la automatización pueden generar valor real en tu empresa, y en qué orden abordarlo.',
+        talk: 'Hablar con un experto',
+        contactHref: '/contacto',
+      };
+const { eyebrow = defaults.eyebrow, title = defaults.title, lead = defaults.lead } = Astro.props;
 ---
 
 <section class="cta-final dark">
@@ -22,7 +37,7 @@ const {
     <p class="sec-lead">{lead}</p>
     <div class="cta-actions">
       <a href={brand.cta.href} class="btn btn-primary">{brand.cta.label}</a>
-      <a href="/contacto" class="btn btn-light-ghost">Hablar con un experto</a>
+      <a href={defaults.contactHref} class="btn btn-light-ghost">{defaults.talk}</a>
     </div>
   </div>
 </section>

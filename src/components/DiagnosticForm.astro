@@ -1,10 +1,51 @@
 ---
-import { brand } from '@/config/brand';
+import { brandFor } from '@/config/brand';
+import { asLocale } from '@/i18n';
 
 interface Props {
   compact?: boolean;
 }
 const { compact = false } = Astro.props;
+const locale = asLocale(Astro.currentLocale);
+const brand = brandFor(locale);
+const f =
+  locale === 'en'
+    ? {
+        name: 'Full name',
+        namePh: 'Your name',
+        role: 'Role',
+        rolePh: 'CEO, general manager, leadership…',
+        email: 'Email',
+        emailPh: 'you@company.com',
+        company: 'Company',
+        companyPh: 'Your company name',
+        size: 'Approximate size',
+        sizeSelect: 'Select…',
+        sizes: ['Fewer than 20 employees', '20–50 employees', '50–150 employees', '150–500 employees', 'More than 500 employees'],
+        challenge: 'What business challenge do you want to solve?',
+        challengePh: 'Tell us briefly where growth is demanding more structure, which decisions arrive late, or which tasks consume qualified time…',
+        consentBefore: 'I have read and accept the ',
+        consentLink: 'Privacy policy',
+        consentHref: '/en/privacidad',
+      }
+    : {
+        name: 'Nombre y apellidos',
+        namePh: 'Tu nombre',
+        role: 'Cargo',
+        rolePh: 'CEO, gerente, dirección…',
+        email: 'Email',
+        emailPh: 'tu@empresa.com',
+        company: 'Empresa',
+        companyPh: 'Nombre de tu empresa',
+        size: 'Tamaño aproximado',
+        sizeSelect: 'Selecciona…',
+        sizes: ['Menos de 20 empleados', '20–50 empleados', '50–150 empleados', '150–500 empleados', 'Más de 500 empleados'],
+        challenge: '¿Qué reto de negocio quieres resolver?',
+        challengePh: 'Cuéntanos brevemente dónde el crecimiento os está exigiendo más estructura, qué decisiones llegan tarde o qué tareas consumen tiempo cualificado…',
+        consentBefore: 'He leído y acepto la ',
+        consentLink: 'Política de privacidad',
+        consentHref: '/privacidad',
+      };
 ---
 
 <form
@@ -14,69 +55,93 @@ const { compact = false } = Astro.props;
   data-form="diagnostico"
   data-endpoint={brand.formEndpoint}
   data-email={brand.email}
+  data-lang={locale}
 >
   <div class="f-row">
     <div class="f-field">
-      <label class="f-label" for="fn">Nombre y apellidos</label>
-      <input class="f-input" type="text" id="fn" name="nombre" placeholder="Tu nombre" required />
+      <label class="f-label" for="fn">{f.name}</label>
+      <input class="f-input" type="text" id="fn" name="nombre" placeholder={f.namePh} required />
     </div>
     <div class="f-field">
-      <label class="f-label" for="frole">Cargo</label>
-      <input class="f-input" type="text" id="frole" name="cargo" placeholder="CEO, gerente, dirección…" />
+      <label class="f-label" for="frole">{f.role}</label>
+      <input class="f-input" type="text" id="frole" name="cargo" placeholder={f.rolePh} />
     </div>
   </div>
 
   <div class="f-row">
     <div class="f-field">
-      <label class="f-label" for="fe">Email</label>
-      <input class="f-input" type="email" id="fe" name="email" placeholder="tu@empresa.com" required />
+      <label class="f-label" for="fe">{f.email}</label>
+      <input class="f-input" type="email" id="fe" name="email" placeholder={f.emailPh} required />
     </div>
     <div class="f-field">
-      <label class="f-label" for="fc">Empresa</label>
-      <input class="f-input" type="text" id="fc" name="empresa" placeholder="Nombre de tu empresa" />
+      <label class="f-label" for="fc">{f.company}</label>
+      <input class="f-input" type="text" id="fc" name="empresa" placeholder={f.companyPh} />
     </div>
   </div>
 
   {
     !compact && (
       <div class="f-field">
-        <label class="f-label" for="fsize">Tamaño aproximado</label>
+        <label class="f-label" for="fsize">{f.size}</label>
         <select class="f-input" id="fsize" name="tamano">
-          <option value="">Selecciona…</option>
-          <option>Menos de 20 empleados</option>
-          <option>20–50 empleados</option>
-          <option>50–150 empleados</option>
-          <option>150–500 empleados</option>
-          <option>Más de 500 empleados</option>
+          <option value="">{f.sizeSelect}</option>
+          {f.sizes.map((s) => (
+            <option>{s}</option>
+          ))}
         </select>
       </div>
     )
   }
 
   <div class="f-field">
-    <label class="f-label" for="fm">¿Qué reto de negocio quieres resolver?</label>
-    <textarea
-      class="f-input"
-      id="fm"
-      name="reto"
-      placeholder="Cuéntanos brevemente dónde el crecimiento os está exigiendo más estructura, qué decisiones llegan tarde o qué tareas consumen tiempo cualificado…"
-      required></textarea>
+    <label class="f-label" for="fm">{f.challenge}</label>
+    <textarea class="f-input" id="fm" name="reto" placeholder={f.challengePh} required></textarea>
   </div>
 
   <label class="f-consent">
     <input type="checkbox" name="consent" required />
-    <span>He leído y acepto la <a href="/privacidad">Política de privacidad</a>.</span>
+    <span>{f.consentBefore}<a href={f.consentHref}>{f.consentLink}</a>.</span>
   </label>
 
   <button type="submit" class="btn btn-primary f-submit">{brand.cta.label}</button>
 </form>
 
 <script>
+  const l10n = {
+    es: {
+      fields: { nombre: 'Nombre', cargo: 'Cargo', email: 'Email', empresa: 'Empresa', tamano: 'Tamaño' },
+      challengeLabel: 'Reto de negocio:',
+      subject: 'Solicitud de Diagnóstico Empresa Aumentada',
+      mailtoTitle: 'Un último paso',
+      mailtoBody: (email: string) =>
+        `Se abrirá tu aplicación de correo con la solicitud preparada: solo tienes que enviarla. Si no se abre, escríbenos directamente a <a href="mailto:${email}">${email}</a>.`,
+      sending: 'Enviando…',
+      okTitle: '¡Gracias!',
+      okBody: 'Hemos recibido tu solicitud. Te contactaremos en menos de 24 horas laborables para agendar tu diagnóstico.',
+      error: 'No se pudo enviar. Inténtalo de nuevo o escríbenos directamente.',
+      netError: 'No se pudo enviar. Revisa tu conexión o escríbenos directamente.',
+    },
+    en: {
+      fields: { nombre: 'Name', cargo: 'Role', email: 'Email', empresa: 'Company', tamano: 'Size' },
+      challengeLabel: 'Business challenge:',
+      subject: 'Augmented Company Assessment request',
+      mailtoTitle: 'One last step',
+      mailtoBody: (email: string) =>
+        `Your email application will open with the request ready: just send it. If it does not open, write to us directly at <a href="mailto:${email}">${email}</a>.`,
+      sending: 'Sending…',
+      okTitle: 'Thank you!',
+      okBody: 'We have received your request. We will contact you within 24 working hours to schedule your assessment.',
+      error: 'It could not be sent. Try again or write to us directly.',
+      netError: 'It could not be sent. Check your connection or write to us directly.',
+    },
+  };
+
   document.querySelectorAll<HTMLFormElement>('form.cform').forEach((form) => {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = form.querySelector<HTMLButtonElement>('button[type="submit"]');
       if (!btn) return;
+      const t = l10n[form.dataset.lang === 'en' ? 'en' : 'es'];
 
       // Sin endpoint configurado: la solicitud se envía por correo (mailto).
       const endpoint = form.dataset.endpoint;
@@ -85,27 +150,26 @@ const { compact = false } = Astro.props;
         const line = (label: string, field: string) =>
           fd.get(field) ? `${label}: ${fd.get(field)}` : '';
         const body = [
-          line('Nombre', 'nombre'),
-          line('Cargo', 'cargo'),
-          line('Email', 'email'),
-          line('Empresa', 'empresa'),
-          line('Tamaño', 'tamano'),
+          line(t.fields.nombre, 'nombre'),
+          line(t.fields.cargo, 'cargo'),
+          line(t.fields.email, 'email'),
+          line(t.fields.empresa, 'empresa'),
+          line(t.fields.tamano, 'tamano'),
           '',
-          'Reto de negocio:',
+          t.challengeLabel,
           String(fd.get('reto') ?? ''),
         ]
           .filter((l, i) => l !== '' || i === 5)
           .join('\n');
         const email = form.dataset.email ?? '';
-        const subject = 'Solicitud de Diagnóstico Empresa Aumentada';
-        window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-        form.innerHTML = `<div class="form-ok-box"><h3>Un último paso</h3><p>Se abrirá tu aplicación de correo con la solicitud preparada: solo tienes que enviarla. Si no se abre, escríbenos directamente a <a href="mailto:${email}">${email}</a>.</p></div>`;
+        window.location.href = `mailto:${email}?subject=${encodeURIComponent(t.subject)}&body=${encodeURIComponent(body)}`;
+        form.innerHTML = `<div class="form-ok-box"><h3>${t.mailtoTitle}</h3><p>${t.mailtoBody(email)}</p></div>`;
         return;
       }
 
       const original = btn.textContent;
       btn.disabled = true;
-      btn.textContent = 'Enviando…';
+      btn.textContent = t.sending;
       try {
         const res = await fetch(form.action, {
           method: 'POST',
@@ -113,19 +177,16 @@ const { compact = false } = Astro.props;
           headers: { Accept: 'application/json' },
         });
         if (res.ok) {
-          form.innerHTML =
-            '<div class="form-ok-box"><h3>¡Gracias!</h3><p>Hemos recibido tu solicitud. Te contactaremos en menos de 24 horas laborables para agendar tu diagnóstico.</p></div>';
+          form.innerHTML = `<div class="form-ok-box"><h3>${t.okTitle}</h3><p>${t.okBody}</p></div>`;
         } else {
           const data = await res.json().catch(() => ({}));
-          const msg =
-            data?.errors?.[0]?.message ||
-            'No se pudo enviar. Inténtalo de nuevo o escríbenos directamente.';
+          const msg = data?.errors?.[0]?.message || t.error;
           showMsg(form, msg);
           btn.disabled = false;
           btn.textContent = original;
         }
       } catch {
-        showMsg(form, 'No se pudo enviar. Revisa tu conexión o escríbenos directamente.');
+        showMsg(form, t.netError);
         btn.disabled = false;
         btn.textContent = original;
       }

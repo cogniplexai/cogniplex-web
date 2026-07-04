@@ -1,0 +1,47 @@
+---
+import LegalLayout from '@/layouts/LegalLayout.astro';
+import { brandFor } from '@/config/brand';
+
+const brand = brandFor('en');
+---
+
+<LegalLayout title="Legal notice" updated="July 2026" path="/aviso-legal">
+  <h2>1. Identifying information</h2>
+  <p>
+    In compliance with Spanish Law 34/2002 on Information Society Services and Electronic Commerce
+    (LSSI-CE), the details of the owner of this website are provided below:
+  </p>
+  <ul>
+    <li>Owner: Cogniplex SL</li>
+    <li>Registered office: Barcelona (Spain)</li>
+    <li>Email: <a href={`mailto:${brand.email}`}>{brand.email}</a></li>
+  </ul>
+
+  <h2>2. Purpose</h2>
+  <p>
+    The purpose of this website is to present the services of {brand.name} and to facilitate
+    contact with the firm. Accessing and using the site confers the status of user and implies
+    acceptance of this legal notice.
+  </p>
+
+  <h2>3. Intellectual and industrial property</h2>
+  <p>
+    The contents of this site (texts, brand, logo, symbol, design and code) are owned by
+    {brand.name} or by third parties who have authorised their use, and are protected by
+    intellectual and industrial property law. Their reproduction without express authorisation is
+    prohibited.
+  </p>
+
+  <h2>4. Liability</h2>
+  <p>
+    {brand.name} is not liable for any misuse of the contents of the site, which is the sole
+    responsibility of the person who accesses or uses them.
+  </p>
+
+  <h2>5. Applicable law</h2>
+  <p>
+    This legal notice is governed by Spanish law. For any dispute, the parties submit to the courts
+    and tribunals with jurisdiction under the law.
+  </p>
+
+</LegalLayout>

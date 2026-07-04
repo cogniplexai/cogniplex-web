@@ -1,0 +1,129 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Hero from '@/components/Hero.astro';
+import ServiceCard from '@/components/ServiceCard.astro';
+import CTASection from '@/components/CTASection.astro';
+import { getPillars } from '@/data/pillars';
+
+export function getStaticPaths() {
+  return getPillars('en').map((pillar) => ({
+    params: { slug: pillar.slug },
+    props: { pillar },
+  }));
+}
+
+const { pillar } = Astro.props;
+const others = getPillars('en').filter((p) => p.slug !== pillar.slug);
+---
+
+<BaseLayout
+  title={pillar.name}
+  description={`${pillar.name} — ${pillar.objective}`}
+  path={`/servicios/${pillar.slug}`}
+>
+  <Hero
+    variant="interior"
+    eyebrow={`Practice ${pillar.order} · ${pillar.kicker}`}
+    title={pillar.name}
+    lead={pillar.intro}
+    secondaryCta={{ label: 'See all services', href: '/en/servicios' }}
+  />
+
+  <section class="block">
+    <div class="wrap">
+      <div class="block-hd fade-in">
+        <p class="eyebrow">The practice's objective</p>
+        <h2 class="sec-h">{pillar.objective}</h2>
+      </div>
+      <div class="services-grid">
+        {pillar.services.map((s) => <ServiceCard service={s} />)}
+      </div>
+    </div>
+  </section>
+
+  <!-- Other practices -->
+  <section class="block soft">
+    <div class="wrap">
+      <div class="block-hd fade-in">
+        <p class="eyebrow">Continue the journey</p>
+        <h2 class="sec-h">Other practices</h2>
+      </div>
+      <div class="others">
+        {
+          others.map((p) => (
+            <a href={`/en/servicios/${p.slug}`} class="other-card fade-in">
+              <span class="other-num">{String(p.order).padStart(2, '0')}</span>
+              <span class="other-name">{p.name}</span>
+              <span class="other-obj">{p.objective}</span>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <CTASection />
+</BaseLayout>
+
+<style>
+  /* Flex centrado: las filas incompletas (nº de servicios impar) quedan
+     centradas manteniendo el tamaño de tarjeta, en vez de una sola a la izquierda. */
+  .services-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 24px;
+  }
+  .services-grid :global(.service-card) {
+    flex: 0 1 calc(50% - 12px);
+  }
+  .others {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+  }
+  .other-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 22px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .other-card:hover {
+    border-color: var(--teal-line);
+    transform: translateY(-3px);
+  }
+  .other-num {
+    font-family: var(--head);
+    font-weight: 700;
+    font-size: 12px;
+    color: var(--teal);
+  }
+  .other-name {
+    font-family: var(--head);
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--tx);
+  }
+  .other-obj {
+    font-size: 13.5px;
+    color: var(--tx-2);
+    line-height: 1.5;
+  }
+  @media (max-width: 900px) {
+    .services-grid :global(.service-card) {
+      flex-basis: 100%;
+    }
+    .others {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  @media (max-width: 560px) {
+    .others {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

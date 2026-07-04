@@ -14,7 +14,7 @@ export interface Solution {
   relatedPillar: { name: string; href: string };
 }
 
-export const solutions: Solution[] = [
+const solutionsEs: Solution[] = [
   {
     slug: 'direccion-ia-externa',
     metaTitle: 'Dirección de IA externa para pymes (CAIO / CDO fractional)',
@@ -34,7 +34,7 @@ export const solutions: Solution[] = [
       { title: 'Fractional CDO', text: 'Convertir datos dispersos en una capacidad confiable para operar y decidir.' },
       { title: 'AI Value Office', text: 'Una cartera viva de oportunidades con disciplina de valor: pipeline, priorización, KPIs y reporting ejecutivo.' },
     ],
-    relatedPillar: { name: 'Fractional Leadership', href: '/servicios/fractional-leadership' },
+    relatedPillar: { name: 'Dirección Fractional', href: '/servicios/fractional-leadership' },
   },
   {
     slug: 'automatizacion-de-procesos',
@@ -55,7 +55,7 @@ export const solutions: Solution[] = [
       { title: 'Automatización e integración', text: 'Flujos automatizados y conectores con tus sistemas, con reglas, seguridad y controles de calidad.' },
       { title: 'Agentes y asistentes con RAG', text: 'Asistentes que responden con el conocimiento y los datos de tu empresa, dentro de tus límites.' },
     ],
-    relatedPillar: { name: 'Build & Transform', href: '/servicios/build-transform' },
+    relatedPillar: { name: 'Construcción y Transformación', href: '/servicios/build-transform' },
   },
   {
     slug: 'formacion-transformativa',
@@ -76,7 +76,7 @@ export const solutions: Solution[] = [
       { title: 'AI Champions', text: 'Una red interna de referentes que acelera la adopción, el feedback y la mejora continua.' },
       { title: 'Gestión del cambio', text: 'Acompañamiento para que la nueva forma de trabajar se sostenga y se mida en el tiempo.' },
     ],
-    relatedPillar: { name: 'Enablement & Adoption', href: '/servicios/enablement-adoption' },
+    relatedPillar: { name: 'Capacitación y Adopción', href: '/servicios/enablement-adoption' },
   },
   {
     slug: 'gobierno-de-ia',
@@ -97,8 +97,100 @@ export const solutions: Solution[] = [
       { title: 'Matriz de riesgos y controles', text: 'Clasificación de riesgos, control de proveedores y checklist de implantación.' },
       { title: 'Uso responsable y formación', text: 'Catálogo de usos permitidos y formación de conducta para toda la organización.' },
     ],
-    relatedPillar: { name: 'Fractional Leadership', href: '/servicios/fractional-leadership' },
+    relatedPillar: { name: 'Dirección Fractional', href: '/servicios/fractional-leadership' },
   },
 ];
 
-export const getSolution = (slug: string) => solutions.find((s) => s.slug === slug);
+const solutionsEn: Solution[] = [
+  {
+    slug: 'direccion-ia-externa',
+    metaTitle: 'Fractional AI leadership for SMEs (fractional CAIO / CDO)',
+    metaDescription:
+      'Part-time senior AI leadership for your SME: fractional CAIO and CDO. Prioritise, govern and turn AI into outcomes without taking on a full in-house structure.',
+    eyebrow: 'Fractional AI leadership',
+    h1: 'Senior AI leadership <span class="em">without taking on a full in-house structure</span>',
+    lead: 'Many companies need AI leadership before they can justify a full-time Chief AI Officer. The fractional model gives you that senior direction, part-time and accountable for outcomes.',
+    pains: [
+      'You try AI tools without a clear view of priorities or risks.',
+      'No one with authority and judgement owns the company’s AI agenda.',
+      'AI initiatives stay scattered and never convert into business impact.',
+      'You cannot hire a full-time in-house AI team.',
+    ],
+    approach: [
+      { title: 'Fractional CAIO', text: 'A single accountable figure who turns AI into a prioritised, governed business agenda with value tracking.' },
+      { title: 'Fractional CDO', text: 'Turn scattered data into a reliable capability for operating and deciding.' },
+      { title: 'AI Value Office', text: 'A living portfolio of opportunities with value discipline: pipeline, prioritisation, KPIs and executive reporting.' },
+    ],
+    relatedPillar: { name: 'Fractional Leadership', href: '/en/servicios/fractional-leadership' },
+  },
+  {
+    slug: 'automatizacion-de-procesos',
+    metaTitle: 'AI-powered process automation for SMEs',
+    metaDescription:
+      'We redesign and implement processes with automation, assistants and agents integrated into your systems. Less repetitive work, less friction, more capacity.',
+    eyebrow: 'Process automation',
+    h1: 'Automation that <span class="em">becomes part of real work</span>, not a demo',
+    lead: 'We redesign end-to-end processes with automation, assistants and agents that respect your rules and connect with your systems. The goal is to free up capacity, not to accumulate tools.',
+    pains: [
+      'Repetitive tasks consume skilled time without creating any difference.',
+      'Information lives scattered across ERP, CRM, spreadsheets and email.',
+      'You have tried automations that never managed to scale.',
+      'Processes depend too heavily on specific individuals.',
+    ],
+    approach: [
+      { title: 'Process redesign', text: 'First the end-to-end target process; then the technology that makes it possible.' },
+      { title: 'Automation and integration', text: 'Automated workflows and connectors with your systems, with rules, security and quality controls.' },
+      { title: 'RAG agents and assistants', text: 'Assistants that answer with your company’s knowledge and data, within your boundaries.' },
+    ],
+    relatedPillar: { name: 'Build & Transform', href: '/en/servicios/build-transform' },
+  },
+  {
+    slug: 'formacion-transformativa',
+    metaTitle: 'Transformative AI training for teams and executives',
+    metaDescription:
+      'AI training that turns access into practical capability, habits and responsible adoption. Cohort-based programmes, real cases and an AI Champions network.',
+    eyebrow: 'Transformative training',
+    h1: 'Training that changes <span class="em">how your team works</span>, not just what it knows',
+    lead: 'Generic courses raise curiosity; transformation requires context, practice and follow-through. We turn access to AI into practical capability, habits and responsible adoption.',
+    pains: [
+      'The team has access to AI but does not use it with judgement or confidence.',
+      'Previous training ended when the session ended.',
+      'Leadership and teams lack a shared language about AI.',
+      'No one sustains adoption once the initial enthusiasm fades.',
+    ],
+    approach: [
+      { title: 'Role-based training', text: 'Learning paths and exercises built on the company’s real processes, not generic examples.' },
+      { title: 'AI Champions', text: 'An internal network of champions that accelerates adoption, feedback and continuous improvement.' },
+      { title: 'Change management', text: 'Support so the new way of working holds — and is measured — over time.' },
+    ],
+    relatedPillar: { name: 'Enablement & Adoption', href: '/en/servicios/enablement-adoption' },
+  },
+  {
+    slug: 'gobierno-de-ia',
+    metaTitle: 'AI governance and trust for companies',
+    metaDescription:
+      'Practical rules for using AI with security, accountability and trust: policies, roles, risks and controls. Governance is designed from the start, not added at the end.',
+    eyebrow: 'AI governance',
+    h1: 'Innovate with AI <span class="em">without compromising</span> your information or your reputation',
+    lead: 'Sustainable adoption requires that employees and leadership know what can be done, who decides and how information is protected. Trust is designed; it is not added at the end.',
+    pains: [
+      'Security and confidentiality are a concern when using AI with company data.',
+      'There are no clear rules on which uses are allowed and who approves them.',
+      'There is no control over vendors, models and access.',
+      'Leadership worries about reputational or compliance risk.',
+    ],
+    approach: [
+      { title: 'AI policy and roles', text: 'What can be done, who decides and how uses are approved, with clear roles.' },
+      { title: 'Risk matrix and controls', text: 'Risk classification, vendor control and an implementation checklist.' },
+      { title: 'Responsible use and training', text: 'A catalogue of permitted uses and conduct training for the whole organisation.' },
+    ],
+    relatedPillar: { name: 'Fractional Leadership', href: '/en/servicios/fractional-leadership' },
+  },
+];
+
+export const solutionsByLocale = { es: solutionsEs, en: solutionsEn } as const;
+export const getSolutions = (locale: 'es' | 'en' = 'es') => solutionsByLocale[locale];
+export const getSolutionBy = (locale: 'es' | 'en', slug: string) => solutionsByLocale[locale].find((s) => s.slug === slug);
+// Compatibilidad:
+export const solutions = solutionsEs;
+export const getSolution = (slug: string) => solutionsEs.find((s) => s.slug === slug);

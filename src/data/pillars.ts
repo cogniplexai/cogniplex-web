@@ -22,12 +22,12 @@ export interface Pillar {
   services: Service[];
 }
 
-export const pillars: Pillar[] = [
+const pillarsEs: Pillar[] = [
   {
     slug: 'fractional-leadership',
     order: 1,
-    name: 'Fractional Leadership',
-    kicker: 'Executive Advisory',
+    name: 'Dirección Fractional',
+    kicker: 'Fractional Leadership',
     objective: 'Aportar dirección y gobierno de IA cuando aún no puedes justificar una estructura interna completa.',
     intro:
       'Dirección senior a tiempo parcial que convierte la IA en una agenda de negocio priorizada, gobernada y con seguimiento de valor. La responsabilidad de resultados permanece siempre en Cogniplex.',
@@ -70,8 +70,8 @@ export const pillars: Pillar[] = [
   {
     slug: 'strategy-design',
     order: 2,
-    name: 'Strategy & Design',
-    kicker: 'Estrategia y diseño',
+    name: 'Estrategia y Diseño',
+    kicker: 'Strategy & Design',
     objective: 'Definir qué transformar, con qué prioridades y con qué arquitectura.',
     intro:
       'Antes de construir, decidimos dónde está el valor. Aquí vive el Diagnóstico Empresa Aumentada, el punto de entrada que convierte la incertidumbre en prioridades y una hoja de ruta.',
@@ -114,8 +114,8 @@ export const pillars: Pillar[] = [
   {
     slug: 'build-transform',
     order: 3,
-    name: 'Build & Transform',
-    kicker: 'Construcción y transformación',
+    name: 'Construcción y Transformación',
+    kicker: 'Build & Transform',
     objective: 'Materializar mejoras de proceso, dato, conocimiento y experiencia.',
     intro:
       'Rediseñamos e implantamos procesos de extremo a extremo con automatización, asistentes, agentes y sistemas de decisión. La tecnología se integra en el trabajo real, no se queda en una demo.',
@@ -150,8 +150,8 @@ export const pillars: Pillar[] = [
   {
     slug: 'enablement-adoption',
     order: 4,
-    name: 'Enablement & Adoption',
-    kicker: 'Capacitación y adopción',
+    name: 'Capacitación y Adopción',
+    kicker: 'Enablement & Adoption',
     objective: 'Conseguir que las personas usen y multipliquen el valor de la IA.',
     intro:
       'Convertimos el acceso a la IA en capacidad práctica, hábitos de trabajo y adopción responsable. Personas aumentadas, no personas desplazadas.',
@@ -186,8 +186,8 @@ export const pillars: Pillar[] = [
   {
     slug: 'managed-evolve',
     order: 5,
-    name: 'Managed & Evolve',
-    kicker: 'Operación y evolución',
+    name: 'Operación y Evolución',
+    kicker: 'Managed & Evolve',
     objective: 'Operar, mejorar y escalar lo construido para que el valor no se evapore.',
     intro:
       'La IA y los procesos cambian. Sin operación continua, las soluciones se degradan. Mantenemos, medimos y hacemos evolucionar lo implantado como un mecanismo de mejora de negocio.',
@@ -221,4 +221,209 @@ export const pillars: Pillar[] = [
   },
 ];
 
-export const getPillar = (slug: string) => pillars.find((p) => p.slug === slug);
+const pillarsEn: Pillar[] = [
+  {
+    slug: 'fractional-leadership',
+    order: 1,
+    name: 'Fractional Leadership',
+    kicker: 'Executive Advisory',
+    objective: 'Provide AI direction and governance before a full in-house structure is justifiable.',
+    intro:
+      'Part-time senior leadership that turns AI into a prioritised, governed business agenda with value tracking. Accountability for outcomes always stays with Cogniplex.',
+    entryLabel: 'Explore external leadership',
+    services: [
+      {
+        code: 'A1',
+        name: 'Fractional CAIO',
+        promise: 'A single accountable figure who turns AI into a prioritised, governed business agenda.',
+        buyer: 'CEO, owner, general management or executive committee.',
+        deliverables: 'Quarterly roadmap, AI committee, prioritised portfolio, governance principles, value dashboard and adoption plan.',
+        model: 'Monthly retainer with an executive cadence.',
+      },
+      {
+        code: 'A2',
+        name: 'Fractional CDO',
+        promise: 'Turn scattered data into a reliable capability for operating and deciding.',
+        buyer: 'CEO, CFO, COO, operations or finance leadership.',
+        deliverables: 'Critical data map, ownership, quality criteria, roadmap and architecture plan.',
+        model: 'Monthly retainer or a 6-to-12-month programme.',
+      },
+      {
+        code: 'A3',
+        name: 'AI Value Office',
+        promise: 'Run a living portfolio of AI opportunities with value discipline.',
+        buyer: 'CAIO, CEO, COO, CFO or PMO.',
+        deliverables: 'Prioritised backlog, impact-effort matrix, case briefs, value dashboard and quarterly review.',
+        model: 'Monthly subscription, usually paired with the Fractional CAIO.',
+      },
+      {
+        code: 'A4',
+        name: 'AI Governance & Trust',
+        promise: 'Practical rules for using AI with security, accountability and trust.',
+        buyer: 'Leadership, legal, security, IT, HR and business teams.',
+        deliverables: 'AI policy, risk matrix, implementation checklist, use-case catalogue and decision roles.',
+        model: 'Initial project + periodic review.',
+      },
+    ],
+  },
+  {
+    slug: 'strategy-design',
+    order: 2,
+    name: 'Strategy & Design',
+    kicker: 'Strategy & Design',
+    objective: 'Define what to transform, with which priorities and which architecture.',
+    intro:
+      'Before we build, we decide where the value is. This is home to the Augmented Company Assessment, the entry point that turns uncertainty into priorities and a roadmap.',
+    entryLabel: 'Start with the assessment',
+    services: [
+      {
+        code: 'S1',
+        name: 'Augmented Company Assessment',
+        promise: 'Identify where AI, data and automation generate business value in a viable way.',
+        buyer: 'CEO, managing director, owner, COO or functional leadership.',
+        deliverables: 'Opportunity map, maturity assessment, impact-effort matrix, prioritised cases, ROI hypotheses and a 90-180-day roadmap.',
+        model: 'Fixed-scope project. The recommended entry point.',
+      },
+      {
+        code: 'S2',
+        name: 'AI Operating System Design',
+        promise: 'Design how the company operates when people, data, automation and agents work together.',
+        buyer: 'CEO, COO, CAIO, CIO, transformation leadership.',
+        deliverables: 'Target process map, functional architecture, role design, agent blueprint and governance model.',
+        model: 'Phased strategic project.',
+      },
+      {
+        code: 'S3',
+        name: 'Data Strategy',
+        promise: 'Define reliable data, shared semantics and actionable decisions.',
+        buyer: 'CDO, CFO, COO, management control.',
+        deliverables: 'Analytics priorities, data governance model, decision cases and roadmap.',
+        model: 'Standalone project or a component of the Fractional CDO.',
+      },
+      {
+        code: 'S4',
+        name: 'Knowledge Engineering',
+        promise: 'Capture tacit knowledge and turn it into a reusable, accessible, governed asset.',
+        buyer: 'Operations, quality, HR, technical service, sales or engineering.',
+        deliverables: 'Knowledge inventory, semantic model, playbooks, structured repository and internal assistants.',
+        model: 'Project + managed evolution service.',
+      },
+    ],
+  },
+  {
+    slug: 'build-transform',
+    order: 3,
+    name: 'Build & Transform',
+    kicker: 'Build & Transform',
+    objective: 'Deliver tangible improvements in processes, data, knowledge and experience.',
+    intro:
+      'We redesign and implement end-to-end processes with automation, assistants, agents and decision systems. The technology becomes part of real work — it does not stay a demo.',
+    entryLabel: 'Explore a use case',
+    services: [
+      {
+        code: 'T1',
+        name: 'Process Transformation & AI Solutions',
+        promise: 'Redesign and implement processes with automation, assistants, agents and decision systems.',
+        buyer: 'Function leads, COO, commercial, finance, operations or engineering leadership.',
+        deliverables: 'Target process, implemented solution, operating manual, training, usage metrics and evolution backlog.',
+        model: 'Phased project delivered in sprints with value milestones.',
+      },
+      {
+        code: 'T2',
+        name: 'Intelligent Automation & Integration',
+        promise: 'Remove end-to-end friction by connecting systems, data and business rules.',
+        buyer: 'COO, IT, operations and administration leads.',
+        deliverables: 'Automated workflows, ERP/CRM connectors, rules, quality controls and testing.',
+        model: 'Phased project.',
+      },
+      {
+        code: 'T3',
+        name: 'RAG Agents & Assistants',
+        promise: 'Assistants that answer with your company’s knowledge and data, within your rules.',
+        buyer: 'Functional leadership, customer service, sales, technical service.',
+        deliverables: 'Integrated assistants, governed knowledge base, usage controls and adoption measurement.',
+        model: 'Project + managed service.',
+      },
+    ],
+  },
+  {
+    slug: 'enablement-adoption',
+    order: 4,
+    name: 'Enablement & Adoption',
+    kicker: 'Enablement & Adoption',
+    objective: 'Get people to use AI — and multiply its value.',
+    intro:
+      'We turn access to AI into practical capability, working habits and responsible adoption. Augmented people, not displaced people.',
+    entryLabel: 'Design an adoption path',
+    services: [
+      {
+        code: 'E1',
+        name: 'Transformative AI Training',
+        promise: 'Turn access to AI into practical capability, working habits and responsible adoption.',
+        buyer: 'Leadership, HR, managers and functional teams.',
+        deliverables: 'Role-based learning paths, proprietary materials, exercises on real processes, prompt kit and metrics.',
+        model: 'Cohort-based programme + 60-90 days of follow-up support.',
+      },
+      {
+        code: 'E2',
+        name: 'AI Champions Program',
+        promise: 'Build an internal network of champions that accelerates adoption, feedback and continuous improvement.',
+        buyer: 'HR, CAIO, CIO, COO and functional leaders.',
+        deliverables: 'Champion profile, learning itinerary, monthly ritual, case repository and internal communication plan.',
+        model: '4-to-9-month programme.',
+      },
+      {
+        code: 'E3',
+        name: 'Change Management',
+        promise: 'Support the organisation so the new way of working holds over time.',
+        buyer: 'Leadership, HR and team leads.',
+        deliverables: 'Change plan, communication, resistance resolution and adoption metrics.',
+        model: 'Embedded in projects and programmes.',
+      },
+    ],
+  },
+  {
+    slug: 'managed-evolve',
+    order: 5,
+    name: 'Managed & Evolve',
+    kicker: 'Managed & Evolve',
+    objective: 'Operate, improve and scale what has been built so the value does not evaporate.',
+    intro:
+      'AI and processes change. Without continuous operation, solutions degrade. We maintain, measure and evolve what has been implemented as a business improvement mechanism.',
+    entryLabel: 'Sustain value over time',
+    services: [
+      {
+        code: 'M1',
+        name: 'Managed AI & Evolution',
+        promise: 'Operate, maintain and improve solutions so they stay useful, secure and aligned.',
+        buyer: 'CAIO, CIO, COO, function lead or transformation leadership.',
+        deliverables: 'SLA, health dashboard, quality review, usage reports, releases and value sessions.',
+        model: 'Monthly subscription with service levels.',
+      },
+      {
+        code: 'M2',
+        name: 'Evolutionary Solution Maintenance',
+        promise: 'Ensure continuity, fixes, improvements and integration of the solutions delivered.',
+        buyer: 'CIO, CAIO, product lead, functional leadership.',
+        deliverables: 'Backlog, release plan, documentation, testing and activity reporting.',
+        model: 'Capacity pool or monthly retainer.',
+      },
+      {
+        code: 'M3',
+        name: 'Data & Decision Operations',
+        promise: 'Keep the data and decision systems that support the operation reliable.',
+        buyer: 'CDO, CFO, COO, management control.',
+        deliverables: 'KPI catalogue, quality rules, alerts, executive dashboard and remediation plan.',
+        model: 'Monthly retainer or a component of the Fractional CDO.',
+      },
+    ],
+  },
+];
+
+export const pillarsByLocale = { es: pillarsEs, en: pillarsEn } as const;
+export type Locale = 'es' | 'en';
+export const getPillars = (locale: Locale = 'es') => pillarsByLocale[locale];
+export const getPillarBy = (locale: Locale, slug: string) => pillarsByLocale[locale].find((p) => p.slug === slug);
+// Compatibilidad con imports existentes:
+export const pillars = pillarsEs;
+export const getPillar = (slug: string) => pillarsEs.find((p) => p.slug === slug);

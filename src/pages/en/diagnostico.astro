@@ -1,0 +1,213 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Hero from '@/components/Hero.astro';
+import DiagnosticForm from '@/components/DiagnosticForm.astro';
+import FAQ from '@/components/FAQ.astro';
+import { brandFor } from '@/config/brand';
+
+const brand = brandFor('en');
+
+const includes = [
+  { t: 'Leadership interviews', d: 'Conversations with the people who know the processes, the data and the key decisions.' },
+  { t: 'Opportunity map', d: 'Where AI, data and automation can generate business value in a viable way.' },
+  { t: 'Maturity assessment', d: 'Your real starting point in data, processes, people and governance.' },
+  { t: 'Impact-effort matrix', d: 'Use cases prioritised by value and feasibility, not by technical novelty.' },
+  { t: 'ROI hypothesis', d: 'A first estimate of return, with a baseline and a way to measure it.' },
+  { t: '90-180 day roadmap', d: 'Two or three high-value initiatives and a governance recommendation.' },
+];
+
+const steps = [
+  { n: '1', t: 'Initial session', d: 'A short conversation to understand your business tension and confirm the fit.' },
+  { n: '2', t: 'Immersion', d: 'Interviews and analysis of processes, data and pain points with the key people.' },
+  { n: '3', t: 'Prioritisation', d: 'We turn the findings into opportunities prioritised by impact and effort.' },
+  { n: '4', t: 'Delivery and decision', d: 'We present the map, the roadmap and the recommendation. You decide the next step.' },
+];
+
+const faqDiag = [
+  { q: 'Does the assessment have a cost?', a: 'Yes. It is a fixed-scope product with clear deliverables: it is useful in its own right even if you do not continue with us. We do not give away in-depth assessments because they are intellectual property and the foundation of a quality relationship.' },
+  { q: 'How long does it take?', a: 'It depends on size and complexity, but it is designed to deliver priorities and a roadmap in a few weeks, not months.' },
+  { q: 'What do I need to have ready?', a: 'Nothing special. We start from wherever you are. We need access to the people who know the processes and a leadership team willing to take part.' },
+  { q: 'And after the assessment?', a: 'You decide. The assessment leaves you with an actionable roadmap; we can accompany you through execution (fractional leadership, transformation, training, evolution) or you can execute it on your own.' },
+];
+---
+
+<BaseLayout
+  title="Request the Augmented Company Assessment"
+  description="The Augmented Company Assessment turns uncertainty into priorities and a 90-180 day roadmap. Cogniplex's entry point."
+  path="/diagnostico"
+>
+  <Hero
+    variant="interior"
+    eyebrow="The entry point"
+    title={`Augmented Company <span class="em">Assessment</span>`}
+    lead="Turn a vague concern into clear priorities and an actionable roadmap. Starting with the assessment — not with the tool — creates focus, credibility and an investment you can measure."
+    primaryCta={{ label: 'Request my assessment', href: '#solicitar' }}
+    secondaryCta={{ label: "See what's included", href: '#incluye' }}
+  />
+
+  <!-- What's included -->
+  <section class="block" id="incluye">
+    <div class="wrap">
+      <div class="block-hd fade-in">
+        <p class="eyebrow">What's included</p>
+        <h2 class="sec-h">Clear deliverables, not a pretty presentation</h2>
+      </div>
+      <div class="incl-grid">
+        {
+          includes.map((i) => (
+            <div class="incl fade-in">
+              <span class="incl-dot" aria-hidden="true" />
+              <h3>{i.t}</h3>
+              <p>{i.d}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="block soft">
+    <div class="wrap">
+      <div class="block-hd fade-in">
+        <p class="eyebrow">How it works</p>
+        <h2 class="sec-h">Four steps, with no friction for your team</h2>
+      </div>
+      <div class="grid-4 steps">
+        {
+          steps.map((s) => (
+            <div class="dstep fade-in">
+              <span class="dstep-n">{s.n}</span>
+              <h3>{s.t}</h3>
+              <p>{s.d}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Form -->
+  <section class="block dark" id="solicitar">
+    <div class="wrap">
+      <div class="diag-grid">
+        <div class="fade-in">
+          <p class="eyebrow">Request it</p>
+          <h2 class="sec-h">{brand.cta.label}</h2>
+          <p class="sec-lead">
+            Tell us about your situation. We will get back to you within 24 working hours to
+            schedule the initial session and confirm the fit, candidly.
+          </p>
+          <div class="diag-contact">
+            <div class="c-detail">
+              <div class="c-detail-l">Email</div>
+              <div class="c-detail-v"><a href={`mailto:${brand.email}`}>{brand.email}</a></div>
+            </div>
+            <div class="c-detail">
+              <div class="c-detail-l">Where we are</div>
+              <div class="c-detail-v">{brand.location}</div>
+            </div>
+          </div>
+        </div>
+        <div class="fade-in">
+          <DiagnosticForm />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <FAQ items={faqDiag} title="Questions about the assessment" eyebrow="Before you request it" centered={false} />
+</BaseLayout>
+
+<style>
+  .incl-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+  }
+  .incl {
+    padding-top: 20px;
+    border-top: 2px solid var(--line-2);
+  }
+  .incl-dot {
+    display: block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--teal);
+    margin-bottom: 14px;
+  }
+  .incl h3 {
+    font-family: var(--head);
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--tx);
+    margin-bottom: 8px;
+  }
+  .incl p {
+    font-size: 15px;
+    color: var(--tx-2);
+    line-height: 1.6;
+  }
+  .dstep-n {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1px solid var(--teal-line);
+    font-family: var(--head);
+    font-weight: 700;
+    color: var(--teal-deep);
+    margin-bottom: 16px;
+  }
+  .dstep h3 {
+    font-family: var(--head);
+    font-weight: 700;
+    font-size: 17px;
+    color: var(--tx);
+    margin-bottom: 8px;
+  }
+  .dstep p {
+    font-size: 15px;
+    color: var(--tx-2);
+    line-height: 1.6;
+  }
+  .diag-grid {
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: 60px;
+    align-items: start;
+  }
+  .diag-contact {
+    margin-top: 30px;
+  }
+  .c-detail {
+    margin-top: 22px;
+  }
+  .c-detail-l {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--on-navy-2);
+    margin-bottom: 4px;
+  }
+  .c-detail-v {
+    font-size: 16px;
+    color: var(--on-navy);
+  }
+  .c-detail-v a:hover {
+    color: var(--teal-2);
+  }
+  @media (max-width: 900px) {
+    .incl-grid {
+      grid-template-columns: 1fr;
+    }
+    .diag-grid {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+  }
+</style>

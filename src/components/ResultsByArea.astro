@@ -1,21 +1,33 @@
 ---
-import { resultsByArea } from '@/data/site';
+import { siteFor } from '@/data/site';
+import { asLocale } from '@/i18n';
 
 interface Props {
   dark?: boolean;
 }
 const { dark = false } = Astro.props;
+const locale = asLocale(Astro.currentLocale);
+const { resultsByArea } = siteFor(locale);
+const copy =
+  locale === 'en'
+    ? {
+        eyebrow: 'Outcomes by area',
+        title: 'What changes in each part of your company',
+        lead: 'An augmented company shows in the day-to-day: in every area, intelligence measurably expands what people can do.',
+      }
+    : {
+        eyebrow: 'Resultados por área',
+        title: 'Qué cambia en cada parte de tu empresa',
+        lead: 'Una empresa aumentada se nota en el día a día: en cada área, la inteligencia amplía —de forma medible— la capacidad de las personas.',
+      };
 ---
 
 <section class:list={['block', 'results', { dark }]}>
   <div class="wrap">
     <div class="block-hd fade-in">
-      <p class="eyebrow">Resultados por área</p>
-      <h2 class="sec-h">Qué cambia en cada parte de tu empresa</h2>
-      <p class="sec-lead">
-        Una empresa aumentada se nota en el día a día: en cada área, la inteligencia amplía —de
-        forma medible— la capacidad de las personas.
-      </p>
+      <p class="eyebrow">{copy.eyebrow}</p>
+      <h2 class="sec-h">{copy.title}</h2>
+      <p class="sec-lead">{copy.lead}</p>
     </div>
     <div class="results-list fade-in">
       {

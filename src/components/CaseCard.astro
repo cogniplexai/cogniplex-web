@@ -1,4 +1,6 @@
 ---
+import { asLocale } from '@/i18n';
+
 interface Props {
   title: string;
   sector: string;
@@ -9,6 +11,7 @@ interface Props {
   placeholder?: boolean;
 }
 const { title, sector, area, summary, metric, metricLabel, placeholder = true } = Astro.props;
+const phLabel = asLocale(Astro.currentLocale) === 'en' ? 'Illustrative scenario' : 'Escenario ilustrativo';
 ---
 
 <article class="case-card fade-in">
@@ -26,7 +29,7 @@ const { title, sector, area, summary, metric, metricLabel, placeholder = true } 
       </div>
     )
   }
-  {placeholder && <span class="case-ph">Escenario ilustrativo</span>}
+  {placeholder && <span class="case-ph">{phLabel}</span>}
 </article>
 
 <style>

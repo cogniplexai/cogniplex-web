@@ -1,0 +1,144 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Hero from '@/components/Hero.astro';
+import Declaration from '@/components/Declaration.astro';
+import CogniSteps from '@/components/CogniSteps.astro';
+import ResultsByArea from '@/components/ResultsByArea.astro';
+import CTASection from '@/components/CTASection.astro';
+
+const valueShift = [
+  { layer: 'Technology', cheap: 'Interfaces, CRUD, prototypes and common automations.', value: 'Architecture, integration, security, governance and quality.' },
+  { layer: 'Processes', cheap: 'Digitising an isolated task.', value: 'Redesigning an entire flow and removing friction end to end.' },
+  { layer: 'Data', cheap: 'Connecting sources and visualising information.', value: 'Trustworthy data, shared semantics, traceability and actionable decisions.' },
+  { layer: 'Knowledge', cheap: 'Generating generic answers.', value: 'Capturing the tacit expertise and business rules that set you apart.' },
+  { layer: 'People', cheap: 'Giving access to a tool.', value: 'Building habits, skills, roles and trust.' },
+  { layer: 'Leadership', cheap: 'Trying out isolated use cases.', value: 'Prioritising investments, governing risk and turning initiatives into results.' },
+];
+---
+
+<BaseLayout
+  title="AI-augmented company"
+  description="What an AI-augmented company is and how it changes processes, people, data and decisions. This is how Cogniplex works."
+  path="/empresa-aumentada"
+>
+  <Hero
+    variant="interior"
+    eyebrow="The category"
+    title={`When building is cheap, the judgement to decide <span class="em">what to build</span> is the scarce asset.`}
+    lead="AI tools make development cheaper. Value shifts to understanding the business, its processes, its data, its knowledge and adoption. That is where Cogniplex works."
+  />
+
+  <Declaration>
+    An AI-augmented company is recognised by its results: <span
+      >intelligence measurably amplifies people's capability, accelerates decisions, reduces
+      repetitive work, protects knowledge and enables growth without an equivalent escalation in
+      costs.</span
+    >
+  </Declaration>
+
+  <!-- Where value concentrates -->
+  <section class="block soft">
+    <div class="wrap">
+      <div class="block-hd fade-in">
+        <p class="eyebrow">Why now</p>
+        <h2 class="sec-h">Where business value concentrates</h2>
+        <p class="sec-lead">
+          As building software becomes accessible, value no longer resides in writing code. This is
+          what gets cheaper and what gains value at each layer.
+        </p>
+      </div>
+      <div class="vtable fade-in">
+        <div class="vrow vhead">
+          <span>Layer</span><span>What gets cheaper</span><span>What gains value</span>
+        </div>
+        {
+          valueShift.map((r) => (
+            <div class="vrow">
+              <span class="vlayer">{r.layer}</span>
+              <span class="vcheap">{r.cheap}</span>
+              <span class="vvalue">{r.value}</span>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <div id="como-trabajamos"></div>
+  <CogniSteps detailed eyebrow="The journey" title="How we deliver a transformation" />
+
+  <ResultsByArea dark />
+
+  <CTASection
+    eyebrow="The first step"
+    title="Shall we start by understanding where your value is?"
+    lead="The Augmented Company Assessment turns a diffuse concern into priorities and a 90-180 day roadmap."
+  />
+</BaseLayout>
+
+<style>
+  .vtable {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .vrow {
+    display: grid;
+    grid-template-columns: 160px 1fr 1.2fr;
+    gap: 20px;
+    padding: 18px 24px;
+    border-top: 1px solid var(--line);
+    align-items: baseline;
+  }
+  .vrow:first-child {
+    border-top: 0;
+  }
+  .vhead {
+    background: var(--navy);
+    color: #fff;
+    font-family: var(--head);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .vhead span {
+    color: #fff;
+  }
+  .vlayer {
+    font-family: var(--head);
+    font-weight: 700;
+    color: var(--teal-deep);
+    font-size: 16px;
+  }
+  .vcheap {
+    color: var(--tx-3);
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  .vvalue {
+    color: var(--tx);
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  @media (max-width: 760px) {
+    .vrow {
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
+    .vhead {
+      display: none;
+    }
+    .vcheap::before {
+      content: 'Gets cheaper: ';
+      color: var(--tx-3);
+      font-weight: 600;
+    }
+    .vvalue::before {
+      content: 'Gains value: ';
+      color: var(--teal-deep);
+      font-weight: 600;
+    }
+  }
+</style>

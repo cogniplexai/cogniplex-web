@@ -5,23 +5,23 @@ import Hero from '@/components/Hero.astro';
 import CTASection from '@/components/CTASection.astro';
 
 const posts = (await getCollection('ideas'))
-  .filter((p) => !p.data.draft && !p.id.startsWith('en/'))
+  .filter((p) => !p.data.draft && p.id.startsWith('en/'))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
 const fmt = (d: Date) =>
-  d.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+  d.toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' });
 ---
 
 <BaseLayout
-  title="Ideas"
-  description="Contenidos de negocio para dirección de pymes: empresa aumentada, dirección y ROI, procesos, adopción y gobierno de IA."
+  title="Insights"
+  description="Business content for SME leadership: the augmented company, management and ROI, processes, adoption and AI governance."
   path="/ideas"
 >
   <Hero
     variant="interior"
-    eyebrow="Ideas"
-    title={`Contenido que ayuda a <span class="em">decidir</span>, no que anuncia herramientas.`}
-    lead="Escribimos para gerentes y comités de dirección que necesitan entender cómo cambiar su empresa sin caer en el ruido tecnológico."
+    eyebrow="Insights"
+    title={`Content that helps you <span class="em">decide</span>, not content that advertises tools.`}
+    lead="We write for managing directors and executive committees who need to understand how to change their company without getting lost in the technological noise."
   />
 
   <section class="block">
@@ -29,7 +29,7 @@ const fmt = (d: Date) =>
       <div class="posts">
         {
           posts.map((post) => (
-            <a href={`/ideas/${post.id}`} class="post-card fade-in">
+            <a href={`/en/ideas/${post.id.replace(/^en\//, '')}`} class="post-card fade-in">
               <span class="post-pillar">{post.data.pillar}</span>
               <h2 class="post-title">{post.data.title}</h2>
               <p class="post-desc">{post.data.description}</p>
@@ -44,9 +44,9 @@ const fmt = (d: Date) =>
   </section>
 
   <CTASection
-    eyebrow="Ideas aplicadas a tu empresa"
-    title="¿Y si lo llevamos a tu caso concreto?"
-    lead="Cada idea cobra sentido cuando se aplica a tu negocio. Empieza por un Diagnóstico Empresa Aumentada."
+    eyebrow="Insights applied to your company"
+    title="What if we brought this to your specific case?"
+    lead="Every idea makes sense when applied to your business. Start with an Augmented Company Assessment."
   />
 </BaseLayout>
 
