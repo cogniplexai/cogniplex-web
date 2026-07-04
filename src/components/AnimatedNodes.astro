@@ -1,13 +1,11 @@
 ---
 /**
- * Enjambre de nodos (SVG): cúmulos volumétricos de círculos teal.
- * Cada cúmulo es una esfera 3D real generada en build (núcleo denso, superficie
- * dispersa) y proyectada con perspectiva: el tamaño y la opacidad de cada
- * partícula dependen de su profundidad. La rotación 3D del cúmulo se precalcula
- * (posición proyectada en los dos extremos del giro) y CSS interpola entre ambas,
- * de modo que las partículas cercanas se desplazan más que las lejanas: paralaje
- * real sin JavaScript en runtime.
- * - Respeta prefers-reduced-motion (quedan los cúmulos estáticos, aún con volumen).
+ * Enjambre de nodos (SVG): murmuración de círculos teal sin líneas.
+ * Es la traducción dinámica del símbolo Cogniplex: muchos nodos auto-organizados
+ * formando una banda diagonal que ondula con vida propia.
+ * - Sin JavaScript: toda la animación es CSS (transform/opacity).
+ * - Tres capas de profundidad que se mueven a ritmos distintos + deriva individual.
+ * - Respeta prefers-reduced-motion (queda el enjambre estático).
  * density: 'hero' (denso, portada) | 'soft' (sutil, CTA/interiores)
  */
 interface Props {
@@ -30,128 +28,63 @@ const rnd = mulberry32(density === 'hero' ? 20260704 : 8080);
 
 const W = 1200;
 const H = 800;
-const F = 900; // distancia focal de la proyección en perspectiva
 const palette = ['#5cc6c6', '#75b7b6', '#8fd4d3', '#3f8a8a', '#2e9d9c'];
+const COUNT = density === 'hero' ? 130 : 70;
 
-type V3 = { x: number; y: number; z: number };
-
-/** Rotación alrededor del eje Y (giro) y después del eje X (cabeceo suave). */
-function rotate(p: V3, a: number, b: number): V3 {
-  const x1 = p.x * Math.cos(a) + p.z * Math.sin(a);
-  const z1 = -p.x * Math.sin(a) + p.z * Math.cos(a);
-  const y2 = p.y * Math.cos(b) - z1 * Math.sin(b);
-  const z2 = p.y * Math.sin(b) + z1 * Math.cos(b);
-  return { x: x1, y: y2, z: z2 };
+/** Punto dentro de la banda diagonal (abajo-izquierda → arriba-derecha). */
+function swarmPoint() {
+  const t = rnd();
+  const x = 250 + t * 860 + (rnd() - 0.5) * 100;
+  const baseY = 650 - t * 480 - Math.sin(t * Math.PI) * 60;
+  const spread = 80 + 160 * Math.sin(t * Math.PI); // la banda respira: más ancha en el centro
+  const y = baseY + (rnd() + rnd() - 1) * spread;
+  return { x, y };
 }
 
-/** Proyección en perspectiva sobre el centro del cúmulo. */
-function project(p: V3, cx: number, cy: number) {
-  const s = F / (F + p.z);
-  return { px: cx + p.x * s, py: cy + p.y * s, s };
-}
-
-interface ClusterSpec {
-  cx: number;
-  cy: number;
-  R: number;
-  n: number;
-  swing: number; // amplitud total del giro (radianes)
-  tilt: number; // cabeceo que acompaña al giro
-  dur: number; // segundos por media oscilación
-  dir: 1 | -1; // sentido del giro (alternamos para dar vida)
-}
-
-interface Particle {
+interface Dot {
   x: number;
   y: number;
   r: number;
   c: string;
   o: number;
-  dx: number;
-  dy: number;
+  layer: number;
+  anim: number;
+  dur: number;
   delay: number;
-  m: number;
-  mdur: number;
-  tw: boolean;
+  twinkle: boolean;
 }
 
-function buildCluster(spec: ClusterSpec): Particle[] {
-  const parts: Particle[] = [];
-  for (let i = 0; i < spec.n; i++) {
-    // Punto dentro de la esfera, con núcleo más denso y ligero achatado vertical
-    const u = rnd() * 2 - 1;
-    const phi = rnd() * Math.PI * 2;
-    const rr = spec.R * Math.cbrt(rnd());
-    const sq = Math.sqrt(1 - u * u);
-    const p: V3 = {
-      x: rr * sq * Math.cos(phi),
-      y: rr * sq * Math.sin(phi) * 0.82,
-      z: rr * u,
-    };
-    const half = (spec.swing / 2) * spec.dir;
-    const a = project(rotate(p, -half, -spec.tilt / 2), spec.cx, spec.cy);
-    const b = project(rotate(p, half, spec.tilt / 2), spec.cx, spec.cy);
-    // Profundidad en el extremo inicial: cerca (z<0) → mayor y más opaco
-    const zA = rotate(p, -half, -spec.tilt / 2).z;
-    const t = (spec.R - zA) / (2 * spec.R); // 1 = delante, 0 = detrás
-    const r = (1.3 + rnd() ** 2 * 5.5) * a.s;
-    parts.push({
-      x: +a.px.toFixed(1),
-      y: +a.py.toFixed(1),
-      r: +r.toFixed(1),
-      c: palette[Math.floor(rnd() * palette.length)],
-      o: +(0.3 + 0.62 * t).toFixed(2),
-      dx: +(b.px - a.px).toFixed(1),
-      dy: +(b.py - a.py).toFixed(1),
-      delay: +(-spec.dur / 2 + (rnd() - 0.5) * 2.4).toFixed(1),
-      m: Math.floor(rnd() * 3),
-      mdur: +(6 + rnd() * 6).toFixed(1),
-      tw: rnd() < 0.25 && t > 0.55,
-    });
-  }
-  // De atrás a delante, para que las partículas cercanas pinten encima
-  return parts.sort((p1, p2) => p2.o - p1.o).reverse();
+const dots: Dot[] = [];
+for (let i = 0; i < COUNT; i++) {
+  const ambient = rnd() < 0.2; // polvo suelto fuera de la banda, para profundidad
+  const p = ambient ? { x: rnd() * W, y: rnd() * H } : swarmPoint();
+  dots.push({
+    x: Math.round(p.x),
+    y: Math.round(p.y),
+    r: +(1.2 + rnd() ** 2.2 * (density === 'hero' ? 8 : 6)).toFixed(1),
+    c: palette[Math.floor(rnd() * palette.length)],
+    o: +(ambient ? 0.16 + rnd() * 0.28 : 0.35 + rnd() * 0.55).toFixed(2),
+    layer: Math.floor(rnd() * 3),
+    anim: Math.floor(rnd() * 6),
+    dur: +(7 + rnd() * 11).toFixed(1),
+    delay: +(-rnd() * 18).toFixed(1),
+    twinkle: rnd() < 0.28,
+  });
 }
+const layers = [0, 1, 2].map((l) => dots.filter((d) => d.layer === l));
 
-/** Cúmulos a lo largo de la diagonal de marca (abajo-izda → arriba-dcha). */
-const clusterSpecs: ClusterSpec[] =
-  density === 'hero'
-    ? [
-        { cx: 935, cy: 255, R: 160, n: 58, swing: 0.5, tilt: 0.16, dur: 30, dir: 1 },
-        { cx: 600, cy: 520, R: 115, n: 40, swing: 0.6, tilt: 0.2, dur: 24, dir: -1 },
-        { cx: 315, cy: 655, R: 75, n: 22, swing: 0.7, tilt: 0.24, dur: 19, dir: 1 },
-      ]
-    : [
-        { cx: 890, cy: 320, R: 120, n: 34, swing: 0.5, tilt: 0.16, dur: 28, dir: 1 },
-        { cx: 420, cy: 540, R: 85, n: 24, swing: 0.6, tilt: 0.2, dur: 22, dir: -1 },
-      ];
-
-const clusters = clusterSpecs.map((spec) => ({
-  dur: spec.dur,
-  parts: buildCluster(spec),
-}));
-
-/** Polvo ambiental suelto: profundidad de campo alrededor de los cúmulos. */
-const DUST = density === 'hero' ? 26 : 14;
-const dust = Array.from({ length: DUST }, () => ({
-  x: Math.round(rnd() * W),
-  y: Math.round(rnd() * H),
-  r: +(1 + rnd() ** 2 * 3).toFixed(1),
-  c: palette[Math.floor(rnd() * palette.length)],
-  o: +(0.14 + rnd() * 0.26).toFixed(2),
-  m: Math.floor(rnd() * 3),
-  dur: +(9 + rnd() * 9).toFixed(1),
-  delay: +(-rnd() * 18).toFixed(1),
-}));
-
-/** Orbes de luz difusa en el corazón de cada cúmulo: volumen y resplandor. */
-const orbs = clusterSpecs.map((spec) => ({
-  x: spec.cx,
-  y: spec.cy,
-  r: Math.round(spec.R * 1.35),
-  dur: +(30 + rnd() * 20).toFixed(1),
-  delay: +(-rnd() * 30).toFixed(1),
-}));
+/** Orbes de luz difusa: dan profundidad y volumen detrás del enjambre. */
+const orbs = Array.from({ length: density === 'hero' ? 4 : 2 }, () => {
+  const p = swarmPoint();
+  return {
+    x: Math.round(p.x),
+    y: Math.round(p.y),
+    r: Math.round(70 + rnd() * 90),
+    anim: Math.floor(rnd() * 6),
+    dur: +(26 + rnd() * 26).toFixed(1),
+    delay: +(-rnd() * 40).toFixed(1),
+  };
+});
 ---
 
 <svg
@@ -163,7 +96,7 @@ const orbs = clusterSpecs.map((spec) => ({
 >
   <defs>
     <radialGradient id="cx-orb-grad">
-      <stop offset="0%" stop-color="#2e9d9c" stop-opacity="0.17"></stop>
+      <stop offset="0%" stop-color="#2e9d9c" stop-opacity="0.16"></stop>
       <stop offset="60%" stop-color="#2e9d9c" stop-opacity="0.06"></stop>
       <stop offset="100%" stop-color="#2e9d9c" stop-opacity="0"></stop>
     </radialGradient>
@@ -172,7 +105,7 @@ const orbs = clusterSpecs.map((spec) => ({
   {
     orbs.map((o) => (
       <circle
-        class="cx-orb"
+        class={`cx-dot cx-drift-${o.anim}`}
         cx={o.x}
         cy={o.y}
         r={o.r}
@@ -183,37 +116,18 @@ const orbs = clusterSpecs.map((spec) => ({
   }
 
   {
-    dust.map((d) => (
-      <circle
-        class={`cx-p cx-dust cx-micro-${d.m}`}
-        cx={d.x}
-        cy={d.y}
-        r={d.r}
-        fill={d.c}
-        opacity={d.o}
-        style={`animation-duration:${d.dur}s;animation-delay:${d.delay}s`}
-      />
-    ))
-  }
-
-  {
-    clusters.map((cl) => (
-      <g class="cx-cluster">
-        {cl.parts.map((p) => (
-          <g
-            class="cx-rot"
-            style={`--dx:${p.dx}px;--dy:${p.dy}px;animation-duration:${cl.dur}s;animation-delay:${p.delay}s`}
-          >
-            <circle
-              class={`cx-p cx-micro-${p.m}${p.tw ? ' cx-twinkle' : ''}`}
-              cx={p.x}
-              cy={p.y}
-              r={p.r}
-              fill={p.c}
-              opacity={p.o}
-              style={`animation-duration:${p.mdur}s,${(p.mdur * 0.7).toFixed(1)}s;animation-delay:${p.delay}s,${p.delay}s`}
-            />
-          </g>
+    layers.map((layer, l) => (
+      <g class={`cx-layer cx-layer-${l}`}>
+        {layer.map((d) => (
+          <circle
+            class={`cx-dot cx-drift-${d.anim}${d.twinkle ? ' cx-twinkle' : ''}`}
+            cx={d.x}
+            cy={d.y}
+            r={d.r}
+            fill={d.c}
+            opacity={d.o}
+            style={`animation-duration:${d.dur}s,${(d.dur * 0.6).toFixed(1)}s;animation-delay:${d.delay}s,${d.delay}s`}
+          />
         ))}
       </g>
     ))
@@ -228,89 +142,106 @@ const orbs = clusterSpecs.map((spec) => ({
     height: 100%;
     display: block;
     pointer-events: none;
+    /* Desvanecido en los bordes: evita costuras cuando dos bloques navy
+       contiguos tienen y no tienen partículas (p. ej. CTA + footer). */
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 16%, #000 84%, transparent 100%);
+    mask-image: linear-gradient(180deg, transparent 0%, #000 16%, #000 84%, transparent 100%);
   }
 
-  /* Rotación 3D del cúmulo: cada partícula viaja hasta su posición proyectada
-     en el otro extremo del giro. Las cercanas recorren más que las lejanas. */
-  .cx-rot {
-    animation: cx-rot ease-in-out infinite alternate;
-    animation-name: cx-rot;
+  /* Capas: toda la banda ondula lentamente, cada capa a un ritmo distinto */
+  .cx-layer {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: cx-sway-0 46s ease-in-out infinite alternate;
   }
-  @keyframes cx-rot {
-    from {
-      transform: translate(0, 0);
-    }
-    to {
-      transform: translate(var(--dx), var(--dy));
-    }
+  .cx-layer-1 {
+    animation-name: cx-sway-1;
+    animation-duration: 62s;
+  }
+  .cx-layer-2 {
+    animation-name: cx-sway-2;
+    animation-duration: 78s;
   }
 
-  /* Deriva individual mínima: vida orgánica sin romper la forma del cúmulo */
-  .cx-p {
-    animation-name: cx-micro-0;
+  /* Deriva individual: 6 trayectorias orgánicas repartidas al azar */
+  .cx-dot {
+    animation-name: cx-drift-0;
     animation-timing-function: ease-in-out;
     animation-iteration-count: infinite;
     animation-direction: alternate;
   }
-  .cx-micro-1 { animation-name: cx-micro-1; }
-  .cx-micro-2 { animation-name: cx-micro-2; }
+  .cx-drift-1 { animation-name: cx-drift-1; }
+  .cx-drift-2 { animation-name: cx-drift-2; }
+  .cx-drift-3 { animation-name: cx-drift-3; }
+  .cx-drift-4 { animation-name: cx-drift-4; }
+  .cx-drift-5 { animation-name: cx-drift-5; }
 
-  /* El polvo ambiental deriva con más recorrido */
-  .cx-dust.cx-micro-0 { animation-name: cx-dust-0; }
-  .cx-dust.cx-micro-1 { animation-name: cx-dust-1; }
-  .cx-dust.cx-micro-2 { animation-name: cx-dust-2; }
-
-  /* Destello sutil en las partículas frontales (segunda animación: opacity) */
-  .cx-twinkle { animation-name: cx-micro-0, cx-twinkle; }
-  .cx-twinkle.cx-micro-1 { animation-name: cx-micro-1, cx-twinkle; }
-  .cx-twinkle.cx-micro-2 { animation-name: cx-micro-2, cx-twinkle; }
-
-  .cx-orb {
-    animation: cx-orb ease-in-out infinite alternate;
+  /* Destello sutil en parte de los nodos (segunda animación: solo opacity) */
+  .cx-twinkle {
+    animation-name: cx-drift-0, cx-twinkle;
   }
+  .cx-twinkle.cx-drift-1 { animation-name: cx-drift-1, cx-twinkle; }
+  .cx-twinkle.cx-drift-2 { animation-name: cx-drift-2, cx-twinkle; }
+  .cx-twinkle.cx-drift-3 { animation-name: cx-drift-3, cx-twinkle; }
+  .cx-twinkle.cx-drift-4 { animation-name: cx-drift-4, cx-twinkle; }
+  .cx-twinkle.cx-drift-5 { animation-name: cx-drift-5, cx-twinkle; }
 
-  @keyframes cx-micro-0 {
+  @keyframes cx-drift-0 {
     0% { transform: translate(0, 0); }
-    50% { transform: translate(5px, -4px); }
-    100% { transform: translate(-3px, 4px); }
+    35% { transform: translate(16px, -12px); }
+    70% { transform: translate(-6px, -22px); }
+    100% { transform: translate(9px, 6px); }
   }
-  @keyframes cx-micro-1 {
+  @keyframes cx-drift-1 {
     0% { transform: translate(0, 0); }
-    50% { transform: translate(-4px, 5px); }
-    100% { transform: translate(4px, 2px); }
+    30% { transform: translate(-14px, 10px); }
+    65% { transform: translate(10px, 20px); }
+    100% { transform: translate(-7px, -8px); }
   }
-  @keyframes cx-micro-2 {
+  @keyframes cx-drift-2 {
+    0% { transform: translate(0, 0); }
+    40% { transform: translate(20px, 8px); }
+    75% { transform: translate(6px, -16px); }
+    100% { transform: translate(-11px, 4px); }
+  }
+  @keyframes cx-drift-3 {
+    0% { transform: translate(0, 0); }
+    33% { transform: translate(-18px, -8px); }
+    66% { transform: translate(-4px, 18px); }
+    100% { transform: translate(12px, -5px); }
+  }
+  @keyframes cx-drift-4 {
     0% { transform: translate(0, 0) scale(1); }
-    50% { transform: translate(3px, 4px) scale(1.1); }
-    100% { transform: translate(-4px, -3px) scale(0.94); }
+    50% { transform: translate(10px, -18px) scale(1.12); }
+    100% { transform: translate(-9px, -4px) scale(0.94); }
   }
-  @keyframes cx-dust-0 {
-    0% { transform: translate(0, 0); }
-    50% { transform: translate(16px, -12px); }
-    100% { transform: translate(-8px, 10px); }
-  }
-  @keyframes cx-dust-1 {
-    0% { transform: translate(0, 0); }
-    50% { transform: translate(-14px, 12px); }
-    100% { transform: translate(10px, -8px); }
-  }
-  @keyframes cx-dust-2 {
+  @keyframes cx-drift-5 {
     0% { transform: translate(0, 0) scale(1); }
-    50% { transform: translate(11px, 14px) scale(1.12); }
-    100% { transform: translate(-9px, -6px) scale(0.92); }
+    50% { transform: translate(-12px, 14px) scale(0.9); }
+    100% { transform: translate(14px, 7px) scale(1.08); }
   }
   @keyframes cx-twinkle {
-    0%, 100% { opacity: 0.25; }
+    0%, 100% { opacity: 0.2; }
     50% { opacity: 0.95; }
   }
-  @keyframes cx-orb {
+  @keyframes cx-sway-0 {
+    0% { transform: translate(0, 0) rotate(0.001deg); }
+    50% { transform: translate(-24px, 14px) rotate(-1.1deg); }
+    100% { transform: translate(16px, -10px) rotate(0.7deg); }
+  }
+  @keyframes cx-sway-1 {
+    0% { transform: translate(0, 0) rotate(0.001deg); }
+    50% { transform: translate(20px, -16px) rotate(0.9deg); }
+    100% { transform: translate(-14px, 8px) rotate(-0.6deg); }
+  }
+  @keyframes cx-sway-2 {
     0% { transform: translate(0, 0) scale(1); }
-    50% { transform: translate(-12px, 8px) scale(1.06); }
-    100% { transform: translate(10px, -6px) scale(0.97); }
+    50% { transform: translate(-10px, -12px) scale(1.03); }
+    100% { transform: translate(12px, 10px) scale(0.98); }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .cx-swarm :is(.cx-p, .cx-rot, .cx-orb) {
+    .cx-swarm :is(.cx-dot, .cx-layer) {
       animation: none !important;
     }
   }
