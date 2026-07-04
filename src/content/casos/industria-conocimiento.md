@@ -5,8 +5,6 @@ area: Conocimiento
 summary: Una empresa familiar captura el conocimiento técnico que vivía en pocas personas y lo convierte en un activo consultable por todo el equipo de operaciones.
 before: El conocimiento crítico de mantenimiento y calidad dependía de dos personas próximas a la jubilación y no estaba documentado.
 after: Un repositorio semántico y un asistente interno permiten al equipo resolver consultas técnicas al instante, reduciendo la dependencia de personas clave.
-metric: "[PLACEHOLDER]"
-metricLabel: Reducción del tiempo de consulta técnica
 order: 2
 placeholder: true
 ---

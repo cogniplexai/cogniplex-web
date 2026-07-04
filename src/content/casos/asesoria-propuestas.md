@@ -5,8 +5,6 @@ area: Comercial
 summary: Una asesoría con un equipo reducido automatiza la elaboración de propuestas e incorpora su know-how en cada oferta, multiplicando su capacidad sin contratar más personal.
 before: El equipo dedicaba horas a preparar cada propuesta a mano y solo llegaba a enviar unas pocas ofertas a la semana.
 after: Con un asistente que incorpora el criterio y los precedentes de la firma, se generan borradores de propuesta en minutos y el equipo revisa y personaliza en lugar de partir de cero.
-metric: "[PLACEHOLDER]"
-metricLabel: Aumento de propuestas enviadas / mes
 order: 1
 placeholder: true
 ---

@@ -11,7 +11,7 @@ const casos = defineCollection({
     summary: z.string(),
     before: z.string(),
     after: z.string(),
-    /** Métrica destacada; usar [PLACEHOLDER] hasta validar con el cliente. */
+    /** Métrica destacada; solo con casos reales validados con el cliente. */
     metric: z.string().optional(),
     metricLabel: z.string().optional(),
     order: z.number().default(99),

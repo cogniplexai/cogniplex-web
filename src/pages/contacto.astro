@@ -28,10 +28,18 @@ import { brand } from '@/config/brand';
             <div class="c-detail-l">Dónde estamos</div>
             <div class="c-detail-v">{brand.location}</div>
           </div>
-          <div class="c-detail">
-            <div class="c-detail-l">LinkedIn</div>
-            <div class="c-detail-v"><a href={brand.social.linkedin} target="_blank" rel="noopener">/cogniplex</a></div>
-          </div>
+          {
+            brand.social.linkedin && (
+              <div class="c-detail">
+                <div class="c-detail-l">LinkedIn</div>
+                <div class="c-detail-v">
+                  <a href={brand.social.linkedin} target="_blank" rel="noopener">
+                    /cogniplex
+                  </a>
+                </div>
+              </div>
+            )
+          }
 
           <div class="c-cta-note">
             ¿Prefieres ir al grano? Solicita directamente tu

@@ -26,7 +26,7 @@ const { title, sector, area, summary, metric, metricLabel, placeholder = true } 
       </div>
     )
   }
-  {placeholder && <span class="case-ph">[PLACEHOLDER — caso pendiente de validar]</span>}
+  {placeholder && <span class="case-ph">Escenario ilustrativo</span>}
 </article>
 
 <style>
@@ -91,8 +91,9 @@ const { title, sector, area, summary, metric, metricLabel, placeholder = true } 
     font-size: 11.5px;
     font-weight: 600;
     letter-spacing: 0.3px;
-    color: var(--granate);
-    background: rgba(128, 0, 0, 0.07);
+    color: var(--tx-3);
+    background: var(--surface-2);
+    border: 1px solid var(--line);
     border-radius: 5px;
     padding: 4px 8px;
     align-self: flex-start;
