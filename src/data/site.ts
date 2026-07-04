@@ -57,8 +57,8 @@ const es = {
   /** El recorrido de servicios (flywheel). */
   journey: [
     { step: 'Diagnosticar', pillar: 'Estrategia y Diseño', href: '/servicios/strategy-design' },
-    { step: 'Liderar', pillar: 'Dirección Fractional', href: '/servicios/fractional-leadership' },
-    { step: 'Transformar', pillar: 'Construcción y Transformación', href: '/servicios/build-transform' },
+    { step: 'Liderar', pillar: 'Liderazgo Fraccional', href: '/servicios/fractional-leadership' },
+    { step: 'Transformar', pillar: 'Implementación y Transformación', href: '/servicios/build-transform' },
     { step: 'Adoptar', pillar: 'Capacitación y Adopción', href: '/servicios/enablement-adoption' },
     { step: 'Evolucionar', pillar: 'Operación y Evolución', href: '/servicios/managed-evolve' },
   ],

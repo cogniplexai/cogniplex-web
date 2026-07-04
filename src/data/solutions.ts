@@ -34,7 +34,7 @@ const solutionsEs: Solution[] = [
       { title: 'Fractional CDO', text: 'Convertir datos dispersos en una capacidad confiable para operar y decidir.' },
       { title: 'AI Value Office', text: 'Una cartera viva de oportunidades con disciplina de valor: pipeline, priorización, KPIs y reporting ejecutivo.' },
     ],
-    relatedPillar: { name: 'Dirección Fractional', href: '/servicios/fractional-leadership' },
+    relatedPillar: { name: 'Liderazgo Fraccional', href: '/servicios/fractional-leadership' },
   },
   {
     slug: 'automatizacion-de-procesos',
@@ -55,7 +55,7 @@ const solutionsEs: Solution[] = [
       { title: 'Automatización e integración', text: 'Flujos automatizados y conectores con tus sistemas, con reglas, seguridad y controles de calidad.' },
       { title: 'Agentes y asistentes con RAG', text: 'Asistentes que responden con el conocimiento y los datos de tu empresa, dentro de tus límites.' },
     ],
-    relatedPillar: { name: 'Construcción y Transformación', href: '/servicios/build-transform' },
+    relatedPillar: { name: 'Implementación y Transformación', href: '/servicios/build-transform' },
   },
   {
     slug: 'formacion-transformativa',
@@ -97,7 +97,7 @@ const solutionsEs: Solution[] = [
       { title: 'Matriz de riesgos y controles', text: 'Clasificación de riesgos, control de proveedores y checklist de implantación.' },
       { title: 'Uso responsable y formación', text: 'Catálogo de usos permitidos y formación de conducta para toda la organización.' },
     ],
-    relatedPillar: { name: 'Dirección Fractional', href: '/servicios/fractional-leadership' },
+    relatedPillar: { name: 'Liderazgo Fraccional', href: '/servicios/fractional-leadership' },
   },
 ];
 
