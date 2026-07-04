@@ -1,14 +1,18 @@
 ---
 /**
  * Enjambre de nodos (SVG): murmuración de círculos teal con volumetría real.
- * La banda diagonal se organiza en 4 capas de profundidad: las partículas
- * cercanas son grandes, brillantes y algunas con desenfoque bokeh; las lejanas,
- * pequeñas y tenues. La sensación 3D llega por paralaje de movimiento: cada
- * capa reacciona al ratón y al scroll con inercia, desplazándose en proporción
- * a su profundidad (JS mínimo que solo actualiza 3 variables CSS por frame).
- * - Sin JS por partícula: deriva, vaivén y destellos son animación CSS.
+ * La banda diagonal se organiza en 4 capas de profundidad con paralaje ligado
+ * al ratón y al scroll (JS mínimo: 3 variables CSS por frame). Además, cada
+ * partícula tiene vida propia de enfoque:
+ * - Focusable (la mayoría): dos círculos superpuestos —nítido + halo bokeh—
+ *   cuyas opacidades se cruzan en ciclos asíncronos: la partícula entra y
+ *   sale del plano focal, como si cambiara de plano de profundidad.
+ * - Bokeh permanente (cercanas y grandes): disco desenfocado que respira
+ *   (escala y brillo).
+ * - Polvo lejano: puntos nítidos con destellos.
+ * Sin filtros de blur (caros): el desenfoque es un gradiente radial.
  * - Desvanecido en los bordes: sin costuras entre bloques navy contiguos.
- * - Respeta prefers-reduced-motion (banda estática, sin paralaje).
+ * - Respeta prefers-reduced-motion (banda estática, nítida, sin paralaje).
  * density: 'hero' (denso, diagonal ↗) | 'soft' (sutil, diagonal ↘ invertida)
  */
 interface Props {
@@ -46,6 +50,8 @@ function swarmPoint() {
   return { x, y };
 }
 
+type Kind = 'focus' | 'bokeh' | 'dust';
+
 interface Dot {
   x: number;
   y: number;
@@ -53,11 +59,13 @@ interface Dot {
   c: number; // índice de paleta
   o: number;
   d: number; // profundidad 0 (lejos) → 1 (cerca)
-  bokeh: boolean;
+  kind: Kind;
   anim: number;
   da: number; // amplitud de la deriva individual (escala con la profundidad)
   dur: number;
   delay: number;
+  fd: number; // duración del ciclo de enfoque
+  fdel: number; // fase del ciclo de enfoque
   twinkle: boolean;
 }
 
@@ -66,22 +74,27 @@ for (let i = 0; i < COUNT; i++) {
   const ambient = rnd() < 0.2; // polvo suelto fuera de la banda
   const p = ambient ? { x: rnd() * W, y: rnd() * H } : swarmPoint();
   const d = rnd() ** 0.9; // profundidad
-  const near = d > 0.8;
   const rBase = 0.9 + d ** 1.3 * (density === 'hero' ? 7.5 : 5.5) + rnd() * 1.2;
-  const bokeh = near && rBase > 4.6 && rnd() < 0.75; // cercano y grande → desenfocado
+  const kind: Kind = ambient
+    ? 'dust'
+    : d > 0.8 && rBase > 4.6 && rnd() < 0.5
+      ? 'bokeh'
+      : 'focus';
   dots.push({
     x: Math.round(p.x),
     y: Math.round(p.y),
-    r: +(bokeh ? rBase * 1.7 : rBase).toFixed(1),
+    r: +(kind === 'bokeh' ? rBase * 1.7 : rBase).toFixed(1),
     c: Math.floor(rnd() * palette.length),
-    o: +((ambient ? 0.5 : 1) * (0.15 + d * 0.75) * (density === 'soft' ? 0.85 : 1)).toFixed(2),
+    o: +((ambient ? 0.5 : 1) * (0.15 + d * 0.72) * (density === 'soft' ? 0.85 : 1)).toFixed(2),
     d,
-    bokeh,
+    kind,
     anim: Math.floor(rnd() * 6),
     da: +(0.35 + d * 0.9).toFixed(2),
     dur: +(7 + rnd() * 11).toFixed(1),
     delay: +(-rnd() * 18).toFixed(1),
-    twinkle: !bokeh && rnd() < 0.16 + d * 0.2,
+    fd: +(8 + rnd() * 10).toFixed(1),
+    fdel: +(-rnd() * 20).toFixed(1),
+    twinkle: ambient && rnd() < 0.45,
   });
 }
 
@@ -155,17 +168,42 @@ const orbs = Array.from({ length: density === 'hero' ? 4 : 2 }, () => {
     layers.map((layer, l) => (
       <g class="cx-par" style={`--amp:${layer.amp}`}>
         <g class="cx-layer" style={`--sw:${layer.sw};animation-duration:${layer.dur}s;animation-name:cx-sway-${l % 3}`}>
-          {layer.dots.map((dt) => (
-            <circle
-              class={`cx-dot cx-drift-${dt.anim}${dt.twinkle ? ' cx-twinkle' : ''}`}
-              cx={dt.x}
-              cy={dt.y}
-              r={dt.r}
-              fill={dt.bokeh ? `url(#cx-bk-${dt.c})` : palette[dt.c]}
-              opacity={dt.o}
-              style={`--da:${dt.da};animation-duration:${dt.dur}s,${(dt.dur * 0.6).toFixed(1)}s;animation-delay:${dt.delay}s,${dt.delay}s`}
-            />
-          ))}
+          {layer.dots.map((dt) =>
+            dt.kind === 'focus' ? (
+              <g
+                class={`cx-dot cx-fg cx-drift-${dt.anim}`}
+                style={`--da:${dt.da};--o:${dt.o};--fd:${dt.fd}s;--fdel:${dt.fdel}s;animation-duration:${dt.dur}s;animation-delay:${dt.delay}s`}
+              >
+                <circle class="cx-fo-sharp" cx={dt.x} cy={dt.y} r={dt.r} fill={palette[dt.c]} />
+                <circle
+                  class="cx-fo-soft"
+                  cx={dt.x}
+                  cy={dt.y}
+                  r={+(dt.r * 2.1).toFixed(1)}
+                  fill={`url(#cx-bk-${dt.c})`}
+                />
+              </g>
+            ) : dt.kind === 'bokeh' ? (
+              <circle
+                class={`cx-dot cx-bk cx-drift-${dt.anim}`}
+                cx={dt.x}
+                cy={dt.y}
+                r={dt.r}
+                fill={`url(#cx-bk-${dt.c})`}
+                style={`--da:${dt.da};--o:${dt.o};animation-duration:${dt.dur}s,${dt.fd}s;animation-delay:${dt.delay}s,${dt.fdel}s`}
+              />
+            ) : (
+              <circle
+                class={`cx-dot cx-drift-${dt.anim}${dt.twinkle ? ' cx-twinkle' : ''}`}
+                cx={dt.x}
+                cy={dt.y}
+                r={dt.r}
+                fill={palette[dt.c]}
+                opacity={dt.o}
+                style={`--da:${dt.da};animation-duration:${dt.dur}s,${(dt.dur * 0.6).toFixed(1)}s;animation-delay:${dt.delay}s,${dt.delay}s`}
+              />
+            )
+          )}
         </g>
       </g>
     ))
@@ -284,8 +322,11 @@ const orbs = Array.from({ length: density === 'hero' ? 4 : 2 }, () => {
     animation: cx-sway-0 60s ease-in-out infinite alternate;
   }
 
-  /* Deriva individual: 6 trayectorias orgánicas, amplitud por profundidad (--da) */
+  /* Deriva individual: 6 trayectorias orgánicas, amplitud por profundidad (--da).
+     Se aplica a círculos sueltos y a los grupos nítido+halo. */
   .cx-dot {
+    transform-box: fill-box;
+    transform-origin: center;
     animation-name: cx-drift-0;
     animation-timing-function: ease-in-out;
     animation-iteration-count: infinite;
@@ -297,7 +338,45 @@ const orbs = Array.from({ length: density === 'hero' ? 4 : 2 }, () => {
   .cx-drift-4 { animation-name: cx-drift-4; }
   .cx-drift-5 { animation-name: cx-drift-5; }
 
-  /* Destello sutil (segunda animación: solo opacity) */
+  /* Respiración de enfoque: el círculo nítido y su halo bokeh se cruzan.
+     55 % del ciclo en foco pleno; después la partícula sale del plano focal. */
+  .cx-fo-sharp {
+    opacity: var(--o, 1);
+    animation: cx-fo-sharp var(--fd, 12s) ease-in-out var(--fdel, 0s) infinite alternate;
+  }
+  .cx-fo-soft {
+    opacity: 0;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: cx-fo-soft var(--fd, 12s) ease-in-out var(--fdel, 0s) infinite alternate;
+  }
+  @keyframes cx-fo-sharp {
+    0%, 55% { opacity: var(--o, 1); }
+    100% { opacity: calc(var(--o, 1) * 0.12); }
+  }
+  @keyframes cx-fo-soft {
+    0%, 55% { opacity: 0; transform: scale(0.85); }
+    100% { opacity: var(--o, 1); transform: scale(1.2); }
+  }
+
+  /* Bokeh permanente: el disco desenfocado respira (escala y brillo) */
+  .cx-bk {
+    animation-name: cx-drift-0, cx-bk-breathe;
+  }
+  .cx-bk.cx-drift-1 { animation-name: cx-drift-1, cx-bk-breathe; }
+  .cx-bk.cx-drift-2 { animation-name: cx-drift-2, cx-bk-breathe; }
+  .cx-bk.cx-drift-3 { animation-name: cx-drift-3, cx-bk-breathe; }
+  .cx-bk.cx-drift-4 { animation-name: cx-drift-4, cx-bk-breathe; }
+  .cx-bk.cx-drift-5 { animation-name: cx-drift-5, cx-bk-breathe; }
+  @keyframes cx-bk-breathe {
+    0% { opacity: calc(var(--o, 1) * 0.65); }
+    100% { opacity: var(--o, 1); }
+  }
+  .cx-bk {
+    opacity: var(--o, 1);
+  }
+
+  /* Destello sutil del polvo (segunda animación: solo opacity) */
   .cx-twinkle { animation-name: cx-drift-0, cx-twinkle; }
   .cx-twinkle.cx-drift-1 { animation-name: cx-drift-1, cx-twinkle; }
   .cx-twinkle.cx-drift-2 { animation-name: cx-drift-2, cx-twinkle; }
@@ -360,7 +439,7 @@ const orbs = Array.from({ length: density === 'hero' ? 4 : 2 }, () => {
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .cx-swarm :is(.cx-dot, .cx-layer) {
+    .cx-swarm :is(.cx-dot, .cx-layer, .cx-fo-sharp, .cx-fo-soft) {
       animation: none !important;
     }
     .cx-par {
