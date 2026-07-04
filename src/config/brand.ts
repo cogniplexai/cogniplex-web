@@ -26,21 +26,24 @@ export const brand = {
     href: '/diagnostico',
   },
 
-  /** Endpoint del formulario (Formspree). Sustituir por el ID real de la cuenta Cogniplex. */
-  formEndpoint: 'https://formspree.io/f/XXXXXXXX', // [PLACEHOLDER] ID de Formspree
+  /**
+   * Endpoint del formulario (Formspree). Vacío = los formularios se envían por email
+   * (mailto a brand.email). Poner aquí la URL real cuando exista la cuenta de Formspree.
+   */
+  formEndpoint: '',
 
   /** Navegación principal. */
   nav: [
     { label: 'Empresa aumentada', href: '/empresa-aumentada' },
     { label: 'Servicios', href: '/servicios' },
-    { label: 'Casos', href: '/casos' },
+    { label: 'Escenarios', href: '/casos' },
     { label: 'Ideas', href: '/ideas' },
     { label: 'Contacto', href: '/contacto' },
   ],
 
-  /** Redes sociales. Rellenar con las URL reales. */
+  /** Redes sociales. Vacío = no se muestra. Rellenar cuando exista la página de empresa. */
   social: {
-    linkedin: 'https://www.linkedin.com/company/cogniplex', // [PLACEHOLDER]
+    linkedin: '',
   },
 
   /** Año para el copyright del footer. */

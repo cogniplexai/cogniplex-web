@@ -92,7 +92,7 @@ export const faqHome = [
 /**
  * Pruebas y credibilidad.
  * Contexto de mercado con fuentes públicas verificables + ejemplo ilustrativo.
- * Las métricas de clientes reales deben sustituir los [PLACEHOLDER].
+ * Cuando existan métricas de clientes reales, añadirlas aquí y destacarlas sobre las de mercado.
  */
 export const marketProof = [
   {
@@ -104,7 +104,7 @@ export const marketProof = [
     source: 'Comisión Europea · Década Digital',
   },
   {
-    stat: 'La adopción de IA en las pymes va todavía muy por detrás de la de las grandes empresas.',
+    stat: 'La mayoría de las empresas europeas aún no ha incorporado la IA a su operativa: la ventaja está en moverse antes y mejor.',
     source: 'Eurostat · Uso de IA en empresas de la UE',
   },
 ];

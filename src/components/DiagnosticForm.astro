@@ -9,9 +9,11 @@ const { compact = false } = Astro.props;
 
 <form
   class="cform"
-  action={brand.formEndpoint}
+  action={brand.formEndpoint || undefined}
   method="POST"
   data-form="diagnostico"
+  data-endpoint={brand.formEndpoint}
+  data-email={brand.email}
 >
   <div class="f-row">
     <div class="f-field">
@@ -75,6 +77,32 @@ const { compact = false } = Astro.props;
       e.preventDefault();
       const btn = form.querySelector<HTMLButtonElement>('button[type="submit"]');
       if (!btn) return;
+
+      // Sin endpoint configurado: la solicitud se envía por correo (mailto).
+      const endpoint = form.dataset.endpoint;
+      if (!endpoint) {
+        const fd = new FormData(form);
+        const line = (label: string, field: string) =>
+          fd.get(field) ? `${label}: ${fd.get(field)}` : '';
+        const body = [
+          line('Nombre', 'nombre'),
+          line('Cargo', 'cargo'),
+          line('Email', 'email'),
+          line('Empresa', 'empresa'),
+          line('Tamaño', 'tamano'),
+          '',
+          'Reto de negocio:',
+          String(fd.get('reto') ?? ''),
+        ]
+          .filter((l, i) => l !== '' || i === 5)
+          .join('\n');
+        const email = form.dataset.email ?? '';
+        const subject = 'Solicitud de Diagnóstico Empresa Aumentada';
+        window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        form.innerHTML = `<div class="form-ok-box"><h3>Un último paso</h3><p>Se abrirá tu aplicación de correo con la solicitud preparada: solo tienes que enviarla. Si no se abre, escríbenos directamente a <a href="mailto:${email}">${email}</a>.</p></div>`;
+        return;
+      }
+
       const original = btn.textContent;
       btn.disabled = true;
       btn.textContent = 'Enviando…';
@@ -210,6 +238,9 @@ const { compact = false } = Astro.props;
     color: var(--on-navy-2);
     font-size: 15px;
     line-height: 1.6;
+  }
+  :global(.form-ok-box a) {
+    color: var(--teal-2);
   }
   @media (max-width: 560px) {
     .f-row {

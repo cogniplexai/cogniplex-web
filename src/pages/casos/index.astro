@@ -10,24 +10,19 @@ const casos = (await getCollection('casos')).sort((a, b) => a.data.order - b.dat
 ---
 
 <BaseLayout
-  title="Casos de impacto"
-  description="Resultados de negocio explicados desde el problema, el proceso y el resultado. Casos de transformación de pymes con Cogniplex."
+  title="Escenarios de transformación"
+  description="Cómo trabaja Cogniplex, explicado desde el problema, el proceso y el resultado. Escenarios de transformación empresarial con IA."
   path="/casos"
 >
   <Hero
     variant="interior"
-    eyebrow="Casos de impacto"
+    eyebrow="Escenarios de transformación"
     title={`Resultados explicados desde el <span class="em">problema</span>, no desde la herramienta.`}
-    lead="Nuestros casos se cuentan desde la situación de partida, el proceso rediseñado y el resultado medible. El cliente no compra agentes ni dashboards: compra capacidad, control, velocidad y aprendizaje."
+    lead="Cada escenario se cuenta desde la situación de partida, el proceso rediseñado y el resultado que buscamos. El cliente no compra agentes ni dashboards: compra capacidad, control, velocidad y aprendizaje. A medida que documentemos casos de cliente —con su permiso y con métricas verificables— los publicaremos aquí."
   />
 
   <section class="block">
     <div class="wrap">
-      <div class="ph-banner fade-in" role="note">
-        <strong>Nota:</strong> los casos siguientes son ilustrativos y están marcados como
-        <code>[PLACEHOLDER]</code>. Se sustituirán por casos reales documentados con permiso del
-        cliente y métricas verificables. No publicamos cifras sin validar.
-      </div>
       <div class="cases-grid">
         {
           casos.map((c) => (
@@ -70,20 +65,6 @@ const casos = (await getCollection('casos')).sort((a, b) => a.data.order - b.dat
 </BaseLayout>
 
 <style>
-  .ph-banner {
-    background: rgba(128, 0, 0, 0.06);
-    border: 1px solid rgba(128, 0, 0, 0.18);
-    border-radius: var(--radius);
-    padding: 16px 20px;
-    font-size: 14.5px;
-    color: var(--tx-2);
-    line-height: 1.6;
-    margin-bottom: 32px;
-  }
-  .ph-banner code {
-    font-size: 13px;
-    color: var(--granate);
-  }
   .cases-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
