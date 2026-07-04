@@ -15,7 +15,7 @@ const labels =
 <article class="service-card fade-in">
   <header class="service-hd">
     <span class="service-code">{service.code}</span>
-    <h3 class="service-name">{service.name}</h3>
+    <h3 class="service-name">{service.italic ? <em>{service.name}</em> : service.name}</h3>
   </header>
   <p class="service-promise">{service.promise}</p>
   <dl class="service-meta">

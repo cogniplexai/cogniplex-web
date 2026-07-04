@@ -16,7 +16,7 @@ const href = `${prefix}/servicios/${pillar.slug}`;
     <p class="pillar-obj">{pillar.objective}</p>
   </div>
   <ul class="pillar-services">
-    {pillar.services.map((s) => <li>{s.name}</li>)}
+    {pillar.services.map((s) => <li>{s.italic ? <em>{s.name}</em> : s.name}</li>)}
   </ul>
   <a href={href} class="arrow-link">
     {pillar.entryLabel}

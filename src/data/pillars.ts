@@ -5,6 +5,8 @@
 export interface Service {
   code: string;
   name: string;
+  /** Si true, el nombre se mantiene en español y se muestra en cursiva (producto de marca). */
+  italic?: boolean;
   promise: string;
   buyer: string;
   deliverables: string;
@@ -26,7 +28,7 @@ const pillarsEs: Pillar[] = [
   {
     slug: 'fractional-leadership',
     order: 1,
-    name: 'Dirección Fractional',
+    name: 'Liderazgo Fraccional',
     kicker: 'Fractional Leadership',
     objective: 'Aportar dirección y gobierno de IA cuando aún no puedes justificar una estructura interna completa.',
     intro:
@@ -80,6 +82,7 @@ const pillarsEs: Pillar[] = [
       {
         code: 'S1',
         name: 'Diagnóstico Empresa Aumentada',
+        italic: true,
         promise: 'Identificar dónde la IA, los datos y la automatización generan valor de negocio de forma viable.',
         buyer: 'CEO, gerente, propietario, COO o dirección funcional.',
         deliverables: 'Mapa de oportunidades, evaluación de madurez, matriz impacto-esfuerzo, casos priorizados, hipótesis de ROI y roadmap de 90-180 días.',
@@ -95,7 +98,7 @@ const pillarsEs: Pillar[] = [
       },
       {
         code: 'S3',
-        name: 'Estrategia de dato',
+        name: 'Data Strategy',
         promise: 'Definir datos confiables, semántica compartida y decisiones accionables.',
         buyer: 'CDO, CFO, COO, control de gestión.',
         deliverables: 'Prioridades analíticas, modelo de gobierno del dato, casos de decisión y hoja de ruta.',
@@ -114,16 +117,16 @@ const pillarsEs: Pillar[] = [
   {
     slug: 'build-transform',
     order: 3,
-    name: 'Construcción y Transformación',
+    name: 'Implementación y Transformación',
     kicker: 'Build & Transform',
     objective: 'Materializar mejoras de proceso, dato, conocimiento y experiencia.',
     intro:
       'Rediseñamos e implantamos procesos de extremo a extremo con automatización, asistentes, agentes y sistemas de decisión. La tecnología se integra en el trabajo real, no se queda en una demo.',
-    entryLabel: 'Explorar un caso de uso',
+    entryLabel: 'Rediseñar un proceso',
     services: [
       {
         code: 'T1',
-        name: 'Transformación de procesos y soluciones IA',
+        name: 'Process Transformation & AI Solutions',
         promise: 'Rediseñar e implantar procesos con automatización, asistentes, agentes y sistemas de decisión.',
         buyer: 'Responsables de función, COO, dirección comercial, finanzas, operaciones o ingeniería.',
         deliverables: 'Proceso objetivo, solución implantada, manual operativo, formación, métricas de uso y backlog evolutivo.',
@@ -131,7 +134,7 @@ const pillarsEs: Pillar[] = [
       },
       {
         code: 'T2',
-        name: 'Automatización inteligente e integración',
+        name: 'Intelligent Automation & Integration',
         promise: 'Eliminar fricción de extremo a extremo conectando sistemas, datos y reglas de negocio.',
         buyer: 'COO, IT, responsables de operaciones y administración.',
         deliverables: 'Flujos automatizados, conectores con ERP/CRM, reglas, controles de calidad y pruebas.',
@@ -139,7 +142,7 @@ const pillarsEs: Pillar[] = [
       },
       {
         code: 'T3',
-        name: 'Agentes y asistentes con RAG',
+        name: 'RAG Agents & Assistants',
         promise: 'Asistentes que responden con el conocimiento y los datos de tu empresa, dentro de tus reglas.',
         buyer: 'Dirección funcional, atención al cliente, ventas, servicio técnico.',
         deliverables: 'Asistentes integrados, base de conocimiento gobernada, controles de uso y medición de adopción.',
@@ -159,7 +162,7 @@ const pillarsEs: Pillar[] = [
     services: [
       {
         code: 'E1',
-        name: 'Formación Transformativa en IA',
+        name: 'Transformative AI Training',
         promise: 'Convertir acceso a IA en capacidad práctica, hábitos de trabajo y adopción responsable.',
         buyer: 'Dirección, RRHH, managers y equipos funcionales.',
         deliverables: 'Ruta por colectivos, materiales propios, ejercicios sobre procesos reales, kit de prompts y métricas.',
@@ -175,7 +178,7 @@ const pillarsEs: Pillar[] = [
       },
       {
         code: 'E3',
-        name: 'Gestión del cambio',
+        name: 'Change Management',
         promise: 'Acompañar a la organización para que la nueva forma de trabajar se sostenga en el tiempo.',
         buyer: 'Dirección, RRHH y líderes de equipo.',
         deliverables: 'Plan de cambio, comunicación, resolución de resistencias y métricas de adopción.',
@@ -203,7 +206,7 @@ const pillarsEs: Pillar[] = [
       },
       {
         code: 'M2',
-        name: 'Mantenimiento evolutivo de soluciones',
+        name: 'Evolutionary Solution Maintenance',
         promise: 'Asegurar continuidad, correcciones, mejoras e integración de las soluciones desarrolladas.',
         buyer: 'CIO, CAIO, responsable de producto, dirección funcional.',
         deliverables: 'Backlog, plan de releases, documentación, pruebas y reporte de actividad.',
@@ -318,7 +321,7 @@ const pillarsEn: Pillar[] = [
     objective: 'Deliver tangible improvements in processes, data, knowledge and experience.',
     intro:
       'We redesign and implement end-to-end processes with automation, assistants, agents and decision systems. The technology becomes part of real work — it does not stay a demo.',
-    entryLabel: 'Explore a use case',
+    entryLabel: 'Redesign a process',
     services: [
       {
         code: 'T1',
