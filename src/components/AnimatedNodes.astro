@@ -1,12 +1,15 @@
 ---
 /**
- * Enjambre de nodos (SVG): murmuración de círculos teal sin líneas.
- * Es la traducción dinámica del símbolo Cogniplex: muchos nodos auto-organizados
- * formando una banda diagonal que ondula con vida propia.
- * - Sin JavaScript: toda la animación es CSS (transform/opacity).
- * - Tres capas de profundidad que se mueven a ritmos distintos + deriva individual.
- * - Respeta prefers-reduced-motion (queda el enjambre estático).
- * density: 'hero' (denso, portada) | 'soft' (sutil, CTA/interiores)
+ * Enjambre de nodos (SVG): murmuración de círculos teal con volumetría real.
+ * La banda diagonal se organiza en 4 capas de profundidad: las partículas
+ * cercanas son grandes, brillantes y algunas con desenfoque bokeh; las lejanas,
+ * pequeñas y tenues. La sensación 3D llega por paralaje de movimiento: cada
+ * capa reacciona al ratón y al scroll con inercia, desplazándose en proporción
+ * a su profundidad (JS mínimo que solo actualiza 3 variables CSS por frame).
+ * - Sin JS por partícula: deriva, vaivén y destellos son animación CSS.
+ * - Desvanecido en los bordes: sin costuras entre bloques navy contiguos.
+ * - Respeta prefers-reduced-motion (banda estática, sin paralaje).
+ * density: 'hero' (denso, diagonal ↗) | 'soft' (sutil, diagonal ↘ invertida)
  */
 interface Props {
   density?: 'hero' | 'soft';
@@ -29,13 +32,15 @@ const rnd = mulberry32(density === 'hero' ? 20260704 : 8080);
 const W = 1200;
 const H = 800;
 const palette = ['#5cc6c6', '#75b7b6', '#8fd4d3', '#3f8a8a', '#2e9d9c'];
-const COUNT = density === 'hero' ? 130 : 70;
+const COUNT = density === 'hero' ? 130 : 66;
+const inverted = density === 'soft'; // contraste entre secciones: diagonal opuesta
 
-/** Punto dentro de la banda diagonal (abajo-izquierda → arriba-derecha). */
+/** Punto dentro de la banda diagonal (↗ en hero, ↘ en soft). */
 function swarmPoint() {
   const t = rnd();
   const x = 250 + t * 860 + (rnd() - 0.5) * 100;
-  const baseY = 650 - t * 480 - Math.sin(t * Math.PI) * 60;
+  let baseY = 650 - t * 480 - Math.sin(t * Math.PI) * 60;
+  if (inverted) baseY = H - baseY;
   const spread = 80 + 160 * Math.sin(t * Math.PI); // la banda respira: más ancha en el centro
   const y = baseY + (rnd() + rnd() - 1) * spread;
   return { x, y };
@@ -45,10 +50,12 @@ interface Dot {
   x: number;
   y: number;
   r: number;
-  c: string;
+  c: number; // índice de paleta
   o: number;
-  layer: number;
+  d: number; // profundidad 0 (lejos) → 1 (cerca)
+  bokeh: boolean;
   anim: number;
+  da: number; // amplitud de la deriva individual (escala con la profundidad)
   dur: number;
   delay: number;
   twinkle: boolean;
@@ -56,24 +63,42 @@ interface Dot {
 
 const dots: Dot[] = [];
 for (let i = 0; i < COUNT; i++) {
-  const ambient = rnd() < 0.2; // polvo suelto fuera de la banda, para profundidad
+  const ambient = rnd() < 0.2; // polvo suelto fuera de la banda
   const p = ambient ? { x: rnd() * W, y: rnd() * H } : swarmPoint();
+  const d = rnd() ** 0.9; // profundidad
+  const near = d > 0.8;
+  const rBase = 0.9 + d ** 1.3 * (density === 'hero' ? 7.5 : 5.5) + rnd() * 1.2;
+  const bokeh = near && rBase > 4.6 && rnd() < 0.75; // cercano y grande → desenfocado
   dots.push({
     x: Math.round(p.x),
     y: Math.round(p.y),
-    r: +(1.2 + rnd() ** 2.2 * (density === 'hero' ? 8 : 6)).toFixed(1),
-    c: palette[Math.floor(rnd() * palette.length)],
-    o: +(ambient ? 0.16 + rnd() * 0.28 : 0.35 + rnd() * 0.55).toFixed(2),
-    layer: Math.floor(rnd() * 3),
+    r: +(bokeh ? rBase * 1.7 : rBase).toFixed(1),
+    c: Math.floor(rnd() * palette.length),
+    o: +((ambient ? 0.5 : 1) * (0.15 + d * 0.75) * (density === 'soft' ? 0.85 : 1)).toFixed(2),
+    d,
+    bokeh,
     anim: Math.floor(rnd() * 6),
+    da: +(0.35 + d * 0.9).toFixed(2),
     dur: +(7 + rnd() * 11).toFixed(1),
     delay: +(-rnd() * 18).toFixed(1),
-    twinkle: rnd() < 0.28,
+    twinkle: !bokeh && rnd() < 0.16 + d * 0.2,
   });
 }
-const layers = [0, 1, 2].map((l) => dots.filter((d) => d.layer === l));
 
-/** Orbes de luz difusa: dan profundidad y volumen detrás del enjambre. */
+/** 4 capas de profundidad; amplitud de paralaje y vaivén según cercanía. */
+const layerAmp = density === 'hero' ? [7, 16, 30, 50] : [5, 11, 20, 33];
+const swayScale = [0.4, 0.65, 1, 1.45];
+const swayDur = [92, 74, 58, 44];
+const layers = [0, 1, 2, 3].map((l) => ({
+  amp: layerAmp[l],
+  sw: swayScale[l],
+  dur: swayDur[l],
+  dots: dots
+    .filter((dt) => Math.min(3, Math.floor(dt.d * 4)) === l)
+    .sort((a, b) => a.d - b.d),
+}));
+
+/** Orbes de luz difusa: volumen de fondo (capa más lejana). */
 const orbs = Array.from({ length: density === 'hero' ? 4 : 2 }, () => {
   const p = swarmPoint();
   return {
@@ -100,39 +125,133 @@ const orbs = Array.from({ length: density === 'hero' ? 4 : 2 }, () => {
       <stop offset="60%" stop-color="#2e9d9c" stop-opacity="0.06"></stop>
       <stop offset="100%" stop-color="#2e9d9c" stop-opacity="0"></stop>
     </radialGradient>
+    {
+      palette.map((c, i) => (
+        <radialGradient id={`cx-bk-${i}`}>
+          <stop offset="0%" stop-color={c} stop-opacity="0.9" />
+          <stop offset="55%" stop-color={c} stop-opacity="0.5" />
+          <stop offset="100%" stop-color={c} stop-opacity="0" />
+        </radialGradient>
+      ))
+    }
   </defs>
 
-  {
-    orbs.map((o) => (
-      <circle
-        class={`cx-dot cx-drift-${o.anim}`}
-        cx={o.x}
-        cy={o.y}
-        r={o.r}
-        fill="url(#cx-orb-grad)"
-        style={`animation-duration:${o.dur}s;animation-delay:${o.delay}s`}
-      />
-    ))
-  }
+  <g class="cx-par" style="--amp:4">
+    {
+      orbs.map((o) => (
+        <circle
+          class={`cx-dot cx-drift-${o.anim}`}
+          cx={o.x}
+          cy={o.y}
+          r={o.r}
+          fill="url(#cx-orb-grad)"
+          style={`--da:0.5;animation-duration:${o.dur}s;animation-delay:${o.delay}s`}
+        />
+      ))
+    }
+  </g>
 
   {
     layers.map((layer, l) => (
-      <g class={`cx-layer cx-layer-${l}`}>
-        {layer.map((d) => (
-          <circle
-            class={`cx-dot cx-drift-${d.anim}${d.twinkle ? ' cx-twinkle' : ''}`}
-            cx={d.x}
-            cy={d.y}
-            r={d.r}
-            fill={d.c}
-            opacity={d.o}
-            style={`animation-duration:${d.dur}s,${(d.dur * 0.6).toFixed(1)}s;animation-delay:${d.delay}s,${d.delay}s`}
-          />
-        ))}
+      <g class="cx-par" style={`--amp:${layer.amp}`}>
+        <g class="cx-layer" style={`--sw:${layer.sw};animation-duration:${layer.dur}s;animation-name:cx-sway-${l % 3}`}>
+          {layer.dots.map((dt) => (
+            <circle
+              class={`cx-dot cx-drift-${dt.anim}${dt.twinkle ? ' cx-twinkle' : ''}`}
+              cx={dt.x}
+              cy={dt.y}
+              r={dt.r}
+              fill={dt.bokeh ? `url(#cx-bk-${dt.c})` : palette[dt.c]}
+              opacity={dt.o}
+              style={`--da:${dt.da};animation-duration:${dt.dur}s,${(dt.dur * 0.6).toFixed(1)}s;animation-delay:${dt.delay}s,${dt.delay}s`}
+            />
+          ))}
+        </g>
       </g>
     ))
   }
 </svg>
+
+<script>
+  /**
+   * Paralaje volumétrico: el ratón y el scroll desplazan cada capa en
+   * proporción a su profundidad, con inercia (lerp). Solo se actualizan
+   * 3 variables CSS por SVG y frame; las capas invisibles no se tocan.
+   */
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!reduce) {
+    interface Item {
+      svg: SVGElement;
+      tx: number;
+      ty: number;
+      ts: number;
+      mx: number;
+      my: number;
+      sc: number;
+      visible: boolean;
+    }
+    const items: Item[] = [...document.querySelectorAll<SVGElement>('svg.cx-swarm')].map((svg) => ({
+      svg,
+      tx: 0,
+      ty: 0,
+      ts: 0,
+      mx: 0,
+      my: 0,
+      sc: 0,
+      visible: true,
+    }));
+    if (items.length) {
+      if (window.matchMedia('(pointer: fine)').matches) {
+        window.addEventListener(
+          'mousemove',
+          (e) => {
+            const nx = (e.clientX / window.innerWidth) * 2 - 1;
+            const ny = (e.clientY / window.innerHeight) * 2 - 1;
+            for (const it of items) {
+              it.tx = nx;
+              it.ty = ny;
+            }
+          },
+          { passive: true }
+        );
+      }
+      const onScroll = () => {
+        for (const it of items) {
+          const r = it.svg.getBoundingClientRect();
+          const p =
+            (r.top + r.height / 2 - window.innerHeight / 2) /
+            (window.innerHeight / 2 + r.height / 2);
+          it.ts = Math.max(-1, Math.min(1, p));
+        }
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll, { passive: true });
+      onScroll();
+      const io = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          const it = items.find((i) => i.svg === e.target);
+          if (it) it.visible = e.isIntersecting;
+        }
+      });
+      items.forEach((it) => io.observe(it.svg));
+      const loop = () => {
+        if (!document.hidden) {
+          for (const it of items) {
+            if (!it.visible) continue;
+            it.mx += (it.tx - it.mx) * 0.035;
+            it.my += (it.ty - it.my) * 0.035;
+            it.sc += (it.ts - it.sc) * 0.07;
+            it.svg.style.setProperty('--mx', it.mx.toFixed(3));
+            it.svg.style.setProperty('--my', it.my.toFixed(3));
+            it.svg.style.setProperty('--sc', it.sc.toFixed(3));
+          }
+        }
+        requestAnimationFrame(loop);
+      };
+      requestAnimationFrame(loop);
+    }
+  }
+</script>
 
 <style>
   .cx-swarm {
@@ -148,22 +267,24 @@ const orbs = Array.from({ length: density === 'hero' ? 4 : 2 }, () => {
     mask-image: linear-gradient(180deg, transparent 0%, #000 16%, #000 84%, transparent 100%);
   }
 
-  /* Capas: toda la banda ondula lentamente, cada capa a un ritmo distinto */
+  /* Paralaje: cada capa se desplaza según su profundidad (--amp) y la
+     posición del ratón (--mx/--my) y del scroll (--sc), con inercia en JS. */
+  .cx-par {
+    transform: translate3d(
+      calc(var(--mx, 0) * var(--amp, 0) * 1px),
+      calc((var(--my, 0) * 0.5 + var(--sc, 0) * 1.3) * var(--amp, 0) * 1px),
+      0
+    );
+  }
+
+  /* Vaivén de capa: la banda ondula; amplitud escalada por profundidad (--sw) */
   .cx-layer {
     transform-box: fill-box;
     transform-origin: center;
-    animation: cx-sway-0 46s ease-in-out infinite alternate;
-  }
-  .cx-layer-1 {
-    animation-name: cx-sway-1;
-    animation-duration: 62s;
-  }
-  .cx-layer-2 {
-    animation-name: cx-sway-2;
-    animation-duration: 78s;
+    animation: cx-sway-0 60s ease-in-out infinite alternate;
   }
 
-  /* Deriva individual: 6 trayectorias orgánicas repartidas al azar */
+  /* Deriva individual: 6 trayectorias orgánicas, amplitud por profundidad (--da) */
   .cx-dot {
     animation-name: cx-drift-0;
     animation-timing-function: ease-in-out;
@@ -176,10 +297,8 @@ const orbs = Array.from({ length: density === 'hero' ? 4 : 2 }, () => {
   .cx-drift-4 { animation-name: cx-drift-4; }
   .cx-drift-5 { animation-name: cx-drift-5; }
 
-  /* Destello sutil en parte de los nodos (segunda animación: solo opacity) */
-  .cx-twinkle {
-    animation-name: cx-drift-0, cx-twinkle;
-  }
+  /* Destello sutil (segunda animación: solo opacity) */
+  .cx-twinkle { animation-name: cx-drift-0, cx-twinkle; }
   .cx-twinkle.cx-drift-1 { animation-name: cx-drift-1, cx-twinkle; }
   .cx-twinkle.cx-drift-2 { animation-name: cx-drift-2, cx-twinkle; }
   .cx-twinkle.cx-drift-3 { animation-name: cx-drift-3, cx-twinkle; }
@@ -188,37 +307,37 @@ const orbs = Array.from({ length: density === 'hero' ? 4 : 2 }, () => {
 
   @keyframes cx-drift-0 {
     0% { transform: translate(0, 0); }
-    35% { transform: translate(16px, -12px); }
-    70% { transform: translate(-6px, -22px); }
-    100% { transform: translate(9px, 6px); }
+    35% { transform: translate(calc(var(--da, 1) * 16px), calc(var(--da, 1) * -12px)); }
+    70% { transform: translate(calc(var(--da, 1) * -6px), calc(var(--da, 1) * -22px)); }
+    100% { transform: translate(calc(var(--da, 1) * 9px), calc(var(--da, 1) * 6px)); }
   }
   @keyframes cx-drift-1 {
     0% { transform: translate(0, 0); }
-    30% { transform: translate(-14px, 10px); }
-    65% { transform: translate(10px, 20px); }
-    100% { transform: translate(-7px, -8px); }
+    30% { transform: translate(calc(var(--da, 1) * -14px), calc(var(--da, 1) * 10px)); }
+    65% { transform: translate(calc(var(--da, 1) * 10px), calc(var(--da, 1) * 20px)); }
+    100% { transform: translate(calc(var(--da, 1) * -7px), calc(var(--da, 1) * -8px)); }
   }
   @keyframes cx-drift-2 {
     0% { transform: translate(0, 0); }
-    40% { transform: translate(20px, 8px); }
-    75% { transform: translate(6px, -16px); }
-    100% { transform: translate(-11px, 4px); }
+    40% { transform: translate(calc(var(--da, 1) * 20px), calc(var(--da, 1) * 8px)); }
+    75% { transform: translate(calc(var(--da, 1) * 6px), calc(var(--da, 1) * -16px)); }
+    100% { transform: translate(calc(var(--da, 1) * -11px), calc(var(--da, 1) * 4px)); }
   }
   @keyframes cx-drift-3 {
     0% { transform: translate(0, 0); }
-    33% { transform: translate(-18px, -8px); }
-    66% { transform: translate(-4px, 18px); }
-    100% { transform: translate(12px, -5px); }
+    33% { transform: translate(calc(var(--da, 1) * -18px), calc(var(--da, 1) * -8px)); }
+    66% { transform: translate(calc(var(--da, 1) * -4px), calc(var(--da, 1) * 18px)); }
+    100% { transform: translate(calc(var(--da, 1) * 12px), calc(var(--da, 1) * -5px)); }
   }
   @keyframes cx-drift-4 {
     0% { transform: translate(0, 0) scale(1); }
-    50% { transform: translate(10px, -18px) scale(1.12); }
-    100% { transform: translate(-9px, -4px) scale(0.94); }
+    50% { transform: translate(calc(var(--da, 1) * 10px), calc(var(--da, 1) * -18px)) scale(1.12); }
+    100% { transform: translate(calc(var(--da, 1) * -9px), calc(var(--da, 1) * -4px)) scale(0.94); }
   }
   @keyframes cx-drift-5 {
     0% { transform: translate(0, 0) scale(1); }
-    50% { transform: translate(-12px, 14px) scale(0.9); }
-    100% { transform: translate(14px, 7px) scale(1.08); }
+    50% { transform: translate(calc(var(--da, 1) * -12px), calc(var(--da, 1) * 14px)) scale(0.9); }
+    100% { transform: translate(calc(var(--da, 1) * 14px), calc(var(--da, 1) * 7px)) scale(1.08); }
   }
   @keyframes cx-twinkle {
     0%, 100% { opacity: 0.2; }
@@ -226,23 +345,26 @@ const orbs = Array.from({ length: density === 'hero' ? 4 : 2 }, () => {
   }
   @keyframes cx-sway-0 {
     0% { transform: translate(0, 0) rotate(0.001deg); }
-    50% { transform: translate(-24px, 14px) rotate(-1.1deg); }
-    100% { transform: translate(16px, -10px) rotate(0.7deg); }
+    50% { transform: translate(calc(var(--sw, 1) * -24px), calc(var(--sw, 1) * 14px)) rotate(-1.1deg); }
+    100% { transform: translate(calc(var(--sw, 1) * 16px), calc(var(--sw, 1) * -10px)) rotate(0.7deg); }
   }
   @keyframes cx-sway-1 {
     0% { transform: translate(0, 0) rotate(0.001deg); }
-    50% { transform: translate(20px, -16px) rotate(0.9deg); }
-    100% { transform: translate(-14px, 8px) rotate(-0.6deg); }
+    50% { transform: translate(calc(var(--sw, 1) * 20px), calc(var(--sw, 1) * -16px)) rotate(0.9deg); }
+    100% { transform: translate(calc(var(--sw, 1) * -14px), calc(var(--sw, 1) * 8px)) rotate(-0.6deg); }
   }
   @keyframes cx-sway-2 {
     0% { transform: translate(0, 0) scale(1); }
-    50% { transform: translate(-10px, -12px) scale(1.03); }
-    100% { transform: translate(12px, 10px) scale(0.98); }
+    50% { transform: translate(calc(var(--sw, 1) * -10px), calc(var(--sw, 1) * -12px)) scale(1.03); }
+    100% { transform: translate(calc(var(--sw, 1) * 12px), calc(var(--sw, 1) * 10px)) scale(0.98); }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .cx-swarm :is(.cx-dot, .cx-layer) {
       animation: none !important;
+    }
+    .cx-par {
+      transform: none !important;
     }
   }
 </style>
