@@ -37,7 +37,7 @@ const pillarsEs: Pillar[] = [
     services: [
       {
         code: 'A1',
-        name: 'Fractional CAIO',
+        name: 'CAIO Fraccional',
         promise: 'Una figura responsable de convertir la IA en una agenda de negocio priorizada y gobernada.',
         buyer: 'CEO, propietario, dirección general o comité de dirección.',
         deliverables: 'Roadmap trimestral, comité de IA, cartera priorizada, principios de gobierno, tablero de valor y plan de adopción.',
@@ -45,7 +45,7 @@ const pillarsEs: Pillar[] = [
       },
       {
         code: 'A2',
-        name: 'Fractional CDO',
+        name: 'CDO Fraccional',
         promise: 'Convertir datos dispersos en una capacidad confiable para operar y decidir.',
         buyer: 'CEO, CFO, COO, dirección de operaciones o financiera.',
         deliverables: 'Mapa de datos críticos, ownership, criterios de calidad, hoja de ruta y plan de arquitectura.',
@@ -53,7 +53,7 @@ const pillarsEs: Pillar[] = [
       },
       {
         code: 'A3',
-        name: 'AI Value Office',
+        name: 'Oficina de Valor de IA',
         promise: 'Operar una cartera viva de oportunidades de IA con disciplina de valor.',
         buyer: 'CAIO, CEO, COO, CFO o PMO.',
         deliverables: 'Backlog priorizado, matriz impacto-esfuerzo, fichas de caso, tablero de valor y revisión trimestral.',
@@ -61,7 +61,7 @@ const pillarsEs: Pillar[] = [
       },
       {
         code: 'A4',
-        name: 'AI Governance & Trust',
+        name: 'Gobierno y Confianza de IA',
         promise: 'Reglas prácticas para usar IA con seguridad, responsabilidad y confianza.',
         buyer: 'Dirección, legal, seguridad, IT, RRHH y negocio.',
         deliverables: 'Política de IA, matriz de riesgos, checklist de implantación, catálogo de usos y roles de decisión.',
@@ -82,7 +82,6 @@ const pillarsEs: Pillar[] = [
       {
         code: 'S1',
         name: 'Diagnóstico Empresa Aumentada',
-        italic: true,
         promise: 'Identificar dónde la IA, los datos y la automatización generan valor de negocio de forma viable.',
         buyer: 'CEO, gerente, propietario, COO o dirección funcional.',
         deliverables: 'Mapa de oportunidades, evaluación de madurez, matriz impacto-esfuerzo, casos priorizados, hipótesis de ROI y roadmap de 90-180 días.',
@@ -90,7 +89,7 @@ const pillarsEs: Pillar[] = [
       },
       {
         code: 'S2',
-        name: 'AI Operating System Design',
+        name: 'Diseño del Sistema Operativo de IA',
         promise: 'Diseñar cómo opera la empresa cuando personas, datos, automatización y agentes colaboran.',
         buyer: 'CEO, COO, CAIO, CIO, dirección de transformación.',
         deliverables: 'Mapa de procesos objetivo, arquitectura funcional, diseño de roles, blueprint de agentes y modelo de gobierno.',
@@ -98,7 +97,7 @@ const pillarsEs: Pillar[] = [
       },
       {
         code: 'S3',
-        name: 'Data Strategy',
+        name: 'Estrategia de Datos',
         promise: 'Definir datos confiables, semántica compartida y decisiones accionables.',
         buyer: 'CDO, CFO, COO, control de gestión.',
         deliverables: 'Prioridades analíticas, modelo de gobierno del dato, casos de decisión y hoja de ruta.',
@@ -106,7 +105,7 @@ const pillarsEs: Pillar[] = [
       },
       {
         code: 'S4',
-        name: 'Knowledge Engineering',
+        name: 'Ingeniería del Conocimiento',
         promise: 'Capturar conocimiento tácito y convertirlo en un activo reutilizable, accesible y gobernado.',
         buyer: 'Operaciones, calidad, RRHH, servicio técnico, ventas o ingeniería.',
         deliverables: 'Inventario de conocimiento, modelo semántico, playbooks, repositorio estructurado y asistentes internos.',
@@ -126,7 +125,7 @@ const pillarsEs: Pillar[] = [
     services: [
       {
         code: 'T1',
-        name: 'Process Transformation & AI Solutions',
+        name: 'Transformación de procesos y soluciones de IA',
         promise: 'Rediseñar e implantar procesos con automatización, asistentes, agentes y sistemas de decisión.',
         buyer: 'Responsables de función, COO, dirección comercial, finanzas, operaciones o ingeniería.',
         deliverables: 'Proceso objetivo, solución implantada, manual operativo, formación, métricas de uso y backlog evolutivo.',
@@ -134,7 +133,7 @@ const pillarsEs: Pillar[] = [
       },
       {
         code: 'T2',
-        name: 'Intelligent Automation & Integration',
+        name: 'Automatización inteligente e integración',
         promise: 'Eliminar fricción de extremo a extremo conectando sistemas, datos y reglas de negocio.',
         buyer: 'COO, IT, responsables de operaciones y administración.',
         deliverables: 'Flujos automatizados, conectores con ERP/CRM, reglas, controles de calidad y pruebas.',
@@ -142,7 +141,7 @@ const pillarsEs: Pillar[] = [
       },
       {
         code: 'T3',
-        name: 'RAG Agents & Assistants',
+        name: 'Agentes y asistentes con RAG',
         promise: 'Asistentes que responden con el conocimiento y los datos de tu empresa, dentro de tus reglas.',
         buyer: 'Dirección funcional, atención al cliente, ventas, servicio técnico.',
         deliverables: 'Asistentes integrados, base de conocimiento gobernada, controles de uso y medición de adopción.',
@@ -162,7 +161,7 @@ const pillarsEs: Pillar[] = [
     services: [
       {
         code: 'E1',
-        name: 'Transformative AI Training',
+        name: 'Formación Transformativa en IA',
         promise: 'Convertir acceso a IA en capacidad práctica, hábitos de trabajo y adopción responsable.',
         buyer: 'Dirección, RRHH, managers y equipos funcionales.',
         deliverables: 'Ruta por colectivos, materiales propios, ejercicios sobre procesos reales, kit de prompts y métricas.',
@@ -171,6 +170,7 @@ const pillarsEs: Pillar[] = [
       {
         code: 'E2',
         name: 'AI Champions Program',
+        italic: true,
         promise: 'Crear una red interna de referentes que acelere adopción, feedback y mejora continua.',
         buyer: 'RRHH, CAIO, CIO, COO y líderes funcionales.',
         deliverables: 'Perfil de champions, itinerario, ritual mensual, repositorio de casos y plan de comunicación interna.',
@@ -178,7 +178,7 @@ const pillarsEs: Pillar[] = [
       },
       {
         code: 'E3',
-        name: 'Change Management',
+        name: 'Gestión del cambio',
         promise: 'Acompañar a la organización para que la nueva forma de trabajar se sostenga en el tiempo.',
         buyer: 'Dirección, RRHH y líderes de equipo.',
         deliverables: 'Plan de cambio, comunicación, resolución de resistencias y métricas de adopción.',
@@ -198,7 +198,7 @@ const pillarsEs: Pillar[] = [
     services: [
       {
         code: 'M1',
-        name: 'Managed AI & Evolution',
+        name: 'Gestión y Evolución de IA',
         promise: 'Operar, mantener y mejorar las soluciones para que sigan siendo útiles, seguras y alineadas.',
         buyer: 'CAIO, CIO, COO, responsable funcional o dirección de transformación.',
         deliverables: 'SLA, tablero de salud, revisión de calidad, informes de uso, releases y sesiones de valor.',
@@ -206,7 +206,7 @@ const pillarsEs: Pillar[] = [
       },
       {
         code: 'M2',
-        name: 'Evolutionary Solution Maintenance',
+        name: 'Mantenimiento evolutivo de soluciones',
         promise: 'Asegurar continuidad, correcciones, mejoras e integración de las soluciones desarrolladas.',
         buyer: 'CIO, CAIO, responsable de producto, dirección funcional.',
         deliverables: 'Backlog, plan de releases, documentación, pruebas y reporte de actividad.',
@@ -214,7 +214,7 @@ const pillarsEs: Pillar[] = [
       },
       {
         code: 'M3',
-        name: 'Data & Decision Operations',
+        name: 'Operaciones de Datos y Decisión',
         promise: 'Mantener confiables los datos y los sistemas de decisión que soportan la operación.',
         buyer: 'CDO, CFO, COO, control de gestión.',
         deliverables: 'Catálogo de KPI, reglas de calidad, alertas, tablero ejecutivo y plan de remediación.',
