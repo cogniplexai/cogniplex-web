@@ -1,0 +1,141 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Hero from '@/components/Hero.astro';
+import PillarCard from '@/components/PillarCard.astro';
+import CTASection from '@/components/CTASection.astro';
+import { getPillars } from '@/data/pillars';
+import { siteFor } from '@/data/site';
+
+const pillars = getPillars('en');
+const { journey } = siteFor('en');
+---
+
+<BaseLayout
+  title="Services"
+  description="Cogniplex's five practices: Fractional Leadership, Strategy & Design, Build & Transform, Enablement & Adoption and Managed & Evolve."
+  path="/servicios"
+>
+  <Hero
+    variant="interior"
+    eyebrow="Portfolio"
+    title={`A journey that accompanies your company's evolution, <span class="em">not a catalogue</span>.`}
+    lead="You come in through a specific need — an assessment, a direction, a process — and evolve towards a strategic relationship. Each service naturally opens the next."
+  />
+
+  <!-- Flywheel / journey -->
+  <section class="block">
+    <div class="wrap">
+      <div class="block-hd fade-in">
+        <p class="eyebrow">The journey</p>
+        <h2 class="sec-h">A cycle that gains momentum with every turn</h2>
+        <p class="sec-lead">
+          The first implementation is only the way in. The real value appears when your company
+          enters a continuous improvement cycle.
+        </p>
+      </div>
+      <ol class="journey fade-in">
+        {
+          journey.map((j, i) => (
+            <li>
+              <a href={j.href}>
+                <span class="journey-n">{i + 1}</span>
+                <span class="journey-step">{j.step}</span>
+                <span class="journey-pillar">{j.pillar}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <!-- Practices -->
+  <section class="block soft">
+    <div class="wrap">
+      <div class="block-hd fade-in">
+        <p class="eyebrow">Five practices</p>
+        <h2 class="sec-h">The five ways we work with you</h2>
+      </div>
+      <div class="pillar-grid">
+        {pillars.map((p) => <PillarCard pillar={p} />)}
+      </div>
+    </div>
+  </section>
+
+  <CTASection />
+</BaseLayout>
+
+<style>
+  .journey {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .journey a {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 22px 20px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    height: 100%;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .journey a:hover {
+    border-color: var(--teal-line);
+    transform: translateY(-3px);
+  }
+  .journey-n {
+    font-family: var(--head);
+    font-weight: 800;
+    font-size: 14px;
+    color: #fff;
+    background: var(--teal);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .journey-step {
+    font-family: var(--head);
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--tx);
+    margin-top: 6px;
+  }
+  .journey-pillar {
+    font-size: 13px;
+    color: var(--tx-3);
+  }
+  .pillar-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 24px;
+  }
+  .pillar-grid :global(.pillar-card) {
+    flex: 0 1 calc(33.333% - 16px);
+  }
+  @media (max-width: 980px) {
+    .journey {
+      grid-template-columns: 1fr 1fr;
+    }
+    .pillar-grid :global(.pillar-card) {
+      flex-basis: calc(50% - 12px);
+    }
+  }
+  @media (max-width: 680px) {
+    .journey {
+      grid-template-columns: 1fr;
+    }
+    .pillar-grid :global(.pillar-card) {
+      flex-basis: 100%;
+    }
+  }
+</style>

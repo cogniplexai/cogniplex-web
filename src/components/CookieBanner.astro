@@ -1,14 +1,29 @@
 ---
 // Banner de cookies mínimo: solo almacenamiento técnico + fuentes de terceros.
+import { asLocale } from '@/i18n';
+
+const locale = asLocale(Astro.currentLocale);
+const copy =
+  locale === 'en'
+    ? {
+        before: 'We use necessary technical storage and third-party services (such as Google Fonts). We do not use tracking or advertising cookies. More information in the ',
+        link: 'Cookie policy',
+        href: '/en/cookies',
+        accept: 'Accept',
+      }
+    : {
+        before: 'Usamos almacenamiento técnico necesario y servicios de terceros (como Google Fonts). No usamos cookies de seguimiento ni de publicidad. Más información en la ',
+        link: 'Política de cookies',
+        href: '/cookies',
+        accept: 'Aceptar',
+      };
 ---
 <div id="cookie-banner" class="cookie-banner" hidden>
   <div class="wrap cb-in">
     <p>
-      Usamos almacenamiento técnico necesario y servicios de terceros (como Google Fonts). No
-      usamos cookies de seguimiento ni de publicidad. Más información en la
-      <a href="/cookies">Política de cookies</a>.
+      {copy.before}<a href={copy.href}>{copy.link}</a>.
     </p>
-    <button id="cookie-accept" class="btn btn-primary">Aceptar</button>
+    <button id="cookie-accept" class="btn btn-primary">{copy.accept}</button>
   </div>
 </div>
 

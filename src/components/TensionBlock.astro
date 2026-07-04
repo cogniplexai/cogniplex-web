@@ -1,16 +1,27 @@
 ---
-import { tensionPoints } from '@/data/site';
+import { siteFor } from '@/data/site';
+import { asLocale } from '@/i18n';
 
 interface Props {
   eyebrow?: string;
   title?: string;
   lead?: string;
 }
-const {
-  eyebrow = 'Lo que escuchamos en dirección',
-  title = 'Cuatro tensiones que conocen bien quienes dirigen una empresa',
-  lead = 'No es falta de esfuerzo: es que la forma de crecer de siempre ha tocado techo.',
-} = Astro.props;
+const locale = asLocale(Astro.currentLocale);
+const { tensionPoints } = siteFor(locale);
+const defaults =
+  locale === 'en'
+    ? {
+        eyebrow: 'What we hear from leadership',
+        title: 'Four tensions anyone running a company knows well',
+        lead: 'It is not a lack of effort: the usual way of growing has hit its ceiling.',
+      }
+    : {
+        eyebrow: 'Lo que escuchamos en dirección',
+        title: 'Cuatro tensiones que conocen bien quienes dirigen una empresa',
+        lead: 'No es falta de esfuerzo: es que la forma de crecer de siempre ha tocado techo.',
+      };
+const { eyebrow = defaults.eyebrow, title = defaults.title, lead = defaults.lead } = Astro.props;
 ---
 
 <section class="block">

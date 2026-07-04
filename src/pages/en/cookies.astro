@@ -1,0 +1,39 @@
+---
+import LegalLayout from '@/layouts/LegalLayout.astro';
+import { brandFor } from '@/config/brand';
+
+const brand = brandFor('en');
+---
+
+<LegalLayout title="Cookie policy" updated="July 2026" path="/cookies">
+  <h2>1. What cookies are</h2>
+  <p>
+    A cookie is a small file stored on your device when you visit a website. This site makes
+    minimal use of storage and does not use tracking or advertising cookies.
+  </p>
+
+  <h2>2. What we use on this site</h2>
+  <ul>
+    <li>
+      <strong>Necessary technical storage:</strong> we remember locally that you have accepted this
+      notice (<code>localStorage</code>), so we do not show it to you again.
+    </li>
+    <li>
+      <strong>Third-party fonts:</strong> we load typefaces from Google Fonts, which involves a
+      connection to Google servers. We do not install analytics or advertising cookies.
+    </li>
+  </ul>
+
+  <h2>3. How to manage them</h2>
+  <p>
+    You can clear local storage and block cookies from your browser settings. The site will
+    continue to work normally.
+  </p>
+
+  <h2>4. Contact</h2>
+  <p>
+    For any questions about this policy, write to us at
+    <a href={`mailto:${brand.email}`}>{brand.email}</a>.
+  </p>
+
+</LegalLayout>

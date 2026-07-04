@@ -5,21 +5,28 @@ import CTASection from '@/components/CTASection.astro';
 
 export async function getStaticPaths() {
   const posts = (await getCollection('ideas')).filter(
-    (p) => !p.data.draft && !p.id.startsWith('en/')
+    (p) => !p.data.draft && p.id.startsWith('en/')
   );
-  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+  return posts.map((post) => ({
+    params: { slug: post.id.replace(/^en\//, '') },
+    props: { post },
+  }));
 }
 
 const { post } = Astro.props;
 const { Content } = await render(post);
 const fmt = (d: Date) =>
-  d.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+  d.toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' });
 ---
 
-<BaseLayout title={post.data.title} description={post.data.description} path={`/ideas/${post.id}`}>
+<BaseLayout
+  title={post.data.title}
+  description={post.data.description}
+  path={`/ideas/${post.id.replace(/^en\//, '')}`}
+>
   <article class="post">
     <div class="wrap post-wrap">
-      <a href="/ideas" class="post-back">← Ideas</a>
+      <a href="/en/ideas" class="post-back">← Insights</a>
       <span class="post-pillar">{post.data.pillar}</span>
       <h1 class="post-h1">{post.data.title}</h1>
       <p class="post-lead">{post.data.description}</p>

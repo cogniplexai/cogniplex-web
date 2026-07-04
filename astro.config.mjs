@@ -8,6 +8,13 @@ export default defineConfig({
   site: 'https://cogniplex.es',
   trailingSlash: 'ignore',
   integrations: [sitemap()],
+  i18n: {
+    defaultLocale: 'es',
+    locales: ['es', 'en'],
+    routing: {
+      prefixDefaultLocale: false,
+    },
+  },
   build: {
     format: 'directory',
   },

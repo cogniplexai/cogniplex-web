@@ -1,5 +1,6 @@
 ---
-import { pillars } from '@/data/pillars';
+import { getPillars } from '@/data/pillars';
+import { asLocale } from '@/i18n';
 import PillarCard from '@/components/PillarCard.astro';
 
 interface Props {
@@ -7,11 +8,21 @@ interface Props {
   title?: string;
   lead?: string;
 }
-const {
-  eyebrow = 'Portfolio',
-  title = 'Un recorrido, no un catálogo',
-  lead = 'Cinco pilares que acompañan a tu empresa desde comprender el problema hasta sostener el valor en el tiempo. Se entra por una necesidad concreta y se evoluciona hacia una relación estratégica.',
-} = Astro.props;
+const locale = asLocale(Astro.currentLocale);
+const pillars = getPillars(locale);
+const defaults =
+  locale === 'en'
+    ? {
+        eyebrow: 'Portfolio',
+        title: 'A journey, not a catalogue',
+        lead: 'Five practices that accompany your company from understanding the problem to sustaining value over time. You enter through one concrete need and evolve towards a strategic relationship.',
+      }
+    : {
+        eyebrow: 'Portfolio',
+        title: 'Un recorrido, no un catálogo',
+        lead: 'Cinco pilares que acompañan a tu empresa desde comprender el problema hasta sostener el valor en el tiempo. Se entra por una necesidad concreta y se evoluciona hacia una relación estratégica.',
+      };
+const { eyebrow = defaults.eyebrow, title = defaults.title, lead = defaults.lead } = Astro.props;
 ---
 
 <section class="block soft">

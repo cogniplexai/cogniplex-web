@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import { asLocale } from '@/i18n';
 
 interface Props {
   title: string;
@@ -7,13 +8,14 @@ interface Props {
   path: string;
 }
 const { title, updated, path } = Astro.props;
+const en = asLocale(Astro.currentLocale) === 'en';
 ---
 
-<BaseLayout title={title} path={path} description={`${title} de Cogniplex.`}>
+<BaseLayout title={title} path={path} description={en ? `Cogniplex ${title.toLowerCase()}.` : `${title} de Cogniplex.`}>
   <article class="legal">
     <div class="wrap legal-wrap">
       <h1>{title}</h1>
-      <p class="legal-updated">Última actualización: {updated}</p>
+      <p class="legal-updated">{en ? 'Last updated' : 'Última actualización'}: {updated}</p>
       <div class="legal-body">
         <slot />
       </div>

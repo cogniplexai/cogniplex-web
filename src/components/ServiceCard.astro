@@ -1,10 +1,15 @@
 ---
 import type { Service } from '@/data/pillars';
+import { asLocale } from '@/i18n';
 
 interface Props {
   service: Service;
 }
 const { service } = Astro.props;
+const labels =
+  asLocale(Astro.currentLocale) === 'en'
+    ? { buyer: 'Who it is for', deliverables: 'Deliverables', model: 'Model' }
+    : { buyer: 'Para quién', deliverables: 'Entregables', model: 'Modelo' };
 ---
 
 <article class="service-card fade-in">
@@ -15,15 +20,15 @@ const { service } = Astro.props;
   <p class="service-promise">{service.promise}</p>
   <dl class="service-meta">
     <div>
-      <dt>Para quién</dt>
+      <dt>{labels.buyer}</dt>
       <dd>{service.buyer}</dd>
     </div>
     <div>
-      <dt>Entregables</dt>
+      <dt>{labels.deliverables}</dt>
       <dd>{service.deliverables}</dd>
     </div>
     <div>
-      <dt>Modelo</dt>
+      <dt>{labels.model}</dt>
       <dd>{service.model}</dd>
     </div>
   </dl>

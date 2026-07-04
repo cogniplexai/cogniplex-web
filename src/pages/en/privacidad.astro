@@ -1,0 +1,49 @@
+---
+import LegalLayout from '@/layouts/LegalLayout.astro';
+import { brandFor } from '@/config/brand';
+
+const brand = brandFor('en');
+---
+
+<LegalLayout title="Privacy policy" updated="July 2026" path="/privacidad">
+  <h2>1. Data controller</h2>
+  <p>
+    The controller of the data collected through this site is Cogniplex SL, with registered office
+    in Barcelona (Spain). You can contact us at
+    <a href={`mailto:${brand.email}`}>{brand.email}</a>.
+  </p>
+
+  <h2>2. What data we process and for what purpose</h2>
+  <p>
+    We process the data you voluntarily provide through the contact or assessment request form
+    (name, role, email, company and the message you send us), for the purpose of handling your
+    request and, where applicable, maintaining the business relationship.
+  </p>
+
+  <h2>3. Legal basis</h2>
+  <p>
+    The legal basis is your consent when submitting the form and the legitimate interest of
+    {brand.name} in responding to your request.
+  </p>
+
+  <h2>4. Retention</h2>
+  <p>
+    We keep your data for as long as necessary to handle your request and, where applicable, for
+    the duration of the business relationship, unless you request its erasure.
+  </p>
+
+  <h2>5. Recipients</h2>
+  <p>
+    Form submissions are sent directly to our corporate email. If in the future we use an external
+    form provider, it will act as a data processor and will be identified in this policy. We do not
+    share your data with third parties except where legally required.
+  </p>
+
+  <h2>6. Your rights</h2>
+  <p>
+    You can exercise your rights of access, rectification, erasure, objection, restriction and
+    portability by writing to <a href={`mailto:${brand.email}`}>{brand.email}</a>. You can also
+    lodge a complaint with the Spanish Data Protection Agency (AEPD).
+  </p>
+
+</LegalLayout>

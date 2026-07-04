@@ -1,5 +1,6 @@
 ---
-import { cogniSteps } from '@/data/cogni';
+import { cogniFor } from '@/data/cogni';
+import { asLocale } from '@/i18n';
 
 interface Props {
   eyebrow?: string;
@@ -8,10 +9,24 @@ interface Props {
   dark?: boolean;
   detailed?: boolean; // muestra la descripción larga de cada paso
 }
+const locale = asLocale(Astro.currentLocale);
+const cogniSteps = cogniFor(locale);
+const defaults =
+  locale === 'en'
+    ? {
+        eyebrow: 'How we work',
+        title: 'A transformation route, not a leap of faith',
+        lead: 'A repeatable route in five stages. Each cycle leaves the company better prepared for the next.',
+      }
+    : {
+        eyebrow: 'Cómo trabajamos',
+        title: 'Una ruta de transformación, no un acto de fe',
+        lead: 'Una ruta repetible en cinco etapas. Cada ciclo deja la empresa más preparada para el siguiente.',
+      };
 const {
-  eyebrow = 'Cómo trabajamos',
-  title = 'Una ruta de transformación, no un acto de fe',
-  lead = 'Una ruta repetible en cinco etapas. Cada ciclo deja la empresa más preparada para el siguiente.',
+  eyebrow = defaults.eyebrow,
+  title = defaults.title,
+  lead = defaults.lead,
   dark = false,
   detailed = false,
 } = Astro.props;

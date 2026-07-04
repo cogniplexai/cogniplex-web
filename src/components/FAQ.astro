@@ -1,4 +1,6 @@
 ---
+import { asLocale } from '@/i18n';
+
 interface Item {
   q: string;
   a: string;
@@ -9,12 +11,11 @@ interface Props {
   title?: string;
   centered?: boolean;
 }
-const {
-  items,
-  eyebrow = 'Preguntas frecuentes',
-  title = 'Lo que suele preguntarse la dirección antes de empezar',
-  centered = true,
-} = Astro.props;
+const defaults =
+  asLocale(Astro.currentLocale) === 'en'
+    ? { eyebrow: 'Frequently asked questions', title: 'What leadership teams usually ask before starting' }
+    : { eyebrow: 'Preguntas frecuentes', title: 'Lo que suele preguntarse la dirección antes de empezar' };
+const { items, eyebrow = defaults.eyebrow, title = defaults.title, centered = true } = Astro.props;
 ---
 
 <section class="block faq-section">

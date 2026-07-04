@@ -4,23 +4,25 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import Hero from '@/components/Hero.astro';
 import CaseCard from '@/components/CaseCard.astro';
 import CTASection from '@/components/CTASection.astro';
-import { outcomes } from '@/data/site';
+import { siteFor } from '@/data/site';
 
 const casos = (await getCollection('casos'))
-  .filter((c) => !c.id.startsWith('en/'))
+  .filter((c) => c.id.startsWith('en/'))
   .sort((a, b) => a.data.order - b.data.order);
+
+const { outcomes } = siteFor('en');
 ---
 
 <BaseLayout
-  title="Escenarios de transformación"
-  description="Cómo trabaja Cogniplex, explicado desde el problema, el proceso y el resultado. Escenarios de transformación empresarial con IA."
+  title="Transformation scenarios"
+  description="How Cogniplex works, explained from the problem, the process and the result. Business transformation scenarios with AI."
   path="/casos"
 >
   <Hero
     variant="interior"
-    eyebrow="Escenarios de transformación"
-    title={`Resultados explicados desde el <span class="em">problema</span>, no desde la herramienta.`}
-    lead="Cada escenario se cuenta desde la situación de partida, el proceso rediseñado y el resultado que buscamos. El cliente no compra agentes ni dashboards: compra capacidad, control, velocidad y aprendizaje. A medida que documentemos casos de cliente —con su permiso y con métricas verificables— los publicaremos aquí."
+    eyebrow="Transformation scenarios"
+    title={`Results explained from the <span class="em">problem</span>, not from the tool.`}
+    lead="Each scenario is told from the starting situation, the redesigned process and the result we pursue. The client does not buy agents or dashboards: they buy capacity, control, speed and learning. As we document client cases — with their permission and with verifiable metrics — we will publish them here."
   />
 
   <section class="block">
@@ -43,12 +45,12 @@ const casos = (await getCollection('casos'))
     </div>
   </section>
 
-  <!-- Qué compra el cliente -->
+  <!-- What the client buys -->
   <section class="block soft">
     <div class="wrap">
       <div class="block-hd fade-in">
-        <p class="eyebrow">Cómo medimos el impacto</p>
-        <h2 class="sec-h">Cuatro resultados que buscamos en cada proyecto</h2>
+        <p class="eyebrow">How we measure impact</p>
+        <h2 class="sec-h">Four outcomes we pursue in every project</h2>
       </div>
       <div class="grid-4">
         {

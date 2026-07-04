@@ -1,44 +1,66 @@
 ---
-import { brand } from '@/config/brand';
+import { brandFor } from '@/config/brand';
+import { asLocale } from '@/i18n';
+import { getPillars } from '@/data/pillars';
+import { getSolutions } from '@/data/solutions';
 import Logo from '@/components/Logo.astro';
 
-const cols = [
-  {
-    title: 'Servicios',
-    links: [
-      { label: 'Fractional Leadership', href: '/servicios/fractional-leadership' },
-      { label: 'Strategy & Design', href: '/servicios/strategy-design' },
-      { label: 'Build & Transform', href: '/servicios/build-transform' },
-      { label: 'Enablement & Adoption', href: '/servicios/enablement-adoption' },
-      { label: 'Managed & Evolve', href: '/servicios/managed-evolve' },
-    ],
-  },
-  {
-    title: 'Empresa',
-    links: [
-      { label: 'Empresa aumentada por IA', href: '/empresa-aumentada' },
-      { label: 'Escenarios de transformación', href: '/casos' },
-      { label: 'Ideas', href: '/ideas' },
-      { label: 'Contacto', href: '/contacto' },
-    ],
-  },
-  {
-    title: 'Soluciones',
-    links: [
-      { label: 'Dirección de IA externa', href: '/soluciones/direccion-ia-externa' },
-      { label: 'Automatización de procesos', href: '/soluciones/automatizacion-de-procesos' },
-      { label: 'Formación transformativa', href: '/soluciones/formacion-transformativa' },
-      { label: 'Gobierno de IA', href: '/soluciones/gobierno-de-ia' },
-    ],
-  },
-];
+const locale = asLocale(Astro.currentLocale);
+const brand = brandFor(locale);
+const prefix = locale === 'en' ? '/en' : '';
+
+const cols =
+  locale === 'en'
+    ? [
+        {
+          title: 'Services',
+          links: getPillars('en').map((p) => ({ label: p.name, href: `/en/servicios/${p.slug}` })),
+        },
+        {
+          title: 'Company',
+          links: [
+            { label: 'The AI-augmented company', href: '/en/empresa-aumentada' },
+            { label: 'Transformation scenarios', href: '/en/casos' },
+            { label: 'Insights', href: '/en/ideas' },
+            { label: 'Contact', href: '/en/contacto' },
+          ],
+        },
+        {
+          title: 'Solutions',
+          links: getSolutions('en').map((s) => ({ label: s.eyebrow, href: `/en/soluciones/${s.slug}` })),
+        },
+      ]
+    : [
+        {
+          title: 'Servicios',
+          links: getPillars('es').map((p) => ({ label: p.name, href: `/servicios/${p.slug}` })),
+        },
+        {
+          title: 'Empresa',
+          links: [
+            { label: 'Empresa aumentada por IA', href: '/empresa-aumentada' },
+            { label: 'Escenarios de transformación', href: '/casos' },
+            { label: 'Ideas', href: '/ideas' },
+            { label: 'Contacto', href: '/contacto' },
+          ],
+        },
+        {
+          title: 'Soluciones',
+          links: getSolutions('es').map((s) => ({ label: s.eyebrow, href: `/soluciones/${s.slug}` })),
+        },
+      ];
+
+const legal =
+  locale === 'en'
+    ? { aviso: 'Legal notice', privacidad: 'Privacy', cookies: 'Cookies', aria: 'Legal', home: 'home' }
+    : { aviso: 'Aviso legal', privacidad: 'Privacidad', cookies: 'Cookies', aria: 'Legal', home: 'inicio' };
 ---
 
 <footer class="dark">
   <div class="wrap">
     <div class="ft-top">
       <div class="ft-brand-col">
-        <a href="/" class="ft-logo" aria-label={`${brand.name} — inicio`}>
+        <a href={prefix || '/'} class="ft-logo" aria-label={`${brand.name} — ${legal.home}`}>
           <Logo size={30} onDark />
         </a>
         <p class="ft-claim">{brand.claim}</p>
@@ -65,10 +87,10 @@ const cols = [
 
     <div class="ft-bottom">
       <p class="ft-copy">© {brand.year} {brand.name}. {brand.claim}</p>
-      <nav class="ft-legal" aria-label="Legal">
-        <a href="/aviso-legal">Aviso legal</a>
-        <a href="/privacidad">Privacidad</a>
-        <a href="/cookies">Cookies</a>
+      <nav class="ft-legal" aria-label={legal.aria}>
+        <a href={`${prefix}/aviso-legal`}>{legal.aviso}</a>
+        <a href={`${prefix}/privacidad`}>{legal.privacidad}</a>
+        <a href={`${prefix}/cookies`}>{legal.cookies}</a>
         <a href={`mailto:${brand.email}`}>{brand.email}</a>
       </nav>
     </div>

@@ -5,7 +5,8 @@ interface Props {
   pillar: Pillar;
 }
 const { pillar } = Astro.props;
-const href = `/servicios/${pillar.slug}`;
+const prefix = Astro.currentLocale === 'en' ? '/en' : '';
+const href = `${prefix}/servicios/${pillar.slug}`;
 ---
 
 <article class="pillar-card fade-in">

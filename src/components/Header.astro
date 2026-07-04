@@ -1,25 +1,31 @@
 ---
-import { brand } from '@/config/brand';
+import { brandFor } from '@/config/brand';
+import { asLocale, localizePath } from '@/i18n';
 import Logo from '@/components/Logo.astro';
 
 interface Props {
   transparent?: boolean;
 }
 const { transparent = false } = Astro.props;
+const locale = asLocale(Astro.currentLocale);
+const brand = brandFor(locale);
 const current = Astro.url.pathname.replace(/\/$/, '') || '/';
-const isActive = (href: string) => current === href || current.startsWith(href + '/');
+const isActive = (href: string) => current === href.replace(/\/$/, '') || current.startsWith(href.replace(/\/$/, '') + '/');
+const esHref = localizePath(current, 'es');
+const enHref = localizePath(current, 'en');
+const homeHref = locale === 'en' ? '/en/' : '/';
 ---
 
-<nav id="site-nav" class={transparent ? 'transparent' : 'opaque'} aria-label="Principal">
+<nav id="site-nav" class={transparent ? 'transparent' : 'opaque'} aria-label={locale === 'en' ? 'Main' : 'Principal'}>
   <div class="wrap nav-in">
-    <a href="/" class="nav-logo" aria-label={`${brand.name} — inicio`}>
+    <a href={homeHref} class="nav-logo" aria-label={`${brand.name} — ${locale === 'en' ? 'home' : 'inicio'}`}>
       <Logo size={30} />
     </a>
 
     <button
       id="nav-toggle"
       class="nav-toggle"
-      aria-label="Abrir menú"
+      aria-label={locale === 'en' ? 'Open menu' : 'Abrir menú'}
       aria-expanded="false"
       aria-controls="nav-menu"
     >
@@ -38,6 +44,11 @@ const isActive = (href: string) => current === href || current.startsWith(href +
           ))
         }
       </ul>
+      <div class="lang-switch" aria-label={locale === 'en' ? 'Language' : 'Idioma'}>
+        <a href={esHref} class={locale === 'es' ? 'on' : ''} aria-current={locale === 'es' ? 'true' : undefined} lang="es" hreflang="es">ES</a>
+        <span aria-hidden="true">·</span>
+        <a href={enHref} class={locale === 'en' ? 'on' : ''} aria-current={locale === 'en' ? 'true' : undefined} lang="en" hreflang="en">EN</a>
+      </div>
       <a href={brand.cta.href} class="nav-cta">{brand.cta.labelShort}</a>
     </div>
   </div>
@@ -141,6 +152,48 @@ const isActive = (href: string) => current === href || current.startsWith(href +
     background: var(--teal-deep);
   }
 
+  /* Selector de idioma: discreto, tipográfico */
+  .lang-switch {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--head);
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    color: var(--tx-3);
+  }
+  .lang-switch a {
+    color: var(--tx-3);
+    transition: color 0.2s;
+    padding: 4px 2px;
+  }
+  .lang-switch a:hover {
+    color: var(--teal-deep);
+  }
+  .lang-switch a.on {
+    color: var(--teal-deep);
+    font-weight: 800;
+  }
+  #site-nav.transparent .lang-switch,
+  #site-nav.transparent .lang-switch a {
+    color: rgba(255, 255, 255, 0.55);
+  }
+  #site-nav.transparent .lang-switch a:hover {
+    color: #fff;
+  }
+  #site-nav.transparent .lang-switch a.on {
+    color: #fff;
+  }
+  #site-nav.transparent.solid .lang-switch,
+  #site-nav.transparent.solid .lang-switch a {
+    color: var(--tx-3);
+  }
+  #site-nav.transparent.solid .lang-switch a.on,
+  #site-nav.transparent.solid .lang-switch a:hover {
+    color: var(--teal-deep);
+  }
+
   .nav-toggle {
     display: none;
     flex-direction: column;
@@ -205,6 +258,17 @@ const isActive = (href: string) => current === href || current.startsWith(href +
     .nav-cta {
       margin-top: 16px;
       text-align: center;
+    }
+    .lang-switch {
+      justify-content: center;
+      padding: 14px 0 0;
+    }
+    #site-nav.transparent.open .lang-switch,
+    #site-nav.transparent.open .lang-switch a {
+      color: var(--tx-3);
+    }
+    #site-nav.transparent.open .lang-switch a.on {
+      color: var(--teal-deep);
     }
   }
 </style>
