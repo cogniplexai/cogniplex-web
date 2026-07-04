@@ -1,150 +1,244 @@
 ---
 /**
- * Red de nodos animada (canvas): círculos teal que derivan lentamente y se
- * conectan cuando se acercan. Es la traducción dinámica del símbolo Cogniplex.
- * - Respeta prefers-reduced-motion (dibuja un fotograma estático).
- * - Se pausa fuera del viewport y con la pestaña oculta.
- * density: 'hero' (más densa) | 'soft' (sutil, para CTA/interiores)
+ * Enjambre de nodos (SVG): murmuración de círculos teal sin líneas.
+ * Es la traducción dinámica del símbolo Cogniplex: muchos nodos auto-organizados
+ * formando una banda diagonal que ondula con vida propia.
+ * - Sin JavaScript: toda la animación es CSS (transform/opacity).
+ * - Tres capas de profundidad que se mueven a ritmos distintos + deriva individual.
+ * - Respeta prefers-reduced-motion (queda el enjambre estático).
+ * density: 'hero' (denso, portada) | 'soft' (sutil, CTA/interiores)
  */
 interface Props {
   density?: 'hero' | 'soft';
   class?: string;
 }
 const { density = 'hero', class: cls = '' } = Astro.props;
+
+/** PRNG con semilla: el enjambre es idéntico en cada build. */
+function mulberry32(seed: number) {
+  return () => {
+    seed |= 0;
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const rnd = mulberry32(density === 'hero' ? 20260704 : 8080);
+
+const W = 1200;
+const H = 800;
+const palette = ['#5cc6c6', '#75b7b6', '#8fd4d3', '#3f8a8a', '#2e9d9c'];
+const COUNT = density === 'hero' ? 130 : 70;
+
+/** Punto dentro de la banda diagonal (abajo-izquierda → arriba-derecha). */
+function swarmPoint() {
+  const t = rnd();
+  const x = 250 + t * 860 + (rnd() - 0.5) * 100;
+  const baseY = 650 - t * 480 - Math.sin(t * Math.PI) * 60;
+  const spread = 80 + 160 * Math.sin(t * Math.PI); // la banda respira: más ancha en el centro
+  const y = baseY + (rnd() + rnd() - 1) * spread;
+  return { x, y };
+}
+
+interface Dot {
+  x: number;
+  y: number;
+  r: number;
+  c: string;
+  o: number;
+  layer: number;
+  anim: number;
+  dur: number;
+  delay: number;
+  twinkle: boolean;
+}
+
+const dots: Dot[] = [];
+for (let i = 0; i < COUNT; i++) {
+  const ambient = rnd() < 0.2; // polvo suelto fuera de la banda, para profundidad
+  const p = ambient ? { x: rnd() * W, y: rnd() * H } : swarmPoint();
+  dots.push({
+    x: Math.round(p.x),
+    y: Math.round(p.y),
+    r: +(1.2 + rnd() ** 2.2 * (density === 'hero' ? 8 : 6)).toFixed(1),
+    c: palette[Math.floor(rnd() * palette.length)],
+    o: +(ambient ? 0.16 + rnd() * 0.28 : 0.35 + rnd() * 0.55).toFixed(2),
+    layer: Math.floor(rnd() * 3),
+    anim: Math.floor(rnd() * 6),
+    dur: +(7 + rnd() * 11).toFixed(1),
+    delay: +(-rnd() * 18).toFixed(1),
+    twinkle: rnd() < 0.28,
+  });
+}
+const layers = [0, 1, 2].map((l) => dots.filter((d) => d.layer === l));
+
+/** Orbes de luz difusa: dan profundidad y volumen detrás del enjambre. */
+const orbs = Array.from({ length: density === 'hero' ? 4 : 2 }, () => {
+  const p = swarmPoint();
+  return {
+    x: Math.round(p.x),
+    y: Math.round(p.y),
+    r: Math.round(70 + rnd() * 90),
+    anim: Math.floor(rnd() * 6),
+    dur: +(26 + rnd() * 26).toFixed(1),
+    delay: +(-rnd() * 40).toFixed(1),
+  };
+});
 ---
 
-<canvas class={`anodes ${cls}`} data-density={density} aria-hidden="true"></canvas>
+<svg
+  class={`cx-swarm ${cls}`}
+  viewBox={`0 0 ${W} ${H}`}
+  preserveAspectRatio="xMidYMid slice"
+  xmlns="http://www.w3.org/2000/svg"
+  aria-hidden="true"
+>
+  <defs>
+    <radialGradient id="cx-orb-grad">
+      <stop offset="0%" stop-color="#2e9d9c" stop-opacity="0.16"></stop>
+      <stop offset="60%" stop-color="#2e9d9c" stop-opacity="0.06"></stop>
+      <stop offset="100%" stop-color="#2e9d9c" stop-opacity="0"></stop>
+    </radialGradient>
+  </defs>
 
-<script>
-  type Node = { x: number; y: number; vx: number; vy: number; r: number; c: string };
-
-  function initNodes(canvas: HTMLCanvasElement) {
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const palette = ['#5cc6c6', '#3f8a8a', '#75b7b6', '#338180', '#6db1b0'];
-    const maxNodes = canvas.dataset.density === 'soft' ? 26 : 46;
-    const linkDist = canvas.dataset.density === 'soft' ? 130 : 155;
-
-    let w = 0,
-      h = 0,
-      dpr = 1,
-      nodes: Node[] = [],
-      raf = 0,
-      running = true;
-
-    function build() {
-      const count = Math.max(10, Math.min(maxNodes, Math.floor((w * h) / 17000)));
-      nodes = Array.from({ length: count }, (_, i) => ({
-        x: Math.random() * w,
-        y: Math.random() * h,
-        vx: (Math.random() - 0.5) * 0.22,
-        vy: (Math.random() - 0.5) * 0.22,
-        r: 1.6 + Math.random() * 3.6,
-        c: palette[i % palette.length],
-      }));
-    }
-
-    function resize() {
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const rect = canvas.getBoundingClientRect();
-      w = rect.width;
-      h = rect.height;
-      canvas.width = Math.max(1, Math.floor(w * dpr));
-      canvas.height = Math.max(1, Math.floor(h * dpr));
-      ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
-      build();
-    }
-
-    function draw() {
-      ctx!.clearRect(0, 0, w, h);
-      // enlaces
-      for (let i = 0; i < nodes.length; i++) {
-        const a = nodes[i];
-        for (let j = i + 1; j < nodes.length; j++) {
-          const b = nodes[j];
-          const dx = a.x - b.x;
-          const dy = a.y - b.y;
-          const d = Math.hypot(dx, dy);
-          if (d < linkDist) {
-            ctx!.globalAlpha = (1 - d / linkDist) * 0.2;
-            ctx!.strokeStyle = '#5cc6c6';
-            ctx!.lineWidth = 1;
-            ctx!.beginPath();
-            ctx!.moveTo(a.x, a.y);
-            ctx!.lineTo(b.x, b.y);
-            ctx!.stroke();
-          }
-        }
-      }
-      // nodos
-      for (const n of nodes) {
-        ctx!.globalAlpha = 0.9;
-        ctx!.fillStyle = n.c;
-        ctx!.beginPath();
-        ctx!.arc(n.x, n.y, n.r, 0, Math.PI * 2);
-        ctx!.fill();
-        if (!reduce) {
-          n.x += n.vx;
-          n.y += n.vy;
-          if (n.x < -24) n.x = w + 24;
-          if (n.x > w + 24) n.x = -24;
-          if (n.y < -24) n.y = h + 24;
-          if (n.y > h + 24) n.y = -24;
-        }
-      }
-      ctx!.globalAlpha = 1;
-      if (!reduce && running) raf = requestAnimationFrame(draw);
-    }
-
-    resize();
-    draw();
-
-    let resizeT: number;
-    window.addEventListener('resize', () => {
-      window.clearTimeout(resizeT);
-      resizeT = window.setTimeout(() => {
-        resize();
-        if (reduce) draw();
-      }, 150);
-    });
-
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          running = e.isIntersecting;
-          if (running && !reduce) {
-            cancelAnimationFrame(raf);
-            raf = requestAnimationFrame(draw);
-          }
-        });
-      },
-      { threshold: 0 }
-    );
-    io.observe(canvas);
-
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) {
-        running = false;
-        cancelAnimationFrame(raf);
-      } else if (!reduce) {
-        running = true;
-        cancelAnimationFrame(raf);
-        raf = requestAnimationFrame(draw);
-      }
-    });
+  {
+    orbs.map((o) => (
+      <circle
+        class={`cx-dot cx-drift-${o.anim}`}
+        cx={o.x}
+        cy={o.y}
+        r={o.r}
+        fill="url(#cx-orb-grad)"
+        style={`animation-duration:${o.dur}s;animation-delay:${o.delay}s`}
+      />
+    ))
   }
 
-  document.querySelectorAll<HTMLCanvasElement>('canvas.anodes').forEach(initNodes);
-</script>
+  {
+    layers.map((layer, l) => (
+      <g class={`cx-layer cx-layer-${l}`}>
+        {layer.map((d) => (
+          <circle
+            class={`cx-dot cx-drift-${d.anim}${d.twinkle ? ' cx-twinkle' : ''}`}
+            cx={d.x}
+            cy={d.y}
+            r={d.r}
+            fill={d.c}
+            opacity={d.o}
+            style={`animation-duration:${d.dur}s,${(d.dur * 0.6).toFixed(1)}s;animation-delay:${d.delay}s,${d.delay}s`}
+          />
+        ))}
+      </g>
+    ))
+  }
+</svg>
 
 <style>
-  .anodes {
+  .cx-swarm {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     display: block;
     pointer-events: none;
+  }
+
+  /* Capas: toda la banda ondula lentamente, cada capa a un ritmo distinto */
+  .cx-layer {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: cx-sway-0 46s ease-in-out infinite alternate;
+  }
+  .cx-layer-1 {
+    animation-name: cx-sway-1;
+    animation-duration: 62s;
+  }
+  .cx-layer-2 {
+    animation-name: cx-sway-2;
+    animation-duration: 78s;
+  }
+
+  /* Deriva individual: 6 trayectorias orgánicas repartidas al azar */
+  .cx-dot {
+    animation-name: cx-drift-0;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+  }
+  .cx-drift-1 { animation-name: cx-drift-1; }
+  .cx-drift-2 { animation-name: cx-drift-2; }
+  .cx-drift-3 { animation-name: cx-drift-3; }
+  .cx-drift-4 { animation-name: cx-drift-4; }
+  .cx-drift-5 { animation-name: cx-drift-5; }
+
+  /* Destello sutil en parte de los nodos (segunda animación: solo opacity) */
+  .cx-twinkle {
+    animation-name: cx-drift-0, cx-twinkle;
+  }
+  .cx-twinkle.cx-drift-1 { animation-name: cx-drift-1, cx-twinkle; }
+  .cx-twinkle.cx-drift-2 { animation-name: cx-drift-2, cx-twinkle; }
+  .cx-twinkle.cx-drift-3 { animation-name: cx-drift-3, cx-twinkle; }
+  .cx-twinkle.cx-drift-4 { animation-name: cx-drift-4, cx-twinkle; }
+  .cx-twinkle.cx-drift-5 { animation-name: cx-drift-5, cx-twinkle; }
+
+  @keyframes cx-drift-0 {
+    0% { transform: translate(0, 0); }
+    35% { transform: translate(16px, -12px); }
+    70% { transform: translate(-6px, -22px); }
+    100% { transform: translate(9px, 6px); }
+  }
+  @keyframes cx-drift-1 {
+    0% { transform: translate(0, 0); }
+    30% { transform: translate(-14px, 10px); }
+    65% { transform: translate(10px, 20px); }
+    100% { transform: translate(-7px, -8px); }
+  }
+  @keyframes cx-drift-2 {
+    0% { transform: translate(0, 0); }
+    40% { transform: translate(20px, 8px); }
+    75% { transform: translate(6px, -16px); }
+    100% { transform: translate(-11px, 4px); }
+  }
+  @keyframes cx-drift-3 {
+    0% { transform: translate(0, 0); }
+    33% { transform: translate(-18px, -8px); }
+    66% { transform: translate(-4px, 18px); }
+    100% { transform: translate(12px, -5px); }
+  }
+  @keyframes cx-drift-4 {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(10px, -18px) scale(1.12); }
+    100% { transform: translate(-9px, -4px) scale(0.94); }
+  }
+  @keyframes cx-drift-5 {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(-12px, 14px) scale(0.9); }
+    100% { transform: translate(14px, 7px) scale(1.08); }
+  }
+  @keyframes cx-twinkle {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 0.95; }
+  }
+  @keyframes cx-sway-0 {
+    0% { transform: translate(0, 0) rotate(0.001deg); }
+    50% { transform: translate(-24px, 14px) rotate(-1.1deg); }
+    100% { transform: translate(16px, -10px) rotate(0.7deg); }
+  }
+  @keyframes cx-sway-1 {
+    0% { transform: translate(0, 0) rotate(0.001deg); }
+    50% { transform: translate(20px, -16px) rotate(0.9deg); }
+    100% { transform: translate(-14px, 8px) rotate(-0.6deg); }
+  }
+  @keyframes cx-sway-2 {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(-10px, -12px) scale(1.03); }
+    100% { transform: translate(12px, 10px) scale(0.98); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cx-swarm :is(.cx-dot, .cx-layer) {
+      animation: none !important;
+    }
   }
 </style>
