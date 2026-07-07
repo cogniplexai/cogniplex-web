@@ -89,6 +89,10 @@ const es = {
       q: '“¿La IA va a sustituir a mi equipo?”',
       a: 'No. Trabajamos con personas aumentadas, no desplazadas: liberamos al equipo de lo repetitivo para que dedique tiempo a lo que aporta valor.',
     },
+    {
+      q: '“¿Quién ejecuta los proyectos?”',
+      a: 'Un núcleo estable que custodia el método y la relación contigo, y una red curada de especialistas que aporta profundidad. Para cada proyecto componemos el equipo exacto que necesitas; la responsabilidad de resultados es siempre de Cogniplex.',
+    },
   ],
 
   /**
@@ -194,6 +198,10 @@ const en: typeof es = {
     {
       q: '“Will AI replace my team?”',
       a: 'No. We work with augmented people, not displaced ones: we free the team from repetitive work so they can spend time on what adds value.',
+    },
+    {
+      q: '“Who delivers the projects?”',
+      a: 'A stable core that safeguards the method and the relationship with you, and a curated network of specialists that brings depth. For each project we assemble exactly the team you need; responsibility for results always rests with Cogniplex.',
     },
   ],
 

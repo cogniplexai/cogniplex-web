@@ -1,0 +1,317 @@
+---
+/**
+ * Formulario de expresión de interés para la red de colaboradores.
+ * Un único formulario con selector de modalidad (freelance en cartera /
+ * incorporación al núcleo). Mismo mecanismo que DiagnosticForm:
+ * Formspree si hay endpoint configurado; mailto en caso contrario.
+ */
+import { brandFor } from '@/config/brand';
+import { asLocale } from '@/i18n';
+import { getPillars } from '@/data/pillars';
+
+const locale = asLocale(Astro.currentLocale);
+const brand = brandFor(locale);
+const capabilities = getPillars(locale).map((p) => p.name);
+
+const f =
+  locale === 'en'
+    ? {
+        name: 'Full name',
+        namePh: 'Your name',
+        email: 'Email',
+        emailPh: 'you@email.com',
+        linkedin: 'LinkedIn or portfolio',
+        linkedinPh: 'https://…',
+        specialty: 'Main capability',
+        specialtySelect: 'Select…',
+        specialtyOther: 'Other',
+        mode: 'How would you like to collaborate?',
+        modeSelect: 'Select…',
+        modes: ['Portfolio freelancer (project-based)', 'Joining the core (employment)', 'Open to both'],
+        availability: 'Availability',
+        availabilitySelect: 'Select…',
+        availabilities: ['Immediate', 'Within 1–3 months', 'Just exploring for now'],
+        message: 'Tell us about yourself',
+        messagePh: 'Your specialty, the kind of projects where you contribute most, and why this way of working appeals to you…',
+        consentBefore: 'I have read and accept the ',
+        consentLink: 'Privacy policy',
+        consentHref: '/en/privacidad',
+        submit: 'Express my interest',
+      }
+    : {
+        name: 'Nombre y apellidos',
+        namePh: 'Tu nombre',
+        email: 'Email',
+        emailPh: 'tu@email.com',
+        linkedin: 'LinkedIn o portfolio',
+        linkedinPh: 'https://…',
+        specialty: 'Capacidad principal',
+        specialtySelect: 'Selecciona…',
+        specialtyOther: 'Otra',
+        mode: '¿Cómo te gustaría colaborar?',
+        modeSelect: 'Selecciona…',
+        modes: ['Freelance en cartera (por proyectos)', 'Incorporación al núcleo (empleo)', 'Abierto a ambas'],
+        availability: 'Disponibilidad',
+        availabilitySelect: 'Selecciona…',
+        availabilities: ['Inmediata', 'En 1–3 meses', 'De momento solo exploro'],
+        message: 'Cuéntanos sobre ti',
+        messagePh: 'Tu especialidad, el tipo de proyectos donde más aportas y por qué te atrae esta forma de trabajar…',
+        consentBefore: 'He leído y acepto la ',
+        consentLink: 'Política de privacidad',
+        consentHref: '/privacidad',
+        submit: 'Expresar mi interés',
+      };
+---
+
+<form
+  class="jform"
+  action={brand.formEndpoint || undefined}
+  method="POST"
+  data-form="colabora"
+  data-endpoint={brand.formEndpoint}
+  data-email={brand.email}
+  data-lang={locale}
+>
+  <div class="f-row">
+    <div class="f-field">
+      <label class="f-label" for="jn">{f.name}</label>
+      <input class="f-input" type="text" id="jn" name="nombre" placeholder={f.namePh} required />
+    </div>
+    <div class="f-field">
+      <label class="f-label" for="je">{f.email}</label>
+      <input class="f-input" type="email" id="je" name="email" placeholder={f.emailPh} required />
+    </div>
+  </div>
+
+  <div class="f-field">
+    <label class="f-label" for="jl">{f.linkedin}</label>
+    <input class="f-input" type="url" id="jl" name="linkedin" placeholder={f.linkedinPh} />
+  </div>
+
+  <div class="f-row">
+    <div class="f-field">
+      <label class="f-label" for="js">{f.specialty}</label>
+      <select class="f-input" id="js" name="capacidad">
+        <option value="">{f.specialtySelect}</option>
+        {capabilities.map((c) => <option>{c}</option>)}
+        <option>{f.specialtyOther}</option>
+      </select>
+    </div>
+    <div class="f-field">
+      <label class="f-label" for="jm">{f.mode}</label>
+      <select class="f-input" id="jm" name="modalidad" required>
+        <option value="">{f.modeSelect}</option>
+        {f.modes.map((m) => <option>{m}</option>)}
+      </select>
+    </div>
+  </div>
+
+  <div class="f-field">
+    <label class="f-label" for="ja">{f.availability}</label>
+    <select class="f-input" id="ja" name="disponibilidad">
+      <option value="">{f.availabilitySelect}</option>
+      {f.availabilities.map((a) => <option>{a}</option>)}
+    </select>
+  </div>
+
+  <div class="f-field">
+    <label class="f-label" for="jmsg">{f.message}</label>
+    <textarea class="f-input" id="jmsg" name="mensaje" placeholder={f.messagePh} required></textarea>
+  </div>
+
+  <label class="f-consent">
+    <input type="checkbox" name="consent" required />
+    <span>{f.consentBefore}<a href={f.consentHref}>{f.consentLink}</a>.</span>
+  </label>
+
+  <button type="submit" class="btn btn-primary f-submit">{f.submit}</button>
+</form>
+
+<script>
+  const l10n = {
+    es: {
+      fields: {
+        nombre: 'Nombre',
+        email: 'Email',
+        linkedin: 'LinkedIn/portfolio',
+        capacidad: 'Capacidad',
+        modalidad: 'Modalidad',
+        disponibilidad: 'Disponibilidad',
+      },
+      messageLabel: 'Mensaje:',
+      subject: 'Interés en colaborar con Cogniplex',
+      mailtoTitle: 'Un último paso',
+      mailtoBody: (email: string) =>
+        `Se abrirá tu aplicación de correo con el mensaje preparado: solo tienes que enviarlo. Si no se abre, escríbenos directamente a <a href="mailto:${email}">${email}</a>.`,
+      sending: 'Enviando…',
+      okTitle: '¡Gracias!',
+      okBody: 'Hemos recibido tu interés. Si vemos encaje, te contactaremos para una primera conversación.',
+      error: 'No se pudo enviar. Inténtalo de nuevo o escríbenos directamente.',
+      netError: 'No se pudo enviar. Revisa tu conexión o escríbenos directamente.',
+    },
+    en: {
+      fields: {
+        nombre: 'Name',
+        email: 'Email',
+        linkedin: 'LinkedIn/portfolio',
+        capacidad: 'Capability',
+        modalidad: 'Mode',
+        disponibilidad: 'Availability',
+      },
+      messageLabel: 'Message:',
+      subject: 'Interest in collaborating with Cogniplex',
+      mailtoTitle: 'One last step',
+      mailtoBody: (email: string) =>
+        `Your email application will open with the message ready: just send it. If it does not open, write to us directly at <a href="mailto:${email}">${email}</a>.`,
+      sending: 'Sending…',
+      okTitle: 'Thank you!',
+      okBody: 'We have received your interest. If we see a fit, we will contact you for a first conversation.',
+      error: 'It could not be sent. Try again or write to us directly.',
+      netError: 'It could not be sent. Check your connection or write to us directly.',
+    },
+  };
+
+  document.querySelectorAll<HTMLFormElement>('form.jform').forEach((form) => {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+      if (!btn) return;
+      const t = l10n[form.dataset.lang === 'en' ? 'en' : 'es'];
+
+      // Sin endpoint configurado: el interés se envía por correo (mailto).
+      const endpoint = form.dataset.endpoint;
+      if (!endpoint) {
+        const fd = new FormData(form);
+        const line = (label: string, field: string) =>
+          fd.get(field) ? `${label}: ${fd.get(field)}` : '';
+        const body = [
+          line(t.fields.nombre, 'nombre'),
+          line(t.fields.email, 'email'),
+          line(t.fields.linkedin, 'linkedin'),
+          line(t.fields.capacidad, 'capacidad'),
+          line(t.fields.modalidad, 'modalidad'),
+          line(t.fields.disponibilidad, 'disponibilidad'),
+          '',
+          t.messageLabel,
+          String(fd.get('mensaje') ?? ''),
+        ]
+          .filter((l, i) => l !== '' || i === 6)
+          .join('\n');
+        const email = form.dataset.email ?? '';
+        window.location.href = `mailto:${email}?subject=${encodeURIComponent(t.subject)}&body=${encodeURIComponent(body)}`;
+        form.innerHTML = `<div class="form-ok-box"><h3>${t.mailtoTitle}</h3><p>${t.mailtoBody(email)}</p></div>`;
+        return;
+      }
+
+      const original = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = t.sending;
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { Accept: 'application/json' },
+        });
+        if (res.ok) {
+          form.innerHTML = `<div class="form-ok-box"><h3>${t.okTitle}</h3><p>${t.okBody}</p></div>`;
+        } else {
+          const data = await res.json().catch(() => ({}));
+          const msg = data?.errors?.[0]?.message || t.error;
+          showMsg(form, msg);
+          btn.disabled = false;
+          btn.textContent = original;
+        }
+      } catch {
+        showMsg(form, t.netError);
+        btn.disabled = false;
+        btn.textContent = original;
+      }
+    });
+  });
+
+  function showMsg(form: HTMLFormElement, text: string) {
+    let el = form.querySelector<HTMLDivElement>('.form-msg');
+    if (!el) {
+      el = document.createElement('div');
+      el.className = 'form-msg';
+      const submit = form.querySelector('button[type="submit"]');
+      form.insertBefore(el, submit);
+    }
+    el.textContent = text;
+  }
+</script>
+
+<style>
+  .jform {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .f-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .f-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .f-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--on-navy-2);
+  }
+  .f-input {
+    background: var(--navy-2);
+    border: 1px solid var(--navy-line);
+    border-radius: 8px;
+    color: #fff;
+    padding: 13px 15px;
+    font-family: var(--sans);
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .f-input::placeholder {
+    color: #6b7a8c;
+  }
+  .f-input:focus {
+    border-color: var(--teal-2);
+  }
+  select.f-input {
+    appearance: none;
+  }
+  textarea.f-input {
+    resize: vertical;
+    min-height: 120px;
+  }
+  .f-consent {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 14px;
+    color: var(--on-navy-2);
+    line-height: 1.5;
+  }
+  .f-consent input {
+    margin-top: 3px;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    accent-color: var(--teal);
+  }
+  .f-consent a {
+    color: var(--teal-2);
+  }
+  .f-submit {
+    align-self: flex-start;
+    margin-top: 4px;
+  }
+  @media (max-width: 560px) {
+    .f-row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

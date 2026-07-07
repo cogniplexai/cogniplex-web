@@ -1,0 +1,171 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Hero from '@/components/Hero.astro';
+import CollaborateForm from '@/components/CollaborateForm.astro';
+import { asLocale, localizePath } from '@/i18n';
+import { firmFor } from '@/data/firm';
+import { getPillars } from '@/data/pillars';
+
+const locale = asLocale(Astro.currentLocale);
+const firm = firmFor(locale);
+const t = firm.collaborate;
+const howHref = localizePath('/organizacion', locale);
+const prefix = locale === 'en' ? '/en' : '';
+const pillars = getPillars(locale);
+const meta =
+  locale === 'en'
+    ? {
+        title: 'Work with us',
+        description:
+          'Join the Cogniplex network: first-rate specialists collaborating on projects as portfolio freelancers or joining the core. Express your interest.',
+        formCta: 'Express my interest',
+      }
+    : {
+        title: 'Colabora con nosotros',
+        description:
+          'Únete a la red Cogniplex: especialistas de primer nivel que colaboran por proyectos como freelances en cartera o se incorporan al núcleo. Expresa tu interés.',
+        formCta: 'Expresar mi interés',
+      };
+---
+
+<BaseLayout title={meta.title} description={meta.description} path="/colabora">
+  <Hero
+    variant="interior"
+    eyebrow={t.heroEyebrow}
+    title={t.heroTitle}
+    lead={t.heroLead}
+    primaryCta={{ label: meta.formCta, href: '#interes' }}
+    secondaryCta={{ label: t.orgCta, href: howHref }}
+  />
+
+  <!-- Qué ofrecemos a la red -->
+  <section class="block soft">
+    <div class="wrap">
+      <div class="block-hd fade-in">
+        <p class="eyebrow">{t.valueEyebrow}</p>
+        <h2 class="sec-h">{t.valueTitle}</h2>
+        <p class="sec-lead">{t.valueLead}</p>
+      </div>
+      <div class="grid-4 fade-in">
+        {
+          firm.networkValue.map((v) => (
+            <div class="card-p">
+              <h3>{v.title}</h3>
+              <p>{v.text}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Perfiles -->
+  <section class="block">
+    <div class="wrap">
+      <div class="block-hd fade-in">
+        <p class="eyebrow">{t.profilesEyebrow}</p>
+        <h2 class="sec-h">{t.profilesTitle}</h2>
+        <p class="sec-lead">{t.profilesLead}</p>
+      </div>
+      <ul class="cap-list fade-in">
+        {
+          pillars.map((p) => (
+            <li>
+              <a href={`${prefix}/servicios/${p.slug}`}>{p.name}</a>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="lead-note fade-in" style="margin-top:32px">
+        {t.howWeWorkNote}
+        <a class="arrow-link" href={howHref}>{t.howWeWorkLink}</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- El recorrido: de la red al núcleo (partner residente) -->
+  <section class="block soft">
+    <div class="wrap">
+      <div class="block-hd fade-in" style="margin-bottom:0">
+        <p class="eyebrow">{t.residentEyebrow}</p>
+        <h2 class="sec-h">{t.residentTitle}</h2>
+        <p class="sec-lead">{t.residentText1}</p>
+        <p class="sec-lead" style="margin-top:16px">{t.residentText2}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Formulario de expresión de interés -->
+  <section class="block dark" id="interes">
+    <div class="wrap">
+      <div class="join-grid">
+        <div class="fade-in">
+          <p class="eyebrow">{t.formEyebrow}</p>
+          <h2 class="sec-h">{t.formTitle}</h2>
+          <p class="sec-lead">{t.formLead}</p>
+        </div>
+        <div class="fade-in">
+          <CollaborateForm />
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .card-p {
+    padding: 26px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+  .card-p h3 {
+    font-family: var(--head);
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--teal-deep);
+    margin-bottom: 8px;
+  }
+  .card-p p {
+    font-size: 15px;
+    color: var(--tx-2);
+    line-height: 1.6;
+  }
+  .cap-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    list-style: none;
+    padding: 0;
+  }
+  .cap-list a {
+    display: inline-block;
+    padding: 10px 18px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    font-family: var(--head);
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--teal-deep);
+    transition:
+      border-color 0.2s,
+      color 0.2s;
+  }
+  .cap-list a:hover {
+    border-color: var(--teal);
+    color: var(--teal);
+  }
+  .join-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .join-grid {
+      grid-template-columns: 1fr;
+      gap: 44px;
+    }
+  }
+</style>

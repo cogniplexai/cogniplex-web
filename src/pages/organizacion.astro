@@ -1,0 +1,266 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Hero from '@/components/Hero.astro';
+import Declaration from '@/components/Declaration.astro';
+import AnimatedNodes from '@/components/AnimatedNodes.astro';
+import { asLocale, localizePath } from '@/i18n';
+import { brandFor } from '@/config/brand';
+import { firmFor } from '@/data/firm';
+
+const locale = asLocale(Astro.currentLocale);
+const brand = brandFor(locale);
+const firm = firmFor(locale);
+const t = firm.howItWorks;
+const joinHref = localizePath('/colabora', locale);
+const meta =
+  locale === 'en'
+    ? {
+        title: 'Our organisation',
+        description:
+          'Cogniplex is a flat, networked organisation: a small core and a curated network of specialists, organised by purpose and principles instead of hierarchy.',
+      }
+    : {
+        title: 'Nuestra organización',
+        description:
+          'Cogniplex es una organización plana y en red: un núcleo pequeño y una red curada de especialistas, organizados por propósito y principios en lugar de jerarquía.',
+      };
+---
+
+<BaseLayout title={meta.title} description={meta.description} path="/organizacion">
+  <Hero
+    variant="interior"
+    eyebrow={t.heroEyebrow}
+    title={t.heroTitle}
+    lead={t.heroLead}
+    secondaryCta={{ label: t.ctaJoin, href: joinHref }}
+  />
+
+  <Declaration>
+    {t.declaration}<span>{t.declarationEm}</span>
+  </Declaration>
+
+  <!-- El modelo: corrientes de las que toma elementos -->
+  <section class="block soft">
+    <div class="wrap">
+      <div class="block-hd fade-in">
+        <p class="eyebrow">{t.modelEyebrow}</p>
+        <h2 class="sec-h">{t.modelTitle}</h2>
+        <p class="sec-lead">{t.modelLead}</p>
+      </div>
+      <div class="grid-3 fade-in">
+        {
+          firm.inspirations.map((i) => (
+            <div class="card-i">
+              <h3>{i.name}</h3>
+              <p class="card-i-author">{i.author}</p>
+              <p>{i.text}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Principios -->
+  <section class="block">
+    <div class="wrap">
+      <div class="block-hd fade-in">
+        <p class="eyebrow">{t.principlesEyebrow}</p>
+        <h2 class="sec-h">{t.principlesTitle}</h2>
+        <p class="sec-lead">{t.principlesLead}</p>
+      </div>
+      <ol class="p-list fade-in">
+        {
+          firm.principles.map((p) => (
+            <li>
+              <strong>{p.title}.</strong> {p.text}
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <!-- La tribu: cómo fluye el trabajo -->
+  <section class="block soft">
+    <div class="wrap">
+      <div class="block-hd fade-in">
+        <p class="eyebrow">{t.tribeEyebrow}</p>
+        <h2 class="sec-h">{t.tribeTitle}</h2>
+        <p class="sec-lead">{t.tribeLead}</p>
+      </div>
+      <div class="grid-3 fade-in">
+        {
+          firm.tribe.map((p) => (
+            <div class="card-p">
+              <h3>{p.title}</h3>
+              <p>{p.text}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Núcleo y red -->
+  <section class="block dark core-block">
+    <div class="core-anim" aria-hidden="true"><AnimatedNodes density="soft" /></div>
+    <div class="wrap core-in">
+      <div class="block-hd fade-in">
+        <p class="eyebrow">{t.coreEyebrow}</p>
+        <h2 class="sec-h">{t.coreTitle}</h2>
+      </div>
+      <div class="core-text fade-in">
+        <p>{t.coreText1}</p>
+        <p>{t.coreText2}</p>
+        <h3 class="core-sub">{t.councilTitle}</h3>
+        <p>{t.councilText}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Qué gana el cliente -->
+  <section class="block soft">
+    <div class="wrap">
+      <div class="block-hd fade-in">
+        <p class="eyebrow">{t.benefitsEyebrow}</p>
+        <h2 class="sec-h">{t.benefitsTitle}</h2>
+      </div>
+      <div class="grid-4 fade-in">
+        {
+          firm.clientBenefits.map((b) => (
+            <div class="card-p">
+              <h3>{b.title}</h3>
+              <p>{b.text}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA doble: cliente y talento -->
+  <section class="cta-final dark">
+    <div class="wrap cta-in fade-in">
+      <p class="eyebrow">{t.ctaEyebrow}</p>
+      <h2 class="sec-h">{t.ctaTitle}</h2>
+      <p class="sec-lead">{t.ctaLead}</p>
+      <div class="cta-actions">
+        <a href={brand.cta.href} class="btn btn-primary">{brand.cta.labelShort}</a>
+        <a href={joinHref} class="btn btn-light-ghost">{t.ctaJoin}</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .card-i,
+  .card-p {
+    padding: 26px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+  .card-i h3,
+  .card-p h3 {
+    font-family: var(--head);
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--teal-deep);
+    margin-bottom: 8px;
+  }
+  .card-i-author {
+    font-size: 13px;
+    color: var(--tx-3);
+    margin-bottom: 10px;
+  }
+  .card-i p,
+  .card-p p {
+    font-size: 15px;
+    color: var(--tx-2);
+    line-height: 1.6;
+  }
+  .core-block {
+    position: relative;
+    overflow: hidden;
+  }
+  .core-anim {
+    position: absolute;
+    inset: 0;
+    opacity: 0.6;
+    pointer-events: none;
+  }
+  .core-in {
+    position: relative;
+  }
+  .core-text {
+    max-width: 720px;
+  }
+  .core-text p {
+    font-size: 17px;
+    line-height: 1.75;
+    color: var(--on-navy);
+  }
+  .core-text p + p {
+    margin-top: 18px;
+  }
+  .core-sub {
+    font-family: var(--head);
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--teal-2);
+    margin: 34px 0 10px;
+  }
+  .p-list {
+    max-width: 760px;
+    list-style: none;
+    padding: 0;
+    counter-reset: principio;
+  }
+  .p-list li {
+    counter-increment: principio;
+    position: relative;
+    padding: 18px 0 18px 56px;
+    border-top: 1px solid var(--line);
+    font-size: 16px;
+    line-height: 1.65;
+    color: var(--tx-2);
+  }
+  .p-list li:first-child {
+    border-top: 0;
+  }
+  .p-list li::before {
+    content: counter(principio);
+    position: absolute;
+    left: 0;
+    top: 18px;
+    font-family: var(--head);
+    font-weight: 800;
+    font-size: 13px;
+    color: var(--teal);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    width: 28px;
+    height: 28px;
+    line-height: 26px;
+    text-align: center;
+  }
+  .p-list strong {
+    font-family: var(--head);
+    font-weight: 700;
+    color: var(--teal-deep);
+  }
+  .cta-final {
+    padding: 100px 0;
+    border-top: 1px solid var(--navy-line);
+  }
+  .cta-in {
+    max-width: 720px;
+  }
+  .cta-actions {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 34px;
+  }
+</style>

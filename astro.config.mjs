@@ -7,7 +7,13 @@ import sitemap from '@astrojs/sitemap';
 export default defineConfig({
   site: 'https://cogniplex.es',
   trailingSlash: 'ignore',
-  integrations: [sitemap()],
+  integrations: [
+    sitemap({
+      // Páginas accesibles solo por URL directa: fuera del sitemap
+      // mientras no se decida enlazarlas públicamente.
+      filter: (page) => !page.includes('/organizacion') && !page.includes('/colabora'),
+    }),
+  ],
   i18n: {
     defaultLocale: 'es',
     locales: ['es', 'en'],
