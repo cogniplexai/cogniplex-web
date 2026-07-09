@@ -21,5 +21,3 @@ accountable for turning AI into a prioritised, governed business agenda.
 - It is not a tool vendor arriving with an answer before understanding the question.
 - It does not replace teams: it directs and enables them.
 - It does not promise savings without a baseline or validation.
-
-*This is sample content. Replace it with real articles from the editorial plan.*

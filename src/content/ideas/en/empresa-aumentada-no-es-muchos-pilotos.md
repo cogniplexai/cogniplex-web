@@ -27,5 +27,3 @@ That is not achieved with a tool, but by connecting five layers: **strategy, dat
 technology, processes and people.** That is the work.
 
 > AI is not the product. Business transformation is the product. AI is the means.
-
-*This is sample content. Replace it with real articles from the editorial plan.*

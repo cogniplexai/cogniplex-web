@@ -27,5 +27,3 @@ Eso no se consigue con una herramienta, sino conectando cinco capas: **estrategi
 tecnología, procesos y personas.** Ese es el trabajo.
 
 > La IA no es el producto. La transformación empresarial es el producto. La IA es el medio.
-
-*Este es un contenido de ejemplo. Sustitúyelo por artículos reales del plan editorial.*

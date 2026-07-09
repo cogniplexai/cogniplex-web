@@ -21,5 +21,3 @@ responsable de convertir la IA en una agenda de negocio priorizada y gobernada.
 - No es un proveedor de herramientas que llega con una respuesta antes de entender la pregunta.
 - No sustituye a los equipos: los orienta y los habilita.
 - No promete ahorros sin línea base ni validación.
-
-*Este es un contenido de ejemplo. Sustitúyelo por artículos reales del plan editorial.*
