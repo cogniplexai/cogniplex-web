@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro build",
+    "build": "astro build && node scripts/generar-corpus.mjs",
+    "chat:index": "node scripts/generar-corpus.mjs",
     "preview": "astro preview",
     "astro": "astro"
   },
