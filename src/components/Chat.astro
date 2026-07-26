@@ -1,0 +1,363 @@
+---
+/**
+ * Chat de atención (Chatwoot auto-hospedado + bot Cogni), sin rastro de
+ * producto de terceros en lo visible:
+ *  - Lanzador propio (pill teal, tokens Cogniplex); la burbuja nativa va oculta.
+ *  - Cero bytes de chatwoot.cogniplex.es hasta que hay consentimiento Y el
+ *    usuario pulsa el lanzador (ni preconnect, ni sdk.js, ni cookies).
+ *  - Sin consentimiento, el lanzador abre una tarjeta que explica qué se
+ *    activa y permite aceptarlo ahí mismo.
+ *  - Si el servidor de chat no responde, el lanzador degrada al CTA de contacto.
+ * Escala de z-index documentada en config/chat.ts.
+ */
+import { chatFor } from '@/config/chat';
+import { asLocale } from '@/i18n';
+
+const locale = asLocale(Astro.currentLocale);
+const chat = chatFor(locale);
+
+// Config que necesita el script en el navegador (todo público).
+const clientCfg = {
+  baseUrl: chat.baseUrl,
+  websiteToken: chat.websiteToken,
+  loadTimeoutMs: chat.loadTimeoutMs,
+  locale,
+  launcher: chat.launcher,
+  launcherAria: chat.launcherAria,
+  launcherClose: chat.launcherClose,
+  loading: chat.loading,
+  fallbackLabel: chat.fallbackLabel,
+  fallbackHref: chat.fallbackHref,
+  welcomeTitle: chat.welcomeTitle,
+  welcomeDescription: chat.welcomeDescription,
+  unavailableMessage: chat.unavailableMessage,
+};
+---
+
+{
+  chat.enabled && (
+    <div id="cgx-chat" data-cfg={JSON.stringify(clientCfg)}>
+      <div
+        id="cgx-chat-consent"
+        class="cgx-consent-card"
+        role="dialog"
+        aria-modal="false"
+        aria-labelledby="cgx-consent-title"
+        hidden
+      >
+        <p id="cgx-consent-title" class="cc-title">{chat.consentTitle}</p>
+        <p class="cc-body">{chat.consentBody}</p>
+        <div class="cc-actions">
+          <button id="cgx-chat-accept" class="btn btn-primary cc-accept">{chat.consentAccept}</button>
+          <a href={chat.consentHref} class="cc-more">{chat.consentMore}</a>
+        </div>
+      </div>
+
+      <button
+        id="cgx-chat-launcher"
+        class="cgx-launcher"
+        aria-label={chat.launcherAria}
+        aria-controls="cgx-chat-consent"
+        aria-expanded="false"
+      >
+        <svg viewBox="0 0 40 40" width="18" height="18" aria-hidden="true">
+          <circle cx="15" cy="14" r="6.5" fill="#fff" opacity="0.95" />
+          <circle cx="27" cy="21" r="4.5" fill="#fff" opacity="0.75" />
+          <circle cx="14" cy="28" r="3.5" fill="#fff" opacity="0.6" />
+          <circle cx="24" cy="31" r="2.5" fill="#fff" opacity="0.45" />
+        </svg>
+        <span id="cgx-chat-label">{chat.launcher}</span>
+      </button>
+    </div>
+  )
+}
+
+<script>
+  import { chatAllowed, saveConsent, CONSENT_EVENT, type Consent } from '@/scripts/consent';
+
+  const root = document.getElementById('cgx-chat');
+  if (root) {
+    const cfg = JSON.parse(root.dataset.cfg!);
+    const launcher = document.getElementById('cgx-chat-launcher') as HTMLButtonElement;
+    const label = document.getElementById('cgx-chat-label')!;
+    const card = document.getElementById('cgx-chat-consent')!;
+    const accept = document.getElementById('cgx-chat-accept')!;
+
+    // Estado del SDK: none → loading → ready | failed. Un solo intento de carga.
+    let sdk: 'none' | 'loading' | 'ready' | 'failed' = 'none';
+    let widgetOpen = false;
+    let hadSdkSession = false;
+
+    const setExpanded = (v: boolean) => launcher.setAttribute('aria-expanded', String(v));
+
+    const showCard = () => {
+      card.hidden = false;
+      setExpanded(true);
+      (card.querySelector('button') as HTMLButtonElement | null)?.focus();
+    };
+    const hideCard = (refocus = false) => {
+      if (card.hidden) return;
+      card.hidden = true;
+      setExpanded(widgetOpen);
+      if (refocus) launcher.focus();
+    };
+
+    /** Degradación: el lanzador pasa a ser el CTA de contacto de siempre. */
+    const degrade = () => {
+      sdk = 'failed';
+      const a = document.createElement('a');
+      a.className = 'cgx-launcher';
+      a.href = cfg.fallbackHref;
+      a.innerHTML = launcher.innerHTML;
+      a.querySelector('span')!.textContent = cfg.fallbackLabel;
+      launcher.replaceWith(a);
+    };
+
+    const openWidget = () => window.$chatwoot?.toggle('open');
+    const closeWidget = () => window.$chatwoot?.toggle('close');
+
+    /**
+     * El estado real (abierto/cerrado) vive en el DOM del widget: Chatwoot
+     * añade la clase `woot--hide` al cerrarse (también desde su propia X,
+     * que no emite ningún evento). Observarla evita desincronizarnos.
+     */
+    const syncFromHolder = (holder: Element) => {
+      widgetOpen = !holder.classList.contains('woot--hide');
+      label.textContent = widgetOpen ? cfg.launcherClose : cfg.launcher;
+      setExpanded(widgetOpen);
+      // En móvil el widget ocupa la pantalla: el lanzador se aparta mientras tanto.
+      document.body.classList.toggle('cgx-chat-open', widgetOpen);
+    };
+    const watchHolder = () => {
+      const holder = document.querySelector('.woot-widget-holder');
+      if (!holder) return;
+      syncFromHolder(holder);
+      new MutationObserver(() => syncFromHolder(holder)).observe(holder, {
+        attributes: true,
+        attributeFilter: ['class'],
+      });
+    };
+
+    /** Carga única y diferida del SDK; nada de esto ocurre sin consentimiento. */
+    const loadSdk = () => {
+      sdk = 'loading';
+      label.textContent = cfg.loading;
+      launcher.setAttribute('aria-busy', 'true');
+
+      window.chatwootSettings = {
+        hideMessageBubble: true, // la burbuja nativa nunca se muestra
+        position: 'right',
+        locale: cfg.locale,
+        type: 'standard',
+        darkMode: 'light', // la web es clara: el widget no sigue el tema del sistema
+        widgetStyle: 'standard',
+        showPopoutButton: false,
+        showUnreadMessagesDialog: false,
+        welcomeTitle: cfg.welcomeTitle,
+        welcomeDescription: cfg.welcomeDescription,
+        unavailableMessage: cfg.unavailableMessage,
+      };
+
+      const timeout = window.setTimeout(() => {
+        if (sdk !== 'ready') degrade();
+      }, cfg.loadTimeoutMs);
+
+      window.addEventListener('chatwoot:ready', () => {
+        window.clearTimeout(timeout);
+        if ((sdk as string) === 'failed') return;
+        sdk = 'ready';
+        hadSdkSession = true;
+        launcher.removeAttribute('aria-busy');
+        window.$chatwoot?.setLocale(cfg.locale);
+        // Contexto mínimo para el bot: página e idioma. Sin datos personales.
+        window.$chatwoot?.setCustomAttributes({
+          pagina: window.location.pathname,
+          idioma: cfg.locale,
+        });
+        openWidget();
+        watchHolder();
+      });
+      window.addEventListener('chatwoot:error', () => {
+        window.clearTimeout(timeout);
+        degrade();
+      });
+
+      const s = document.createElement('script');
+      s.src = `${cfg.baseUrl}/packs/js/sdk.js`;
+      s.defer = true;
+      s.onload = () => window.chatwootSDK?.run({ websiteToken: cfg.websiteToken, baseUrl: cfg.baseUrl });
+      s.onerror = () => {
+        window.clearTimeout(timeout);
+        degrade();
+      };
+      document.body.appendChild(s);
+    };
+
+    launcher.addEventListener('click', () => {
+      if (sdk === 'loading') return;
+      if (!chatAllowed()) {
+        card.hidden ? showCard() : hideCard(true);
+        return;
+      }
+      hideCard();
+      if (sdk === 'none') loadSdk();
+      else if (sdk === 'ready') (widgetOpen ? closeWidget : openWidget)();
+    });
+
+    accept.addEventListener('click', () => {
+      saveConsent(true); // emite CONSENT_EVENT: el banner de cookies también se cierra
+      hideCard();
+      loadSdk();
+    });
+
+    // Revocación desde el banner ("Solo lo necesario") con el SDK ya cargado:
+    // recargar es la única forma limpia de descargarlo y borrar su sesión local.
+    document.addEventListener(CONSENT_EVENT, (e) => {
+      const consent = (e as CustomEvent<Consent>).detail;
+      if (!consent.chat && hadSdkSession) {
+        window.$chatwoot?.reset();
+        window.location.reload();
+      }
+    });
+
+    // Accesibilidad de la tarjeta: Escape cierra y devuelve el foco; clic fuera cierra.
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !card.hidden) hideCard(true);
+    });
+    document.addEventListener('click', (e) => {
+      if (!card.hidden && !card.contains(e.target as Node) && e.target !== launcher && !launcher.contains(e.target as Node)) {
+        hideCard();
+      }
+    });
+  }
+</script>
+
+<style>
+  .cgx-launcher {
+    position: fixed;
+    right: 22px;
+    bottom: 22px;
+    z-index: 195; /* sobre el panel del widget (190), bajo el banner (200) */
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    font-family: var(--head);
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 1.1;
+    color: #fff;
+    background: var(--teal);
+    border: 0;
+    border-radius: var(--radius-pill);
+    padding: 13px 22px;
+    box-shadow: var(--shadow-lg);
+    cursor: pointer;
+    transition:
+      background var(--dur-base) var(--ease-out),
+      transform var(--dur-base) var(--ease-out),
+      box-shadow var(--dur-base) var(--ease-out);
+  }
+  .cgx-launcher:hover {
+    background: var(--teal-deep);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  .cgx-launcher svg {
+    flex-shrink: 0;
+  }
+
+  .cgx-consent-card {
+    position: fixed;
+    right: 22px;
+    bottom: 84px;
+    z-index: 150;
+    width: min(340px, calc(100vw - 44px));
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    padding: 22px;
+  }
+  .cgx-consent-card[hidden] {
+    display: none;
+  }
+  .cc-title {
+    font-family: var(--head);
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--tx);
+    margin-bottom: 8px;
+  }
+  .cc-body {
+    font-size: 14px;
+    color: var(--tx-2);
+    line-height: 1.55;
+    margin-bottom: 16px;
+  }
+  .cc-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .cc-accept {
+    padding: 11px 18px;
+    font-size: 14px;
+  }
+  .cc-more {
+    font-family: var(--head);
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--teal-deep);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cgx-launcher {
+      transition: none;
+    }
+    .cgx-launcher:hover {
+      transform: none;
+    }
+  }
+  @media (max-width: 760px) {
+    .cgx-launcher {
+      right: 16px;
+      bottom: 16px;
+    }
+    .cgx-consent-card {
+      right: 16px;
+      bottom: 76px;
+    }
+  }
+</style>
+
+<style is:global>
+  /* El widget de Chatwoot inyecta su propio <style> con `!important` y
+     z-index 2147483000: para ganar la cascada hacen falta selectores de
+     mayor especificidad (doble clase), no basta con .woot-widget-holder.
+     Capas: widget 190 · lanzador 195 · banner cookies 200 · skip-link 300. */
+  .woot-widget-holder.woot-elements--right,
+  .woot-widget-holder.woot-elements--left {
+    z-index: 190 !important;
+    box-shadow: var(--shadow-lg) !important;
+  }
+  /* Separado del borde inferior para que el lanzador (que hace de cierre)
+     quede visible bajo el panel. */
+  .woot-widget-holder.woot-widget--without-bubble {
+    bottom: 84px !important;
+  }
+  .woot--bubble-holder {
+    display: none !important; /* burbuja nativa fuera, por si acaso */
+  }
+  @media (max-width: 667px) {
+    /* En móvil el widget ocupa la pantalla completa… */
+    .woot-widget-holder.woot-widget--without-bubble {
+      bottom: 0 !important;
+    }
+    /* …y el lanzador se retira mientras esté abierto (body.cgx-chat-open
+       lo gestiona Chat.astro observando el estado real del widget). */
+    body.cgx-chat-open .cgx-launcher {
+      display: none;
+    }
+  }
+</style>

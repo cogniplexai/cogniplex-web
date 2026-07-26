@@ -52,8 +52,8 @@ const cols =
 
 const legal =
   locale === 'en'
-    ? { aviso: 'Legal notice', privacidad: 'Privacy', cookies: 'Cookies', aria: 'Legal', home: 'home' }
-    : { aviso: 'Aviso legal', privacidad: 'Privacidad', cookies: 'Cookies', aria: 'Legal', home: 'inicio' };
+    ? { aviso: 'Legal notice', privacidad: 'Privacy', cookies: 'Cookies', consent: 'Manage consent', aria: 'Legal', home: 'home' }
+    : { aviso: 'Aviso legal', privacidad: 'Privacidad', cookies: 'Cookies', consent: 'Gestionar consentimiento', aria: 'Legal', home: 'inicio' };
 ---
 
 <footer class="dark">
@@ -91,11 +91,21 @@ const legal =
         <a href={`${prefix}/aviso-legal`}>{legal.aviso}</a>
         <a href={`${prefix}/privacidad`}>{legal.privacidad}</a>
         <a href={`${prefix}/cookies`}>{legal.cookies}</a>
+        <button id="cgx-manage-consent" class="ft-consent">{legal.consent}</button>
         <a href={`mailto:${brand.email}`}>{brand.email}</a>
       </nav>
     </div>
   </div>
 </footer>
+
+<script>
+  import { MANAGE_EVENT } from '@/scripts/consent';
+  document.getElementById('cgx-manage-consent')?.addEventListener('click', () => {
+    document.dispatchEvent(new CustomEvent(MANAGE_EVENT));
+    // El banner es fijo al fondo de la ventana: subir el foco visual hasta él.
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  });
+</script>
 
 <style>
   footer {
@@ -165,6 +175,19 @@ const legal =
     transition: color 0.2s;
   }
   .ft-legal a:hover {
+    color: var(--teal-2);
+  }
+  /* Botón con aspecto de enlace legal: reabre el banner de consentimiento. */
+  .ft-consent {
+    background: none;
+    border: 0;
+    padding: 0;
+    font-family: var(--sans);
+    font-size: 13.5px;
+    color: var(--on-navy-2);
+    transition: color 0.2s;
+  }
+  .ft-consent:hover {
     color: var(--teal-2);
   }
   @media (max-width: 820px) {

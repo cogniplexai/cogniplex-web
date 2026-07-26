@@ -5,6 +5,7 @@ import { asLocale, localizePath } from '@/i18n';
 import Header from '@/components/Header.astro';
 import Footer from '@/components/Footer.astro';
 import CookieBanner from '@/components/CookieBanner.astro';
+import Chat from '@/components/Chat.astro';
 
 interface Props {
   title?: string;
@@ -79,6 +80,7 @@ const skipLabel = locale === 'en' ? 'Skip to content' : 'Saltar al contenido';
     </main>
     <Footer />
     <CookieBanner />
+    <Chat />
 
     <script>
       // Cabecera: sólida al hacer scroll.

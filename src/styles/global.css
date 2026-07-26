@@ -3,6 +3,18 @@
    Tokens de marca + reset + utilidades.
    Paleta: teal (firma) · navy (profundidad) · granate (acento puntual).
 ═══════════════════════════════════════════════════════ */
+/* Respaldo métrico de Inter: Arial ajustada a las métricas de Inter para que
+   el intercambio de fuente no reencaje el texto (elimina el layout shift del
+   banner fijo inferior y de cualquier texto largo mientras carga la web font). */
+@font-face {
+  font-family: 'Inter Fallback';
+  src: local('Arial');
+  size-adjust: 107.4%;
+  ascent-override: 90.2%;
+  descent-override: 22.5%;
+  line-gap-override: 0%;
+}
+
 :root {
   /* — Superficies claras — */
   --bg:        #f4f6f7;   /* fondo suave de página */
@@ -39,12 +51,25 @@
 
   /* — Tipografía — */
   --head:  'Manrope', system-ui, sans-serif;
-  --sans:  'Inter', system-ui, sans-serif;
+  --sans:  'Inter', 'Inter Fallback', system-ui, sans-serif;
 
   /* — Layout — */
   --nav-h: 74px;
   --max-w: 1120px;
   --radius: 10px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+
+  /* — Sombras tintadas de navy (Design System) — */
+  --shadow-sm: 0 2px 8px rgba(11,31,51,.09);
+  --shadow-md: 0 8px 24px rgba(11,31,51,.11);
+  --shadow-lg: 0 18px 48px rgba(11,31,51,.16);
+
+  /* — Movimiento (Design System) — */
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --dur-fast: 160ms;
+  --dur-base: 240ms;
+  --dur-slow: 420ms;
 }
 
 /* ═══════════════ RESET ═══════════════ */

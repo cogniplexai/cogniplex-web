@@ -1,39 +1,80 @@
 ---
-// Banner de cookies mínimo: solo almacenamiento técnico + fuentes de terceros.
+/**
+ * Banner de consentimiento por categorías:
+ *  - Necesarias (siempre): recordar esta decisión (localStorage).
+ *  - Chat de atención (opcional): widget de Chatwoot auto-hospedado.
+ * "Aceptar todo" activa también el chat; "Solo lo necesario" lo deja apagado
+ * (el lanzador del chat podrá pedirlo en contexto). El enlace "Gestionar
+ * consentimiento" del pie reabre este banner (evento MANAGE_EVENT).
+ */
 import { asLocale } from '@/i18n';
 
 const locale = asLocale(Astro.currentLocale);
 const copy =
   locale === 'en'
     ? {
-        before: 'We use necessary technical storage and third-party services (such as Google Fonts). We do not use tracking or advertising cookies. More information in the ',
+        before:
+          'We use necessary technical storage and, only if you accept it, the support chat (your conversation is stored on our EU server). We load fonts from Google Fonts. No tracking or advertising cookies. More information in the ',
         link: 'Cookie policy',
         href: '/en/cookies',
-        accept: 'Accept',
+        acceptAll: 'Accept all',
+        onlyNecessary: 'Only necessary',
       }
     : {
-        before: 'Usamos almacenamiento técnico necesario y servicios de terceros (como Google Fonts). No usamos cookies de seguimiento ni de publicidad. Más información en la ',
+        before:
+          'Usamos almacenamiento técnico necesario y, solo si lo aceptas, el chat de atención (tu conversación se guarda en nuestro servidor en la UE). Cargamos tipografías desde Google Fonts. Sin cookies de seguimiento ni de publicidad. Más información en la ',
         link: 'Política de cookies',
         href: '/cookies',
-        accept: 'Aceptar',
+        acceptAll: 'Aceptar todo',
+        onlyNecessary: 'Solo lo necesario',
       };
 ---
-<div id="cookie-banner" class="cookie-banner" hidden>
+
+<div id="cookie-banner" class="cookie-banner">
   <div class="wrap cb-in">
     <p>
       {copy.before}<a href={copy.href}>{copy.link}</a>.
     </p>
-    <button id="cookie-accept" class="btn btn-primary">{copy.accept}</button>
+    <div class="cb-actions">
+      <button id="cookie-necessary" class="btn cb-ghost">{copy.onlyNecessary}</button>
+      <button id="cookie-accept-all" class="btn btn-primary">{copy.acceptAll}</button>
+    </div>
   </div>
 </div>
 
+<script is:inline>
+  // Síncrono y antes del primer pintado: si ya hay decisión, el banner no
+  // llega a pintarse. Visible por defecto en el HTML para no aparecer tarde
+  // (aparecer tras el primer pintado computaba como layout shift en móvil).
+  try {
+    if (localStorage.getItem('cgx-consent') || localStorage.getItem('cgx-cookies')) {
+      document.getElementById('cookie-banner').hidden = true;
+    }
+  } catch (e) {
+    /* almacenamiento bloqueado: el banner queda visible, que es lo seguro */
+  }
+</script>
+
 <script>
+  import { saveConsent, CONSENT_EVENT, MANAGE_EVENT } from '@/scripts/consent';
+
   const banner = document.getElementById('cookie-banner');
-  if (banner && !localStorage.getItem('cgx-cookies')) banner.hidden = false;
-  document.getElementById('cookie-accept')?.addEventListener('click', () => {
-    localStorage.setItem('cgx-cookies', '1');
-    if (banner) banner.hidden = true;
+  const show = () => banner && (banner.hidden = false);
+  const hide = () => banner && (banner.hidden = true);
+
+  document.getElementById('cookie-accept-all')?.addEventListener('click', () => {
+    saveConsent(true);
+    hide();
   });
+  document.getElementById('cookie-necessary')?.addEventListener('click', () => {
+    saveConsent(false);
+    hide();
+  });
+
+  // "Gestionar consentimiento" (footer): reabrir el banner para cambiar de opinión.
+  document.addEventListener(MANAGE_EVENT, show);
+  // Si la decisión llega desde otro sitio (tarjeta del chat), el banner sobra.
+  document.addEventListener(CONSENT_EVENT, hide);
 </script>
 
 <style>
@@ -59,15 +100,30 @@ const copy =
     font-size: 14px;
     color: var(--on-navy-2);
     margin: 0;
-    max-width: 760px;
+    max-width: 680px;
     line-height: 1.5;
   }
   .cookie-banner a {
     color: var(--teal-2);
   }
-  .cookie-banner .btn {
+  .cb-actions {
+    display: flex;
+    gap: 10px;
     flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+  .cookie-banner .btn {
     padding: 11px 22px;
+  }
+  .cb-ghost {
+    background: none;
+    color: var(--on-navy);
+    border: 1px solid var(--navy-line);
+    transition: border-color var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out);
+  }
+  .cb-ghost:hover {
+    border-color: var(--teal-2);
+    color: var(--teal-2);
   }
   .cookie-banner[hidden] {
     display: none;
