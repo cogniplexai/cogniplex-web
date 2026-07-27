@@ -15,25 +15,37 @@ const brand = brandFor('en');
   <h2>2. What we use on this site</h2>
   <ul>
     <li>
-      <strong>Necessary technical storage:</strong> we remember locally that you have accepted this
-      notice (<code>localStorage</code>), so we do not show it to you again.
+      <strong>Necessary technical storage:</strong> we store your decision about this notice in
+      <code>localStorage</code> under the key <code>cgx-consent</code> (<code>cgx-cookies</code>
+      for visits prior to July 2026), so we do not ask you again. It is kept until you delete it
+      or change your choice.
+    </li>
+    <li>
+      <strong>Support chat (only if you accept it):</strong> when you enable the chat, our
+      messaging system is loaded from our own server (<code>chatwoot.cogniplex.es</code>) and the
+      <code>cw_conversation</code> cookie is created on this domain: a session identifier that
+      keeps your conversation across visits, expiring after 180 days. Without your consent nothing
+      is loaded and no cookie is created. You can revoke it at any time (see section 3); doing so
+      removes the chat's local session.
     </li>
     <li>
       <strong>Third-party fonts:</strong> we load typefaces from Google Fonts, which involves a
-      connection to Google servers. We do not install analytics or advertising cookies.
+      connection to Google servers. It does not install cookies.
     </li>
   </ul>
 
-  <h2>3. How to manage them</h2>
+  <h2>3. Managing your consent</h2>
   <p>
-    You can clear local storage and block cookies from your browser settings. The site will
-    continue to work normally.
+    You can change your decision at any time from the "Manage consent" link in the footer:
+    choosing "Only necessary" disables the chat and deletes its local session. You can also clear
+    local storage and cookies from your browser settings; the site will keep working normally.
   </p>
 
   <h2>4. Contact</h2>
   <p>
-    For any questions about this policy, write to us at
-    <a href={`mailto:${brand.email}`}>{brand.email}</a>.
+    For any questions about this policy, write to
+    <a href={`mailto:${brand.email}`}>{brand.email}</a>. How chat data is processed is described
+    in the <a href="/en/privacidad">Privacy policy</a>.
   </p>
 
 </LegalLayout>
