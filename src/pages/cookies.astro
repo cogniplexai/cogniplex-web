@@ -13,25 +13,38 @@ import { brand } from '@/config/brand';
   <h2>2. Qué usamos en este sitio</h2>
   <ul>
     <li>
-      <strong>Almacenamiento técnico necesario:</strong> recordamos localmente que has aceptado este
-      aviso (<code>localStorage</code>), para no volver a mostrártelo.
+      <strong>Almacenamiento técnico necesario:</strong> guardamos tu decisión sobre este aviso en
+      <code>localStorage</code> con la clave <code>cgx-consent</code> (en visitas anteriores a julio
+      de 2026, <code>cgx-cookies</code>), para no volver a preguntarte. Se conserva hasta que la
+      borres o cambies tu elección.
+    </li>
+    <li>
+      <strong>Chat de atención (solo si lo aceptas):</strong> al activar el chat se carga nuestro
+      sistema de mensajería, alojado en un servidor propio (<code>chatwoot.cogniplex.es</code>), y
+      se crea la cookie <code>cw_conversation</code> en este dominio: un identificador de sesión
+      que mantiene tu conversación entre visitas, con una caducidad de 180 días. Sin tu
+      consentimiento no se carga nada ni se crea ninguna cookie. Puedes revocarlo en cualquier
+      momento (ver punto 3); al hacerlo, la sesión local del chat se elimina.
     </li>
     <li>
       <strong>Fuentes de terceros:</strong> cargamos tipografías desde Google Fonts, lo que implica
-      una conexión a servidores de Google. No instalamos cookies de análisis ni publicitarias.
+      una conexión a servidores de Google. No instala cookies.
     </li>
   </ul>
 
-  <h2>3. Cómo gestionarlas</h2>
+  <h2>3. Cómo gestionar tu consentimiento</h2>
   <p>
-    Puedes borrar el almacenamiento local y bloquear cookies desde la configuración de tu navegador.
-    El sitio seguirá funcionando con normalidad.
+    Puedes cambiar tu decisión en cualquier momento desde el enlace «Gestionar consentimiento» del
+    pie de página: al elegir «Solo lo necesario», el chat se desactiva y su sesión local se borra.
+    También puedes eliminar el almacenamiento local y las cookies desde la configuración de tu
+    navegador; el sitio seguirá funcionando con normalidad.
   </p>
 
   <h2>4. Contacto</h2>
   <p>
     Para cualquier duda sobre esta política, escríbenos a
-    <a href={`mailto:${brand.email}`}>{brand.email}</a>.
+    <a href={`mailto:${brand.email}`}>{brand.email}</a>. El tratamiento de los datos del chat se
+    describe en la <a href="/privacidad">Política de privacidad</a>.
   </p>
 
 </LegalLayout>
