@@ -1,0 +1,208 @@
+---
+/**
+ * Uso interno: genera enlaces de reserva de un solo uso desde el navegador.
+ * Pide la clave interna una vez (se guarda en localStorage de ESTE navegador);
+ * el microservicio la valida en cada emisión y aplica límite de peticiones.
+ */
+import { agendaApi } from '@/config/agenda';
+---
+
+<div class="gn" id="gn" data-api={agendaApi}>
+  <!-- Paso 1: clave interna (solo la primera vez en cada navegador) -->
+  <form class="gn-form" id="gn-clave-form">
+    <div class="f-field">
+      <label class="f-label" for="gn-clave">Clave interna</label>
+      <input class="f-input" type="password" id="gn-clave" autocomplete="current-password"
+        placeholder="La clave AGENDA_CLAVE_INTERNA del servidor" required />
+      <p class="gn-nota">Se guarda solo en este navegador. Si la cambias en el servidor, aquí se volverá a pedir.</p>
+    </div>
+    <button type="submit" class="btn btn-primary">Continuar</button>
+  </form>
+
+  <!-- Paso 2: datos del invitado -->
+  <form class="gn-form" id="gn-datos-form" hidden>
+    <div class="f-row">
+      <div class="f-field">
+        <label class="f-label" for="gn-nombre">Nombre (opcional, se prellena)</label>
+        <input class="f-input" type="text" id="gn-nombre" placeholder="Ana García" />
+      </div>
+      <div class="f-field">
+        <label class="f-label" for="gn-email">Email (opcional, se prellena)</label>
+        <input class="f-input" type="email" id="gn-email" placeholder="ana@empresa.com" />
+      </div>
+    </div>
+    <div class="f-row">
+      <div class="f-field">
+        <label class="f-label" for="gn-empresa">Empresa (opcional)</label>
+        <input class="f-input" type="text" id="gn-empresa" placeholder="ACME SL" />
+      </div>
+      <div class="f-field">
+        <label class="f-label" for="gn-idioma">Idioma del enlace</label>
+        <select class="f-input" id="gn-idioma">
+          <option value="es" selected>Español</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+    </div>
+    <div class="f-field gn-caducidad">
+      <label class="f-label" for="gn-dias">Caducidad (días)</label>
+      <input class="f-input" type="number" id="gn-dias" value="14" min="1" max="90" />
+    </div>
+    <div class="gn-acciones">
+      <button type="submit" class="btn btn-primary" id="gn-generar">Generar enlace</button>
+      <button type="button" class="btn btn-light-ghost" id="gn-olvidar">Cambiar clave</button>
+    </div>
+    <p class="gn-error" id="gn-error" role="alert" hidden></p>
+  </form>
+
+  <!-- Resultado -->
+  <div class="gn-resultado" id="gn-resultado" hidden>
+    <span class="gn-resultado-l">Enlace de un solo uso</span>
+    <code id="gn-url"></code>
+    <p class="gn-nota" id="gn-caduca"></p>
+    <div class="gn-acciones">
+      <button type="button" class="btn btn-primary" id="gn-copiar">Copiar enlace</button>
+      <a class="btn btn-light-ghost" id="gn-correo" href="#">Abrir en el correo</a>
+      <button type="button" class="btn btn-light-ghost" id="gn-otro">Generar otro</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const raiz = document.getElementById('gn') as HTMLElement;
+  const api = raiz.dataset.api!;
+  const ALMACEN = 'cgx-agenda-clave';
+  const $ = (id: string) => document.getElementById(id) as HTMLElement;
+
+  const formClave = $('gn-clave-form') as unknown as HTMLFormElement;
+  const formDatos = $('gn-datos-form') as unknown as HTMLFormElement;
+
+  function vista() {
+    const hayClave = !!localStorage.getItem(ALMACEN);
+    formClave.toggleAttribute('hidden', hayClave);
+    formDatos.toggleAttribute('hidden', !hayClave);
+    $('gn-resultado').setAttribute('hidden', '');
+  }
+  vista();
+
+  formClave.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const clave = (document.getElementById('gn-clave') as HTMLInputElement).value.trim();
+    if (clave) {
+      localStorage.setItem(ALMACEN, clave);
+      vista();
+    }
+  });
+
+  $('gn-olvidar').addEventListener('click', () => {
+    localStorage.removeItem(ALMACEN);
+    vista();
+  });
+
+  function fallo(texto: string) {
+    const el = $('gn-error');
+    el.textContent = texto;
+    el.removeAttribute('hidden');
+  }
+
+  formDatos.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    $('gn-error').setAttribute('hidden', '');
+    const btn = $('gn-generar') as HTMLButtonElement;
+    btn.disabled = true;
+    const valor = (id: string) => (document.getElementById(id) as HTMLInputElement).value.trim();
+    const cuerpo: Record<string, unknown> = {
+      idioma: (document.getElementById('gn-idioma') as HTMLSelectElement).value,
+      origen: 'manual',
+      caducidad_dias: parseInt(valor('gn-dias') || '14', 10),
+    };
+    if (valor('gn-nombre')) cuerpo.nombre = valor('gn-nombre');
+    if (valor('gn-email')) cuerpo.email = valor('gn-email');
+    if (valor('gn-empresa')) cuerpo.empresa = valor('gn-empresa');
+    try {
+      const r = await fetch(`${api}/tokens`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Clave-Interna': localStorage.getItem(ALMACEN) || '',
+        },
+        body: JSON.stringify(cuerpo),
+      });
+      if (r.status === 401) {
+        localStorage.removeItem(ALMACEN);
+        vista();
+        return;
+      }
+      if (r.status === 429) return fallo('Demasiadas peticiones seguidas; espera unos minutos.');
+      if (!r.ok) throw new Error();
+      const datos = await r.json();
+      $('gn-url').textContent = datos.url;
+      $('gn-caduca').textContent = `Un solo uso · caduca el ${datos.caduca.slice(0, 10)}`;
+      const asunto = encodeURIComponent('Reserva tu sesión con Cogniplex');
+      const cuerpoCorreo = encodeURIComponent(
+        `Hola${cuerpo.nombre ? ' ' + String(cuerpo.nombre).split(' ')[0] : ''}:\n\n` +
+          `Puedes reservar tu sesión de 30 minutos aquí, eligiendo el día y la hora que mejor te vengan:\n\n${datos.url}\n\n` +
+          `El enlace es personal y de un solo uso.\n\nUn saludo,\nJosep · Cogniplex`,
+      );
+      ($('gn-correo') as HTMLAnchorElement).href =
+        `mailto:${cuerpo.email || ''}?subject=${asunto}&body=${cuerpoCorreo}`;
+      formDatos.setAttribute('hidden', '');
+      $('gn-resultado').removeAttribute('hidden');
+    } catch {
+      fallo('No se pudo generar el enlace. Revisa la conexión e inténtalo de nuevo.');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  $('gn-copiar').addEventListener('click', async () => {
+    await navigator.clipboard.writeText($('gn-url').textContent || '');
+    $('gn-copiar').textContent = 'Copiado ✓';
+    setTimeout(() => ($('gn-copiar').textContent = 'Copiar enlace'), 1600);
+  });
+
+  $('gn-otro').addEventListener('click', vista);
+</script>
+
+<style is:global>
+  .gn { max-width: 640px; }
+  .gn [hidden] { display: none !important; }
+  .gn .gn-form { display: flex; flex-direction: column; gap: 16px; }
+  .gn .gn-form > .btn { align-self: flex-start; }
+  .gn .f-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .gn .f-field { display: flex; flex-direction: column; gap: 7px; }
+  .gn .f-label { font-size: 14px; font-weight: 500; color: var(--on-navy-2); }
+  .gn .f-input {
+    background: var(--navy-2); border: 1px solid var(--navy-line); border-radius: 8px;
+    color: #fff; padding: 13px 15px; font-family: var(--sans); font-size: 15px;
+    outline: none; transition: border-color 0.2s; width: 100%;
+  }
+  .gn .f-input::placeholder { color: #6b7a8c; }
+  .gn .f-input:focus { border-color: var(--teal-2); }
+  .gn select.f-input { appearance: none; }
+  .gn .gn-caducidad { max-width: 180px; }
+  .gn .gn-nota { font-size: 13px; color: var(--on-navy-2); }
+  .gn .gn-acciones { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 4px; }
+  .gn button.btn { background: none; }
+  .gn button.btn-primary { background: var(--teal); }
+  .gn button.btn-primary:hover { background: var(--teal-deep); }
+  .gn .gn-error {
+    font-size: 15px; padding: 14px 16px; border-radius: 8px;
+    background: rgba(255, 90, 90, 0.12); color: #ffd2d2; border: 1px solid rgba(255, 90, 90, 0.4);
+  }
+  .gn .gn-resultado {
+    background: rgba(92, 198, 198, 0.1); border: 1px solid rgba(92, 198, 198, 0.35);
+    border-radius: var(--radius); padding: 22px 24px;
+  }
+  .gn .gn-resultado-l {
+    display: block; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase;
+    font-weight: 600; color: var(--teal-2); margin-bottom: 8px;
+  }
+  .gn .gn-resultado code {
+    display: block; font-size: 14px; color: #fff; word-break: break-all;
+    background: var(--navy-2); border: 1px solid var(--navy-line); border-radius: 8px;
+    padding: 12px 14px; margin-bottom: 10px;
+  }
+  .gn .gn-resultado .gn-acciones { margin-top: 14px; }
+  @media (max-width: 560px) { .gn .f-row { grid-template-columns: 1fr; } }
+</style>
