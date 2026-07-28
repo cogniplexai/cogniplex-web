@@ -16,7 +16,8 @@ import { agendaApi } from '@/config/agenda';
         placeholder="La clave AGENDA_CLAVE_INTERNA del servidor" required />
       <p class="gn-nota">Se guarda solo en este navegador. Si la cambias en el servidor, aquí se volverá a pedir.</p>
     </div>
-    <button type="submit" class="btn btn-primary">Continuar</button>
+    <button type="submit" class="btn btn-primary" id="gn-continuar">Continuar</button>
+    <p class="gn-error" id="gn-clave-error" role="alert" hidden></p>
   </form>
 
   <!-- Paso 2: datos del invitado -->
@@ -77,20 +78,52 @@ import { agendaApi } from '@/config/agenda';
   const formClave = $('gn-clave-form') as unknown as HTMLFormElement;
   const formDatos = $('gn-datos-form') as unknown as HTMLFormElement;
 
-  function vista() {
+  function vista(aviso?: string) {
     const hayClave = !!localStorage.getItem(ALMACEN);
     formClave.toggleAttribute('hidden', hayClave);
     formDatos.toggleAttribute('hidden', !hayClave);
     $('gn-resultado').setAttribute('hidden', '');
+    const error = $('gn-clave-error');
+    error.textContent = aviso || '';
+    error.toggleAttribute('hidden', !aviso);
+    if (!hayClave) (document.getElementById('gn-clave') as HTMLInputElement).focus();
   }
   vista();
 
-  formClave.addEventListener('submit', (e) => {
+  /** La clave se comprueba contra el servidor: aquí no se da nada por bueno. */
+  async function validar(clave: string): Promise<boolean> {
+    const r = await fetch(`${api}/clave`, { method: 'POST', headers: { 'X-Clave-Interna': clave } });
+    if (r.status === 429) throw new Error('429');
+    return r.ok;
+  }
+
+  formClave.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const clave = (document.getElementById('gn-clave') as HTMLInputElement).value.trim();
-    if (clave) {
-      localStorage.setItem(ALMACEN, clave);
-      vista();
+    const campo = document.getElementById('gn-clave') as HTMLInputElement;
+    const clave = campo.value.trim();
+    if (!clave) return;
+    const btn = $('gn-continuar') as HTMLButtonElement;
+    const original = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Comprobando…';
+    try {
+      if (await validar(clave)) {
+        localStorage.setItem(ALMACEN, clave);
+        campo.value = '';
+        vista();
+      } else {
+        campo.value = '';
+        vista('Clave incorrecta. Revísala e inténtalo de nuevo.');
+      }
+    } catch (err) {
+      vista(
+        (err as Error).message === '429'
+          ? 'Demasiados intentos seguidos; espera unos minutos.'
+          : 'No se pudo comprobar la clave. Revisa la conexión.',
+      );
+    } finally {
+      btn.disabled = false;
+      btn.textContent = original;
     }
   });
 
@@ -129,8 +162,9 @@ import { agendaApi } from '@/config/agenda';
         body: JSON.stringify(cuerpo),
       });
       if (r.status === 401) {
+        // La clave ha dejado de ser válida (la han cambiado en el servidor).
         localStorage.removeItem(ALMACEN);
-        vista();
+        vista('La clave ya no es válida. Vuelve a introducirla.');
         return;
       }
       if (r.status === 429) return fallo('Demasiadas peticiones seguidas; espera unos minutos.');
@@ -148,6 +182,8 @@ import { agendaApi } from '@/config/agenda';
         `mailto:${cuerpo.email || ''}?subject=${asunto}&body=${cuerpoCorreo}`;
       formDatos.setAttribute('hidden', '');
       $('gn-resultado').removeAttribute('hidden');
+      window.scrollTo({ top: 0 });
+      $('gn-copiar').focus({ preventScroll: true });
     } catch {
       fallo('No se pudo generar el enlace. Revisa la conexión e inténtalo de nuevo.');
     } finally {
