@@ -390,6 +390,7 @@ const t =
           email: fd.get('email'),
           empresa: fd.get('empresa') || null,
           mensaje: fd.get('mensaje') || null,
+          zona: zonaLocal, // para que el email muestre también la hora del cliente
         }),
       });
       if (r.ok) {

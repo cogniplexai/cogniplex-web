@@ -1,0 +1,32 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import GestionReserva from '@/components/GestionReserva.astro';
+---
+
+<BaseLayout
+  title="Manage your session"
+  description="Cancel or reschedule your Cogniplex session."
+  path="/sesion/gestion"
+  noindex
+>
+  <section class="block dark sesion-block">
+    <div class="wrap">
+      <div class="sesion-cab">
+        <p class="eyebrow">Initial session · 30 minutes</p>
+        <h1 class="sec-h">Manage your session</h1>
+      </div>
+      <GestionReserva />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .sesion-block {
+    min-height: calc(100vh - var(--nav-h));
+    border-top: none;
+  }
+  .sesion-cab {
+    max-width: 720px;
+    margin-bottom: 36px;
+  }
+</style>

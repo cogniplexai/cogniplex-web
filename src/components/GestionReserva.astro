@@ -1,0 +1,394 @@
+---
+/**
+ * Gestión de una reserva existente (cancelar o reprogramar) con el token
+ * derivado `?g=…` que llega en el email de confirmación. Ese token no sirve
+ * para crear citas nuevas: solo opera sobre su reserva.
+ */
+import { agendaApi } from '@/config/agenda';
+import { asLocale, localizePath } from '@/i18n';
+
+const locale = asLocale(Astro.currentLocale);
+const contactoHref = localizePath('/contacto', locale);
+
+const t =
+  locale === 'en'
+    ? {
+        cargando: 'Loading your session…',
+        invalidaT: 'This link is not valid',
+        invalidaP:
+          'The session may already be cancelled, or the link is incomplete. If you need help, write to us and we will sort it out.',
+        cta: 'Contact us',
+        redT: 'We could not load your session',
+        redP: 'Please check your connection and try again.',
+        reintentar: 'Try again',
+        tuSesion: 'Your session',
+        video: 'Video call',
+        reprogramar: 'Reschedule',
+        cancelar: 'Cancel session',
+        seguro: 'Are you sure?',
+        siCancelar: 'Yes, cancel it',
+        noVolver: 'No, keep it',
+        canceladaT: 'Session cancelled',
+        canceladaP:
+          'Your session has been cancelled and the slot is free again. If you want a new session, just ask us for a link.',
+        eligiendo: 'Pick a new time. Times shown in your time zone',
+        zonaMadrid: 'Reference: Europe/Madrid',
+        semAnt: 'Previous days',
+        semSig: 'More days',
+        sinFranjas: 'No slots available in this range. Try the following days.',
+        ocupada: 'That slot has just been taken. Please pick another time.',
+        movidaT: 'Session rescheduled',
+        movidaP: 'Done — this is your updated session. We have emailed you the new details.',
+        enMadrid: 'in Madrid',
+        volver: '← Back',
+      }
+    : {
+        cargando: 'Cargando tu sesión…',
+        invalidaT: 'Este enlace no es válido',
+        invalidaP:
+          'Puede que la sesión ya esté cancelada o que el enlace esté incompleto. Si necesitas ayuda, escríbenos y lo resolvemos.',
+        cta: 'Contactar',
+        redT: 'No hemos podido cargar tu sesión',
+        redP: 'Revisa tu conexión e inténtalo de nuevo.',
+        reintentar: 'Reintentar',
+        tuSesion: 'Tu sesión',
+        video: 'Videollamada',
+        reprogramar: 'Reprogramar',
+        cancelar: 'Cancelar la sesión',
+        seguro: '¿Seguro que quieres cancelarla?',
+        siCancelar: 'Sí, cancelar',
+        noVolver: 'No, mantenerla',
+        canceladaT: 'Sesión cancelada',
+        canceladaP:
+          'Tu sesión queda cancelada y la franja vuelve a estar libre. Si quieres una sesión nueva, pídenos un enlace.',
+        eligiendo: 'Elige una hora nueva. Horas mostradas en tu zona horaria',
+        zonaMadrid: 'Referencia: Europe/Madrid',
+        semAnt: 'Días anteriores',
+        semSig: 'Más días',
+        sinFranjas: 'No quedan huecos en estas fechas. Prueba los días siguientes.',
+        ocupada: 'Esa franja se acaba de ocupar. Elige otra hora.',
+        movidaT: 'Sesión reprogramada',
+        movidaP: 'Hecho: esta es tu sesión actualizada. Te hemos enviado los nuevos datos por email.',
+        enMadrid: 'en Madrid',
+        volver: '← Volver',
+      };
+---
+
+<div class="gr" id="gr" data-api={agendaApi} data-lang={locale} data-contacto={contactoHref} data-l10n={JSON.stringify(t)}>
+  <div class="gr-cargando" id="gr-cargando" role="status">
+    <span class="gr-spinner" aria-hidden="true"></span>
+    <span>{t.cargando}</span>
+  </div>
+
+  <div class="gr-caja" id="gr-alerta" hidden>
+    <h3 id="gr-alerta-t" tabindex="-1"></h3>
+    <p id="gr-alerta-p"></p>
+    <div class="gr-cta" id="gr-alerta-cta"></div>
+  </div>
+
+  <div id="gr-panel" hidden>
+    <div class="gr-resumen">
+      <span class="gr-resumen-l">{t.tuSesion}</span>
+      <strong id="gr-fecha"></strong>
+      <p class="gr-video"><span>{t.video}:</span> <a id="gr-video" href="#" target="_blank" rel="noopener"></a></p>
+    </div>
+    <div class="gr-acciones" id="gr-acciones">
+      <button type="button" class="btn btn-primary" id="gr-btn-repro">{t.reprogramar}</button>
+      <button type="button" class="btn btn-light-ghost" id="gr-btn-cancelar">{t.cancelar}</button>
+    </div>
+    <div class="gr-confirmar" id="gr-confirmar" hidden>
+      <p>{t.seguro}</p>
+      <div class="gr-acciones">
+        <button type="button" class="btn btn-light-ghost gr-peligro" id="gr-si">{t.siCancelar}</button>
+        <button type="button" class="btn btn-primary" id="gr-no">{t.noVolver}</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="gr-selector" hidden>
+    <button type="button" class="gr-volver" id="gr-volver">{t.volver}</button>
+    <div class="gr-tz" id="gr-tz"></div>
+    <div class="gr-nav">
+      <button type="button" class="gr-nav-btn" id="gr-ant" aria-label={t.semAnt}>‹</button>
+      <span class="gr-rango" id="gr-rango" aria-live="polite"></span>
+      <button type="button" class="gr-nav-btn" id="gr-sig" aria-label={t.semSig}>›</button>
+    </div>
+    <div class="gr-dias" id="gr-dias"></div>
+    <div class="gr-franjas" id="gr-franjas" aria-live="polite"></div>
+  </div>
+
+  <div class="gr-caja" id="gr-fin" hidden>
+    <h3 id="gr-fin-t" tabindex="-1"></h3>
+    <p id="gr-fin-p"></p>
+    <p class="gr-fin-fecha" id="gr-fin-fecha"></p>
+  </div>
+</div>
+
+<script>
+  const raiz = document.getElementById('gr') as HTMLElement;
+  const api = raiz.dataset.api!;
+  const lang = raiz.dataset.lang === 'en' ? 'en' : 'es';
+  const t = JSON.parse(raiz.dataset.l10n!) as Record<string, string>;
+  const ZONA_MADRID = 'Europe/Madrid';
+  const zonaLocal = Intl.DateTimeFormat().resolvedOptions().timeZone || ZONA_MADRID;
+  const g = new URLSearchParams(location.search).get('g') || '';
+
+  const $ = (id: string) => document.getElementById(id) as HTMLElement;
+  const vistas = ['gr-cargando', 'gr-alerta', 'gr-panel', 'gr-selector', 'gr-fin'];
+  function ver(id: string, foco?: HTMLElement) {
+    vistas.forEach((v) => $(v).toggleAttribute('hidden', v !== id));
+    window.scrollTo({ top: 0 });
+    foco?.focus({ preventScroll: true });
+  }
+
+  const fmtMadrid = new Intl.DateTimeFormat('en-CA', {
+    timeZone: ZONA_MADRID, year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hour12: false,
+  });
+  function instanteDeMadrid(fecha: string, hora: string): Date {
+    const [y, m, d] = fecha.split('-').map(Number);
+    const [h, mi] = hora.split(':').map(Number);
+    for (const off of [120, 60]) {
+      const cand = new Date(Date.UTC(y, m - 1, d, h, mi) - off * 60000);
+      const p = fmtMadrid.format(cand);
+      if (p.startsWith(fecha) && p.endsWith(hora)) return cand;
+    }
+    return new Date(Date.UTC(y, m - 1, d, h, mi) - 120 * 60000);
+  }
+  const fmtHora = new Intl.DateTimeFormat(lang === 'en' ? 'en-GB' : 'es-ES', {
+    timeZone: zonaLocal, hour: '2-digit', minute: '2-digit', hour12: false,
+  });
+  const fmtDiaLargo = new Intl.DateTimeFormat(lang === 'en' ? 'en-GB' : 'es-ES', {
+    timeZone: zonaLocal, weekday: 'long', day: 'numeric', month: 'long',
+  });
+  const fmtDiaCorto = new Intl.DateTimeFormat(lang === 'en' ? 'en-GB' : 'es-ES', {
+    weekday: 'short', day: 'numeric',
+  });
+
+  function textoFecha(inicioMadrid: string): string {
+    const [fecha, hora] = inicioMadrid.split(' ');
+    const ini = instanteDeMadrid(fecha, hora);
+    const fin = new Date(ini.getTime() + 30 * 60000);
+    let s = `${fmtDiaLargo.format(ini)} · ${fmtHora.format(ini)}–${fmtHora.format(fin)}`;
+    if (zonaLocal !== ZONA_MADRID) s += ` (${hora} ${t.enMadrid})`;
+    return s;
+  }
+
+  function alerta(titulo: string, parrafo: string, reintento = false) {
+    $('gr-alerta-t').textContent = titulo;
+    $('gr-alerta-p').textContent = parrafo;
+    $('gr-alerta-cta').innerHTML = reintento
+      ? `<button type="button" class="btn btn-light-ghost" id="gr-reintentar">${t.reintentar}</button>`
+      : `<a class="btn btn-light-ghost" href="${raiz.dataset.contacto}">${t.cta}</a>`;
+    ver('gr-alerta', $('gr-alerta-t'));
+    document.getElementById('gr-reintentar')?.addEventListener('click', iniciar);
+  }
+
+  // ── Estado ──
+  let reserva: { inicio: string; videollamada: string } | null = null;
+  let franjas: Record<string, string[]> = {};
+  let maximo = '';
+  let pagina = 0;
+  let diaActivo = '';
+  const hoy = new Date().toISOString().slice(0, 10);
+  const sumarDias = (iso: string, n: number) => {
+    const d = new Date(iso + 'T12:00:00Z');
+    d.setUTCDate(d.getUTCDate() + n);
+    return d.toISOString().slice(0, 10);
+  };
+
+  async function iniciar() {
+    if (!g) return alerta(t.invalidaT, t.invalidaP);
+    ver('gr-cargando');
+    try {
+      const r = await fetch(`${api}/reserva?g=${encodeURIComponent(g)}`);
+      if (r.status === 404) return alerta(t.invalidaT, t.invalidaP);
+      if (!r.ok) throw new Error();
+      const datos = await r.json();
+      reserva = datos.reserva;
+      $('gr-fecha').textContent = textoFecha(reserva!.inicio);
+      const v = $('gr-video') as HTMLAnchorElement;
+      v.href = reserva!.videollamada || '#';
+      v.textContent = reserva!.videollamada || '—';
+      ver('gr-panel');
+    } catch {
+      alerta(t.redT, t.redP, true);
+    }
+  }
+
+  // ── Cancelar ──
+  $('gr-btn-cancelar').addEventListener('click', () => {
+    $('gr-acciones').setAttribute('hidden', '');
+    $('gr-confirmar').removeAttribute('hidden');
+  });
+  $('gr-no').addEventListener('click', () => {
+    $('gr-confirmar').setAttribute('hidden', '');
+    $('gr-acciones').removeAttribute('hidden');
+  });
+  $('gr-si').addEventListener('click', async () => {
+    ver('gr-cargando');
+    try {
+      const r = await fetch(`${api}/cancel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ g }),
+      });
+      if (!r.ok) throw new Error();
+      $('gr-fin-t').textContent = t.canceladaT;
+      $('gr-fin-p').textContent = t.canceladaP;
+      $('gr-fin-fecha').textContent = '';
+      ver('gr-fin', $('gr-fin-t'));
+    } catch {
+      alerta(t.redT, t.redP, true);
+    }
+  });
+
+  // ── Reprogramar ──
+  async function cargarRango(desde: string, hasta: string) {
+    const r = await fetch(`${api}/slots?g=${encodeURIComponent(g)}&desde=${desde}&hasta=${hasta}`);
+    if (!r.ok) throw new Error(String(r.status));
+    const datos = await r.json();
+    Object.assign(franjas, datos.franjas);
+    maximo = datos.maximo;
+  }
+  function diasDePagina(): string[] {
+    const inicio = sumarDias(hoy, pagina * 7);
+    return Array.from({ length: 7 }, (_, i) => sumarDias(inicio, i)).filter((f) => !maximo || f <= maximo);
+  }
+  function pintarSelector() {
+    const dias = diasDePagina();
+    $('gr-rango').textContent = `${fmtDiaCorto.format(new Date(dias[0] + 'T12:00:00'))} — ${fmtDiaCorto.format(new Date(dias[dias.length - 1] + 'T12:00:00'))}`;
+    ($('gr-ant') as HTMLButtonElement).disabled = pagina === 0;
+    ($('gr-sig') as HTMLButtonElement).disabled = !!maximo && sumarDias(hoy, (pagina + 1) * 7) > maximo;
+    if (!diaActivo || !dias.includes(diaActivo)) {
+      diaActivo = dias.find((d) => (franjas[d] || []).length > 0) || dias[0];
+    }
+    const contDias = $('gr-dias');
+    contDias.innerHTML = '';
+    dias.forEach((fecha) => {
+      const n = (franjas[fecha] || []).length;
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'gr-dia' + (fecha === diaActivo ? ' activo' : '');
+      b.disabled = n === 0;
+      b.innerHTML = `<span>${fmtDiaCorto.format(new Date(fecha + 'T12:00:00'))}</span><small>${n || '—'}</small>`;
+      b.addEventListener('click', () => { diaActivo = fecha; pintarSelector(); });
+      contDias.appendChild(b);
+    });
+    const lista = franjas[diaActivo] || [];
+    const contFranjas = $('gr-franjas');
+    contFranjas.innerHTML = lista.length ? '' : `<p class="gr-tz">${t.sinFranjas}</p>`;
+    lista.forEach((hora) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'gr-franja';
+      b.textContent = fmtHora.format(instanteDeMadrid(diaActivo, hora));
+      if (zonaLocal !== ZONA_MADRID) b.title = `${hora} ${t.enMadrid}`;
+      b.addEventListener('click', () => mover(diaActivo, hora));
+      contFranjas.appendChild(b);
+    });
+    ver('gr-selector');
+  }
+  async function abrirSelector() {
+    ver('gr-cargando');
+    $('gr-tz').textContent = zonaLocal === ZONA_MADRID ? `${t.eligiendo}: ${zonaLocal}` : `${t.eligiendo}: ${zonaLocal} · ${t.zonaMadrid}`;
+    try {
+      await cargarRango(hoy, sumarDias(hoy, 13));
+      pintarSelector();
+    } catch {
+      alerta(t.redT, t.redP, true);
+    }
+  }
+  $('gr-btn-repro').addEventListener('click', abrirSelector);
+  $('gr-volver').addEventListener('click', () => ver('gr-panel'));
+  $('gr-ant').addEventListener('click', () => { pagina = Math.max(0, pagina - 1); diaActivo = ''; asegurar(); });
+  $('gr-sig').addEventListener('click', () => { pagina += 1; diaActivo = ''; asegurar(); });
+  async function asegurar() {
+    const faltan = diasDePagina().filter((d) => !(d in franjas));
+    if (faltan.length) {
+      ver('gr-cargando');
+      try { await cargarRango(faltan[0], faltan[faltan.length - 1]); } catch { return alerta(t.redT, t.redP, true); }
+    }
+    pintarSelector();
+  }
+  async function mover(fecha: string, hora: string) {
+    ver('gr-cargando');
+    try {
+      const r = await fetch(`${api}/reschedule`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ g, inicio: `${fecha} ${hora}` }),
+      });
+      if (r.status === 409) {
+        delete franjas[fecha];
+        await cargarRango(fecha, fecha).catch(() => {});
+        pintarSelector();
+        const aviso = document.createElement('p');
+        aviso.className = 'gr-aviso';
+        aviso.setAttribute('role', 'alert');
+        aviso.textContent = t.ocupada;
+        $('gr-selector').prepend(aviso);
+        return;
+      }
+      if (!r.ok) throw new Error();
+      const datos = await r.json();
+      $('gr-fin-t').textContent = t.movidaT;
+      $('gr-fin-p').textContent = t.movidaP;
+      $('gr-fin-fecha').textContent = textoFecha(datos.reserva.inicio);
+      ver('gr-fin', $('gr-fin-t'));
+    } catch {
+      alerta(t.redT, t.redP, true);
+    }
+  }
+
+  iniciar();
+</script>
+
+<!-- Globales a propósito (nodos creados por JS); todo bajo .gr -->
+<style is:global>
+  .gr { max-width: 720px; }
+  .gr [hidden] { display: none !important; }
+  /* .btn-light-ghost sobre <button>: sin el fondo gris por defecto del navegador */
+  .gr button.btn { background: none; }
+  .gr button.btn-primary { background: var(--teal); }
+  .gr button.btn-primary:hover { background: var(--teal-deep); }
+  .gr-cargando { display: flex; align-items: center; gap: 12px; color: var(--on-navy-2); font-size: 15px; padding: 28px 0; }
+  .gr-spinner { width: 18px; height: 18px; border: 2px solid var(--navy-line); border-top-color: var(--teal-2); border-radius: 50%; animation: gr-girar 0.8s linear infinite; }
+  @keyframes gr-girar { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .gr-spinner { animation: none; } }
+  .gr-caja { background: var(--navy-2); border: 1px solid var(--navy-line); border-radius: var(--radius); padding: 32px 30px; }
+  .gr-caja h3 { font-family: var(--head); font-weight: 700; font-size: 22px; color: #fff; margin-bottom: 8px; }
+  .gr-caja h3:focus { outline: none; }
+  .gr-caja p { color: var(--on-navy-2); font-size: 15px; line-height: 1.6; }
+  .gr-cta { margin-top: 18px; }
+  .gr-fin-fecha { font-family: var(--head); font-weight: 700; font-size: 19px; color: #fff !important; margin-top: 12px; }
+  .gr-resumen { background: rgba(92, 198, 198, 0.1); border: 1px solid rgba(92, 198, 198, 0.35); border-radius: var(--radius); padding: 18px 22px; margin-bottom: 22px; }
+  .gr-resumen-l { display: block; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 600; color: var(--teal-2); margin-bottom: 4px; }
+  .gr-resumen strong { font-family: var(--head); font-size: 18px; color: #fff; }
+  .gr-video { margin-top: 10px; font-size: 14px; color: var(--on-navy-2); }
+  .gr-video a { color: var(--teal-2); word-break: break-all; }
+  .gr-acciones { display: flex; gap: 12px; flex-wrap: wrap; }
+  .gr-peligro { border-color: rgba(255, 120, 120, 0.55); color: #ffb4b4; }
+  .gr-peligro:hover { border-color: #ff8a8a; background: rgba(255, 90, 90, 0.12); }
+  .gr-confirmar p { color: var(--on-navy); font-size: 16px; margin-bottom: 14px; }
+  .gr-volver { background: none; border: none; color: var(--teal-2); font-family: var(--head); font-weight: 600; font-size: 14px; padding: 0; margin-bottom: 16px; }
+  .gr-tz { font-size: 13px; color: var(--on-navy-2); margin-bottom: 16px; }
+  .gr-nav { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+  .gr-nav-btn { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--navy-line); background: var(--navy-2); color: var(--on-navy); font-size: 18px; }
+  .gr-nav-btn:hover:not(:disabled) { border-color: var(--teal-2); }
+  .gr-nav-btn:disabled { opacity: 0.35; cursor: default; }
+  .gr-rango { font-family: var(--head); font-weight: 600; font-size: 15px; color: var(--on-navy); }
+  .gr-dias { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; margin-bottom: 20px; }
+  .gr-dia { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 10px 4px; border-radius: 8px; border: 1px solid var(--navy-line); background: var(--navy-2); color: var(--on-navy); font-family: var(--head); font-weight: 600; font-size: 13px; }
+  .gr-dia small { font-family: var(--sans); font-weight: 400; font-size: 12px; color: var(--on-navy-2); }
+  .gr-dia:hover:not(:disabled) { border-color: var(--teal-2); }
+  .gr-dia.activo { border-color: var(--teal-2); background: rgba(92, 198, 198, 0.12); }
+  .gr-dia:disabled { opacity: 0.4; cursor: default; }
+  .gr-franjas { display: grid; grid-template-columns: repeat(auto-fill, minmax(86px, 1fr)); gap: 8px; }
+  .gr-franja { padding: 11px 8px; border-radius: 8px; border: 1px solid var(--navy-line); background: var(--navy-2); color: #fff; font-family: var(--head); font-weight: 600; font-size: 15px; }
+  .gr-franja:hover { border-color: var(--teal-2); background: rgba(92, 198, 198, 0.12); }
+  .gr-aviso { font-size: 15px; padding: 14px 16px; border-radius: 8px; background: rgba(255, 90, 90, 0.12); color: #ffd2d2; border: 1px solid rgba(255, 90, 90, 0.4); margin-bottom: 16px; }
+  @media (max-width: 560px) {
+    .gr-dias { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+  }
+</style>
