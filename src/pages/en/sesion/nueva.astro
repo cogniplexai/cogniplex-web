@@ -1,0 +1,36 @@
+---
+// Página de uso interno: se mantiene en español también bajo /en (solo la usa el equipo).
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import GeneradorEnlace from '@/components/GeneradorEnlace.astro';
+---
+
+<BaseLayout
+  title="Nuevo enlace de reserva"
+  description="Uso interno: generación de enlaces de reserva."
+  path="/sesion/nueva"
+  noindex
+>
+  <section class="block dark sesion-block">
+    <div class="wrap">
+      <div class="sesion-cab">
+        <p class="eyebrow">Uso interno</p>
+        <h1 class="sec-h">Nuevo enlace de reserva</h1>
+        <p class="sec-lead">
+          Genera un enlace privado de un solo uso y envíaselo a quien quieras invitar a una sesión.
+        </p>
+      </div>
+      <GeneradorEnlace />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .sesion-block {
+    min-height: calc(100vh - var(--nav-h));
+    border-top: none;
+  }
+  .sesion-cab {
+    max-width: 720px;
+    margin-bottom: 40px;
+  }
+</style>
