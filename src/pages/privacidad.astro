@@ -41,20 +41,41 @@ import { brand } from '@/config/brand';
     identificativos que no hayas escrito tú en el propio chat.
   </p>
 
-  <h2>4. Base jurídica</h2>
+  <h2>4. La reserva de sesiones</h2>
+  <p>
+    Si te enviamos un enlace privado para reservar una sesión inicial de 30 minutos, al reservarla
+    tratamos tu nombre, tu email, opcionalmente tu empresa y lo que nos indiques que quieres tratar,
+    junto con la fecha y hora elegidas y tu zona horaria, con la finalidad de concertar y gestionar
+    esa sesión (confirmación, recordatorios, cancelación y reprogramación).
+  </p>
+  <p>
+    Toda esta información se aloja en <strong>sistemas propios</strong> —el motor de citas y el
+    calendario— en el mismo servidor de Hetzner en Helsinki (Finlandia, UE). La videollamada se
+    realiza mediante una sala de <strong>Jitsi Meet</strong> generada al reservar; no grabamos las
+    sesiones. El enlace de reserva es personal, de un solo uso y caduca; sin él no es posible
+    consultar la disponibilidad ni reservar. Si el enlace te lo ofrece el asistente del chat, la
+    reserva queda además asociada a esa conversación para que podamos darle continuidad.
+  </p>
+  <p>
+    Las citas pasadas y sus datos asociados se eliminan automáticamente a los <strong>12 meses</strong>.
+    Puedes cancelar tu sesión en cualquier momento desde el enlace de tu correo de confirmación.
+  </p>
+
+  <h2>5. Base jurídica</h2>
   <p>
     La base legal es tu consentimiento (al enviar el formulario o al activar el chat) y el interés
     legítimo de {brand.name} en responder a tu solicitud.
   </p>
 
-  <h2>5. Conservación</h2>
+  <h2>6. Conservación</h2>
   <p>
     Conservamos los datos de los formularios durante el tiempo necesario para atender tu solicitud
-    y, si procede, mientras dure la relación comercial. Las conversaciones del chat se conservan
-    como máximo 12 meses. En ambos casos puedes solicitar antes su supresión.
+    y, si procede, mientras dure la relación comercial. Las conversaciones del chat y las citas
+    pasadas se conservan como máximo 12 meses. En todos los casos puedes solicitar antes su
+    supresión.
   </p>
 
-  <h2>6. Destinatarios y encargados del tratamiento</h2>
+  <h2>7. Destinatarios y encargados del tratamiento</h2>
   <p>
     Los envíos del formulario se remiten directamente a nuestro correo electrónico corporativo. No
     cedemos tus datos a terceros salvo obligación legal. Para prestar el servicio utilizamos los
@@ -71,11 +92,17 @@ import { brand } from '@/config/brand';
     </li>
     <li>
       <strong>Zoho Corporation — ZeptoMail</strong> (datos en la UE): envío de correos
-      transaccionales, como los avisos del chat cuando no hay nadie disponible.
+      transaccionales, como las confirmaciones y recordatorios de las sesiones o los avisos del
+      chat cuando no hay nadie disponible.
+    </li>
+    <li>
+      <strong>8x8, Inc. — Jitsi Meet</strong> (servidor público meet.jit.si): sala de videollamada
+      de las sesiones reservadas. Solo se comparte el identificador aleatorio de la sala; las
+      sesiones no se graban.
     </li>
   </ul>
 
-  <h2>7. Derechos</h2>
+  <h2>8. Derechos</h2>
   <p>
     Puedes ejercer tus derechos de acceso, rectificación, supresión, oposición, limitación y
     portabilidad escribiendo a <a href={`mailto:${brand.email}`}>{brand.email}</a>. También puedes

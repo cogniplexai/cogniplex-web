@@ -42,20 +42,41 @@ const brand = brandFor('en');
     send it identifying data you have not typed into the chat yourself.
   </p>
 
-  <h2>4. Legal basis</h2>
+  <h2>4. Session booking</h2>
+  <p>
+    If we send you a private link to book a 30-minute initial session, when you book it we process
+    your name, your email, optionally your company and whatever you tell us you would like to
+    discuss, together with the date and time you choose and your time zone, in order to arrange and
+    manage that session (confirmation, reminders, cancellation and rescheduling).
+  </p>
+  <p>
+    All of this information is hosted on <strong>our own systems</strong> — the appointment engine
+    and the calendar — on the same Hetzner server in Helsinki (Finland, EU). The video call takes
+    place in a <strong>Jitsi Meet</strong> room generated when you book; we do not record sessions.
+    The booking link is personal, single-use and expires; without it, availability cannot be viewed
+    and no booking can be made. If the link is offered to you by the chat assistant, the booking is
+    also linked to that conversation so that we can follow up on it.
+  </p>
+  <p>
+    Past appointments and their associated data are deleted automatically after
+    <strong>12 months</strong>. You can cancel your session at any time from the link in your
+    confirmation email.
+  </p>
+
+  <h2>5. Legal basis</h2>
   <p>
     The legal basis is your consent (when submitting the form or enabling the chat) and the
     legitimate interest of {brand.name} in responding to your request.
   </p>
 
-  <h2>5. Retention</h2>
+  <h2>6. Retention</h2>
   <p>
     We keep form data for as long as necessary to handle your request and, where applicable, for
-    the duration of the business relationship. Chat conversations are kept for a maximum of 12
-    months. In both cases you can request earlier erasure.
+    the duration of the business relationship. Chat conversations and past appointments are kept
+    for a maximum of 12 months. In all cases you can request earlier erasure.
   </p>
 
-  <h2>6. Recipients and data processors</h2>
+  <h2>7. Recipients and data processors</h2>
   <p>
     Form submissions are sent directly to our corporate email. We do not share your data with
     third parties except where legally required. To provide the service we rely on the following
@@ -72,11 +93,15 @@ const brand = brandFor('en');
     </li>
     <li>
       <strong>Zoho Corporation — ZeptoMail</strong> (data in the EU): transactional email delivery,
-      such as chat notifications when no one is available.
+      such as session confirmations and reminders, or chat notifications when no one is available.
+    </li>
+    <li>
+      <strong>8x8, Inc. — Jitsi Meet</strong> (public meet.jit.si server): video call room for
+      booked sessions. Only the room's random identifier is shared; sessions are not recorded.
     </li>
   </ul>
 
-  <h2>7. Your rights</h2>
+  <h2>8. Your rights</h2>
   <p>
     You can exercise your rights of access, rectification, erasure, objection, restriction and
     portability by writing to <a href={`mailto:${brand.email}`}>{brand.email}</a>. You can also
