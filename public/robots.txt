@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
+# Reserva de sesiones: solo por enlace privado
+Disallow: /sesion
+Disallow: /en/sesion
 
 Sitemap: https://cogniplex.es/sitemap-index.xml

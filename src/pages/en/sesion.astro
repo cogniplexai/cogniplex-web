@@ -1,0 +1,36 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SessionBooking from '@/components/SessionBooking.astro';
+---
+
+<BaseLayout
+  title="Book your session"
+  description="Book a 30-minute initial session with Cogniplex."
+  path="/sesion"
+  noindex
+>
+  <section class="block dark sesion-block">
+    <div class="wrap">
+      <div class="sesion-cab">
+        <p class="eyebrow">Initial session · 30 minutes</p>
+        <h1 class="sec-h">Book your session</h1>
+        <p class="sec-lead">
+          A 30-minute video call to understand your situation and honestly confirm the fit. Pick the
+          day and time that suit you best.
+        </p>
+      </div>
+      <SessionBooking />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .sesion-block {
+    min-height: calc(100vh - var(--nav-h));
+    border-top: none;
+  }
+  .sesion-cab {
+    max-width: 720px;
+    margin-bottom: 44px;
+  }
+</style>

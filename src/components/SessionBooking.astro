@@ -1,0 +1,813 @@
+---
+/**
+ * Reserva de sesión de 30 minutos.
+ * Isla vanilla: lee el token de un uso de ?t=…, pide franjas al microservicio
+ * (agenda.cogniplex.es) y reserva. Sin token válido no muestra disponibilidad.
+ * Patrón visual y de estados: DiagnosticForm.astro (sección navy).
+ */
+import { agendaApi } from '@/config/agenda';
+import { asLocale, localizePath } from '@/i18n';
+
+const locale = asLocale(Astro.currentLocale);
+const contactoHref = localizePath('/contacto', locale);
+const privacidadHref = localizePath('/privacidad', locale);
+
+const t =
+  locale === 'en'
+    ? {
+        cargando: 'Loading availability…',
+        sinTokenT: 'This link is not valid',
+        sinTokenP:
+          'Booking links are personal, single-use and they expire. If yours no longer works, ask us for a new one and we will send it right away.',
+        sinTokenCta: 'Request a new link',
+        usadoT: 'This link has already been used',
+        usadoP:
+          'Each booking link works only once. If you need to change your session, use the link in your confirmation email; if you need a new session, just ask us.',
+        caducadoT: 'This link has expired',
+        redT: 'We could not load availability',
+        redP: 'Please check your connection and try again.',
+        reintentar: 'Try again',
+        tuZona: 'Times shown in your time zone',
+        zonaMadrid: 'Reference: Europe/Madrid',
+        semAnt: 'Previous days',
+        semSig: 'More days',
+        sinFranjas: 'No slots available in this range. Try the following days.',
+        elegir: 'Choose a time for',
+        volver: '← Choose another time',
+        resumenLabel: 'Your session',
+        nombre: 'Full name',
+        nombrePh: 'Your name',
+        email: 'Email',
+        emailPh: 'you@company.com',
+        empresa: 'Company',
+        empresaPh: 'Your company name',
+        mensaje: 'What would you like to discuss? (optional)',
+        mensajePh: 'A couple of lines so we can prepare the session…',
+        consentBefore: 'I have read and accept the ',
+        consentLink: 'Privacy policy',
+        politica: 'If you cannot attend, you can cancel or reschedule from your confirmation email.',
+        confirmar: 'Confirm booking',
+        confirmando: 'Booking…',
+        ocupada: 'That slot has just been taken. Availability has been refreshed — please pick another time.',
+        exitoT: 'Session booked',
+        exitoP: 'We look forward to meeting you. This is your session:',
+        video: 'Video call link',
+        ics: 'Add to calendar',
+        enMadrid: 'in Madrid',
+        gestionNota: 'You will receive a confirmation email with the details and links to cancel or reschedule.',
+        madrugada: 'Note: this time is shown in your local time zone.',
+      }
+    : {
+        cargando: 'Cargando disponibilidad…',
+        sinTokenT: 'Este enlace no es válido',
+        sinTokenP:
+          'Los enlaces de reserva son personales, de un solo uso y caducan. Si el tuyo ya no funciona, pídenos uno nuevo y te lo enviamos al momento.',
+        sinTokenCta: 'Pedir un enlace nuevo',
+        usadoT: 'Este enlace ya se ha utilizado',
+        usadoP:
+          'Cada enlace de reserva funciona una sola vez. Si necesitas cambiar tu sesión, usa el enlace de tu email de confirmación; si necesitas una sesión nueva, pídenosla.',
+        caducadoT: 'Este enlace ha caducado',
+        redT: 'No hemos podido cargar la disponibilidad',
+        redP: 'Revisa tu conexión e inténtalo de nuevo.',
+        reintentar: 'Reintentar',
+        tuZona: 'Horas mostradas en tu zona horaria',
+        zonaMadrid: 'Referencia: Europe/Madrid',
+        semAnt: 'Días anteriores',
+        semSig: 'Más días',
+        sinFranjas: 'No quedan huecos en estas fechas. Prueba los días siguientes.',
+        elegir: 'Elige una hora para el',
+        volver: '← Elegir otra hora',
+        resumenLabel: 'Tu sesión',
+        nombre: 'Nombre y apellidos',
+        nombrePh: 'Tu nombre',
+        email: 'Email',
+        emailPh: 'tu@empresa.com',
+        empresa: 'Empresa',
+        empresaPh: 'Nombre de tu empresa',
+        mensaje: '¿Qué quieres tratar? (opcional)',
+        mensajePh: 'Un par de líneas para que preparemos la sesión…',
+        consentBefore: 'He leído y acepto la ',
+        consentLink: 'Política de privacidad',
+        politica: 'Si no puedes asistir, podrás cancelar o reprogramar desde tu email de confirmación.',
+        confirmar: 'Confirmar reserva',
+        confirmando: 'Reservando…',
+        ocupada: 'Esa franja se acaba de ocupar. Hemos actualizado la disponibilidad: elige otra hora.',
+        exitoT: 'Sesión reservada',
+        exitoP: 'Estamos deseando conocerte. Esta es tu sesión:',
+        video: 'Enlace de videollamada',
+        ics: 'Añadir al calendario',
+        enMadrid: 'en Madrid',
+        gestionNota: 'Recibirás un email de confirmación con los detalles y los enlaces para cancelar o reprogramar.',
+        madrugada: 'Nota: esta hora se muestra en tu zona horaria local.',
+      };
+---
+
+<div
+  class="sb"
+  id="sb"
+  data-api={agendaApi}
+  data-lang={locale}
+  data-contacto={contactoHref}
+  data-l10n={JSON.stringify(t)}
+>
+  <!-- Cargando -->
+  <div class="sb-cargando" id="sb-cargando" role="status">
+    <span class="sb-spinner" aria-hidden="true"></span>
+    <span>{t.cargando}</span>
+  </div>
+
+  <!-- Token inválido / usado / caducado / error de red -->
+  <div class="sb-alerta form-ok-box" id="sb-alerta" hidden>
+    <h3 id="sb-alerta-t" tabindex="-1"></h3>
+    <p id="sb-alerta-p"></p>
+    <div class="sb-alerta-cta" id="sb-alerta-cta"></div>
+  </div>
+
+  <!-- Selector de día y franja -->
+  <div class="sb-selector" id="sb-selector" hidden>
+    <div class="sb-tz" id="sb-tz"></div>
+    <div class="sb-nav">
+      <button type="button" class="sb-nav-btn" id="sb-ant" aria-label={t.semAnt}>‹</button>
+      <span class="sb-rango" id="sb-rango" aria-live="polite"></span>
+      <button type="button" class="sb-nav-btn" id="sb-sig" aria-label={t.semSig}>›</button>
+    </div>
+    <div class="sb-dias" id="sb-dias" role="tablist" aria-label="Días"></div>
+    <p class="sb-elige" id="sb-elige"></p>
+    <div class="sb-franjas" id="sb-franjas" aria-live="polite"></div>
+  </div>
+
+  <!-- Formulario de confirmación -->
+  <form class="sb-form" id="sb-form" hidden novalidate>
+    <button type="button" class="sb-volver" id="sb-volver">{t.volver}</button>
+    <div class="sb-resumen" id="sb-resumen">
+      <span class="sb-resumen-l">{t.resumenLabel}</span>
+      <strong id="sb-resumen-v"></strong>
+    </div>
+    <div class="f-row">
+      <div class="f-field">
+        <label class="f-label" for="sb-nombre">{t.nombre}</label>
+        <input class="f-input" type="text" id="sb-nombre" name="nombre" placeholder={t.nombrePh} required minlength="2" />
+      </div>
+      <div class="f-field">
+        <label class="f-label" for="sb-email">{t.email}</label>
+        <input class="f-input" type="email" id="sb-email" name="email" placeholder={t.emailPh} required />
+      </div>
+    </div>
+    <div class="f-field">
+      <label class="f-label" for="sb-empresa">{t.empresa}</label>
+      <input class="f-input" type="text" id="sb-empresa" name="empresa" placeholder={t.empresaPh} />
+    </div>
+    <div class="f-field">
+      <label class="f-label" for="sb-mensaje">{t.mensaje}</label>
+      <textarea class="f-input" id="sb-mensaje" name="mensaje" placeholder={t.mensajePh} maxlength="600"></textarea>
+    </div>
+    <label class="f-consent">
+      <input type="checkbox" name="consent" required />
+      <span>{t.consentBefore}<a href={privacidadHref} target="_blank" rel="noopener">{t.consentLink}</a>.</span>
+    </label>
+    <p class="sb-politica">{t.politica}</p>
+    <button type="submit" class="btn btn-primary">{t.confirmar}</button>
+  </form>
+
+  <!-- Éxito -->
+  <div class="form-ok-box sb-exito" id="sb-exito" hidden>
+    <h3 tabindex="-1">{t.exitoT}</h3>
+    <p>{t.exitoP}</p>
+    <p class="sb-exito-fecha" id="sb-exito-fecha"></p>
+    <p class="sb-exito-video">
+      <span>{t.video}:</span>
+      <a id="sb-exito-video" href="#" target="_blank" rel="noopener"></a>
+    </p>
+    <p><a class="btn btn-light-ghost sb-ics" id="sb-ics" download="cogniplex-sesion.ics">{t.ics}</a></p>
+    <p class="sb-exito-nota">{t.gestionNota}</p>
+  </div>
+</div>
+
+<script>
+  const raiz = document.getElementById('sb') as HTMLElement;
+  const api = raiz.dataset.api!;
+  const lang = raiz.dataset.lang === 'en' ? 'en' : 'es';
+  const t = JSON.parse(raiz.dataset.l10n!) as Record<string, string>;
+  const ZONA_MADRID = 'Europe/Madrid';
+  const zonaLocal = Intl.DateTimeFormat().resolvedOptions().timeZone || ZONA_MADRID;
+  const token = new URLSearchParams(location.search).get('t') || '';
+
+  const $ = (id: string) => document.getElementById(id) as HTMLElement;
+  const vistas = ['sb-cargando', 'sb-alerta', 'sb-selector', 'sb-form', 'sb-exito'];
+  function ver(id: string) {
+    vistas.forEach((v) => $(v).toggleAttribute('hidden', v !== id));
+  }
+  function arriba(foco?: HTMLElement) {
+    // Al cambiar de estado el contenido encoge: sin esto el scroll queda colgado.
+    window.scrollTo({ top: 0 });
+    foco?.focus({ preventScroll: true });
+  }
+
+  // El selector de idioma del header debe conservar el token del enlace.
+  document
+    .querySelectorAll<HTMLAnchorElement>('a[href$="/sesion"], a[href$="/en/sesion"]')
+    .forEach((a) => {
+      a.href = a.getAttribute('href') + location.search;
+    });
+
+  // ── Conversión Madrid ↔ instante (el API habla en reloj de Madrid) ──
+  const fmtMadrid = new Intl.DateTimeFormat('en-CA', {
+    timeZone: ZONA_MADRID, year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hour12: false,
+  });
+  function instanteDeMadrid(fecha: string, hora: string): Date {
+    // Prueba los dos desfases posibles (CET +60 / CEST +120) y valida.
+    const [y, m, d] = fecha.split('-').map(Number);
+    const [h, mi] = hora.split(':').map(Number);
+    for (const off of [120, 60]) {
+      const cand = new Date(Date.UTC(y, m - 1, d, h, mi) - off * 60000);
+      const p = fmtMadrid.format(cand); // 'YYYY-MM-DD, HH:MM'
+      if (p.startsWith(fecha) && p.endsWith(hora)) return cand;
+    }
+    return new Date(Date.UTC(y, m - 1, d, h, mi) - 120 * 60000);
+  }
+  const fmtHoraLocal = new Intl.DateTimeFormat(lang === 'en' ? 'en-GB' : 'es-ES', {
+    timeZone: zonaLocal, hour: '2-digit', minute: '2-digit', hour12: false,
+  });
+  const fmtDiaLargo = new Intl.DateTimeFormat(lang === 'en' ? 'en-GB' : 'es-ES', {
+    timeZone: zonaLocal, weekday: 'long', day: 'numeric', month: 'long',
+  });
+  const fmtDiaCorto = new Intl.DateTimeFormat(lang === 'en' ? 'en-GB' : 'es-ES', {
+    weekday: 'short', day: 'numeric',
+  });
+
+  // ── Estado ──
+  let franjas: Record<string, string[]> = {};
+  let maximo = '';
+  let prellenado: Record<string, string | null> = {};
+  let pagina = 0; // páginas de 7 días desde hoy
+  let diaActivo = '';
+  let seleccion: { fecha: string; hora: string } | null = null;
+  let reservaOk: { inicio: Date; fin: Date; video: string } | null = null;
+
+  function fechaISO(d: Date): string {
+    return d.toISOString().slice(0, 10);
+  }
+  function sumarDias(iso: string, n: number): string {
+    const d = new Date(iso + 'T12:00:00Z');
+    d.setUTCDate(d.getUTCDate() + n);
+    return fechaISO(d);
+  }
+  const hoy = fechaISO(new Date());
+
+  async function cargarRango(desde: string, hasta: string): Promise<boolean> {
+    const r = await fetch(`${api}/slots?t=${encodeURIComponent(token)}&desde=${desde}&hasta=${hasta}`);
+    if (r.status === 401) {
+      const cuerpo = await r.json().catch(() => ({ detail: {} }));
+      mostrarAlertaToken(cuerpo?.detail?.codigo);
+      return false;
+    }
+    if (!r.ok) throw new Error(String(r.status));
+    const datos = await r.json();
+    Object.assign(franjas, datos.franjas);
+    maximo = datos.maximo;
+    prellenado = datos.prellenado || {};
+    return true;
+  }
+
+  function mostrarAlertaToken(codigo?: string) {
+    const [titulo, parrafo] =
+      codigo === 'token_usado'
+        ? [t.usadoT, t.usadoP]
+        : codigo === 'token_caducado'
+          ? [t.caducadoT, t.sinTokenP]
+          : [t.sinTokenT, t.sinTokenP];
+    $('sb-alerta-t').textContent = titulo;
+    $('sb-alerta-p').textContent = parrafo;
+    $('sb-alerta-cta').innerHTML =
+      `<a class="btn btn-light-ghost" href="${raiz.dataset.contacto}">${t.sinTokenCta}</a>`;
+    ver('sb-alerta');
+    arriba($('sb-alerta-t'));
+  }
+
+  function mostrarErrorRed() {
+    $('sb-alerta-t').textContent = t.redT;
+    $('sb-alerta-p').textContent = t.redP;
+    $('sb-alerta-cta').innerHTML = `<button type="button" class="btn btn-light-ghost" id="sb-reintentar">${t.reintentar}</button>`;
+    ver('sb-alerta');
+    document.getElementById('sb-reintentar')?.addEventListener('click', iniciar);
+  }
+
+  // ── Render ──
+  function diasDePagina(): string[] {
+    const inicio = sumarDias(hoy, pagina * 7);
+    return Array.from({ length: 7 }, (_, i) => sumarDias(inicio, i)).filter(
+      (f) => !maximo || f <= maximo,
+    );
+  }
+
+  function pintarSelector() {
+    const dias = diasDePagina();
+    const rango = `${fmtDiaCorto.format(new Date(dias[0] + 'T12:00:00'))} — ${fmtDiaCorto.format(new Date(dias[dias.length - 1] + 'T12:00:00'))}`;
+    $('sb-rango').textContent = rango;
+    ($('sb-ant') as HTMLButtonElement).disabled = pagina === 0;
+    ($('sb-sig') as HTMLButtonElement).disabled = !!maximo && sumarDias(hoy, (pagina + 1) * 7) > maximo;
+
+    const contDias = $('sb-dias');
+    contDias.innerHTML = '';
+    if (!diaActivo || !dias.includes(diaActivo)) {
+      diaActivo = dias.find((d) => (franjas[d] || []).length > 0) || dias[0];
+    }
+    dias.forEach((fecha) => {
+      const n = (franjas[fecha] || []).length;
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'sb-dia' + (fecha === diaActivo ? ' activo' : '');
+      b.setAttribute('role', 'tab');
+      b.setAttribute('aria-selected', String(fecha === diaActivo));
+      b.disabled = n === 0;
+      b.innerHTML = `<span>${fmtDiaCorto.format(new Date(fecha + 'T12:00:00'))}</span><small>${n || '—'}</small>`;
+      b.addEventListener('click', () => {
+        diaActivo = fecha;
+        pintarSelector();
+      });
+      contDias.appendChild(b);
+    });
+
+    const lista = franjas[diaActivo] || [];
+    $('sb-elige').textContent = lista.length
+      ? `${t.elegir} ${fmtDiaLargo.format(new Date(diaActivo + 'T12:00:00'))}`
+      : t.sinFranjas;
+    const contFranjas = $('sb-franjas');
+    contFranjas.innerHTML = '';
+    lista.forEach((hora) => {
+      const instante = instanteDeMadrid(diaActivo, hora);
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'sb-franja';
+      b.textContent = fmtHoraLocal.format(instante);
+      if (zonaLocal !== ZONA_MADRID) b.title = `${hora} ${t.enMadrid}`;
+      b.addEventListener('click', () => elegirFranja(diaActivo, hora));
+      contFranjas.appendChild(b);
+    });
+    ver('sb-selector');
+  }
+
+  function textoResumen(fecha: string, hora: string): string {
+    const ini = instanteDeMadrid(fecha, hora);
+    const fin = new Date(ini.getTime() + 30 * 60000);
+    let s = `${fmtDiaLargo.format(ini)} · ${fmtHoraLocal.format(ini)}–${fmtHoraLocal.format(fin)}`;
+    if (zonaLocal !== ZONA_MADRID) s += ` (${hora} ${t.enMadrid})`;
+    return s;
+  }
+
+  function elegirFranja(fecha: string, hora: string) {
+    seleccion = { fecha, hora };
+    $('sb-resumen-v').textContent = textoResumen(fecha, hora);
+    const nombre = document.getElementById('sb-nombre') as HTMLInputElement;
+    const email = document.getElementById('sb-email') as HTMLInputElement;
+    const empresa = document.getElementById('sb-empresa') as HTMLInputElement;
+    if (prellenado.nombre && !nombre.value) nombre.value = prellenado.nombre;
+    if (prellenado.email && !email.value) email.value = prellenado.email;
+    if (prellenado.empresa && !empresa.value) empresa.value = prellenado.empresa;
+    ver('sb-form');
+    arriba(nombre);
+  }
+
+  // ── Reserva ──
+  const form = $('sb-form') as unknown as HTMLFormElement;
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!form.reportValidity() || !seleccion) return;
+    const btn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+    const original = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = t.confirmando;
+    const fd = new FormData(form);
+    try {
+      const r = await fetch(`${api}/book`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          t: token,
+          inicio: `${seleccion.fecha} ${seleccion.hora}`,
+          nombre: fd.get('nombre'),
+          email: fd.get('email'),
+          empresa: fd.get('empresa') || null,
+          mensaje: fd.get('mensaje') || null,
+        }),
+      });
+      if (r.ok) {
+        const datos = await r.json();
+        const ini = instanteDeMadrid(seleccion.fecha, seleccion.hora);
+        reservaOk = {
+          inicio: ini,
+          fin: new Date(ini.getTime() + 30 * 60000),
+          video: datos.reserva.videollamada,
+        };
+        pintarExito();
+        return;
+      }
+      const cuerpo = await r.json().catch(() => ({ detail: {} }));
+      const codigo = cuerpo?.detail?.codigo;
+      if (r.status === 409 && codigo === 'franja_ocupada') {
+        delete franjas[seleccion.fecha];
+        await cargarRango(seleccion.fecha, seleccion.fecha).catch(() => {});
+        avisar(t.ocupada);
+        pintarSelector();
+      } else if (r.status === 401) {
+        mostrarAlertaToken(codigo);
+      } else {
+        avisar(t.redP);
+      }
+    } catch {
+      avisar(t.redP);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = original;
+    }
+  });
+
+  function avisar(texto: string) {
+    let el = raiz.querySelector<HTMLDivElement>('.form-msg');
+    if (!el) {
+      el = document.createElement('div');
+      el.className = 'form-msg';
+      el.setAttribute('role', 'alert');
+      $('sb-selector').prepend(el);
+    }
+    el.textContent = texto;
+  }
+
+  function pintarExito() {
+    if (!reservaOk) return;
+    let fecha = `${fmtDiaLargo.format(reservaOk.inicio)} · ${fmtHoraLocal.format(reservaOk.inicio)}–${fmtHoraLocal.format(reservaOk.fin)}`;
+    if (zonaLocal !== ZONA_MADRID && seleccion) fecha += ` (${seleccion.hora} ${t.enMadrid})`;
+    $('sb-exito-fecha').textContent = fecha;
+    const enlace = $('sb-exito-video') as HTMLAnchorElement;
+    enlace.href = reservaOk.video;
+    enlace.textContent = reservaOk.video;
+    ($('sb-ics') as HTMLAnchorElement).href = urlICS();
+    ver('sb-exito');
+    arriba($('sb-exito').querySelector('h3') as HTMLElement);
+  }
+
+  function urlICS(): string {
+    if (!reservaOk) return '#';
+    const utc = (d: Date) => d.toISOString().replace(/[-:]/g, '').slice(0, 15) + 'Z';
+    const titulo = lang === 'en' ? 'Cogniplex session' : 'Sesión con Cogniplex';
+    const ics = [
+      'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Cogniplex//Sesion//ES', 'BEGIN:VEVENT',
+      `UID:cogniplex-${reservaOk.inicio.getTime()}@cogniplex.es`,
+      `DTSTAMP:${utc(new Date())}`, `DTSTART:${utc(reservaOk.inicio)}`, `DTEND:${utc(reservaOk.fin)}`,
+      `SUMMARY:${titulo}`, `DESCRIPTION:${reservaOk.video}`, `URL:${reservaOk.video}`,
+      'END:VEVENT', 'END:VCALENDAR', '',
+    ].join('\r\n');
+    return 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics);
+  }
+
+  // ── Arranque ──
+  $('sb-volver').addEventListener('click', () => {
+    seleccion = null;
+    pintarSelector();
+  });
+  $('sb-ant').addEventListener('click', () => {
+    pagina = Math.max(0, pagina - 1);
+    diaActivo = '';
+    asegurarPagina();
+  });
+  $('sb-sig').addEventListener('click', () => {
+    pagina += 1;
+    diaActivo = '';
+    asegurarPagina();
+  });
+
+  async function asegurarPagina() {
+    const dias = diasDePagina();
+    const faltan = dias.filter((d) => !(d in franjas));
+    if (faltan.length) {
+      ver('sb-cargando');
+      try {
+        if (!(await cargarRango(faltan[0], faltan[faltan.length - 1]))) return;
+      } catch {
+        mostrarErrorRed();
+        return;
+      }
+    }
+    pintarSelector();
+  }
+
+  async function iniciar() {
+    if (!token) {
+      mostrarAlertaToken();
+      return;
+    }
+    ver('sb-cargando');
+    $('sb-tz').textContent =
+      zonaLocal === ZONA_MADRID ? `${t.tuZona}: ${zonaLocal}` : `${t.tuZona}: ${zonaLocal} · ${t.zonaMadrid}`;
+    try {
+      if (!(await cargarRango(hoy, sumarDias(hoy, 13)))) return;
+      pintarSelector();
+    } catch {
+      mostrarErrorRed();
+    }
+  }
+  iniciar();
+</script>
+
+<!-- Globales a propósito: parte del árbol lo crea JS y no lleva el scoping de
+     Astro. Todo va bajo el espacio .sb para no filtrar estilos fuera. -->
+<style is:global>
+  .sb {
+    max-width: 720px;
+  }
+  /* Los estados se alternan con [hidden]; debe ganar a cualquier display propio. */
+  .sb [hidden] {
+    display: none !important;
+  }
+  .sb-cargando {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--on-navy-2);
+    font-size: 15px;
+    padding: 28px 0;
+  }
+  .sb-spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--navy-line);
+    border-top-color: var(--teal-2);
+    border-radius: 50%;
+    animation: sb-girar 0.8s linear infinite;
+  }
+  @keyframes sb-girar {
+    to { transform: rotate(360deg); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sb-spinner { animation: none; }
+  }
+  .sb-alerta h3:focus,
+  .sb-exito h3:focus {
+    outline: none;
+  }
+  .sb-alerta-cta {
+    margin-top: 18px;
+  }
+  .sb-tz {
+    font-size: 13px;
+    color: var(--on-navy-2);
+    margin-bottom: 18px;
+  }
+  .sb-nav {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .sb-nav-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--navy-line);
+    background: var(--navy-2);
+    color: var(--on-navy);
+    font-size: 18px;
+    line-height: 1;
+    transition: border-color var(--dur-fast);
+  }
+  .sb-nav-btn:hover:not(:disabled) {
+    border-color: var(--teal-2);
+  }
+  .sb-nav-btn:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+  .sb-rango {
+    font-family: var(--head);
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--on-navy);
+  }
+  .sb-dias {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 22px;
+  }
+  .sb-dia {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 10px 4px;
+    border-radius: 8px;
+    border: 1px solid var(--navy-line);
+    background: var(--navy-2);
+    color: var(--on-navy);
+    font-family: var(--head);
+    font-weight: 600;
+    font-size: 13px;
+    transition: border-color var(--dur-fast), background var(--dur-fast);
+  }
+  .sb-dia small {
+    font-family: var(--sans);
+    font-weight: 400;
+    font-size: 12px;
+    color: var(--on-navy-2);
+  }
+  .sb-dia:hover:not(:disabled) {
+    border-color: var(--teal-2);
+  }
+  .sb-dia.activo {
+    border-color: var(--teal-2);
+    background: rgba(92, 198, 198, 0.12);
+  }
+  .sb-dia:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+  .sb-elige {
+    font-size: 14px;
+    color: var(--on-navy-2);
+    margin-bottom: 12px;
+  }
+  .sb-franjas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(86px, 1fr));
+    gap: 8px;
+  }
+  .sb-franja {
+    padding: 11px 8px;
+    border-radius: 8px;
+    border: 1px solid var(--navy-line);
+    background: var(--navy-2);
+    color: #fff;
+    font-family: var(--head);
+    font-weight: 600;
+    font-size: 15px;
+    transition: border-color var(--dur-fast), background var(--dur-fast);
+  }
+  .sb-franja:hover {
+    border-color: var(--teal-2);
+    background: rgba(92, 198, 198, 0.12);
+  }
+  /* Formulario (patrón DiagnosticForm sobre navy) */
+  .sb-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .sb-volver {
+    align-self: flex-start;
+    background: none;
+    border: none;
+    color: var(--teal-2);
+    font-family: var(--head);
+    font-weight: 600;
+    font-size: 14px;
+    padding: 0;
+  }
+  .sb-resumen {
+    background: rgba(92, 198, 198, 0.1);
+    border: 1px solid rgba(92, 198, 198, 0.35);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .sb-resumen-l {
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--teal-2);
+  }
+  .sb-resumen strong {
+    font-family: var(--head);
+    font-size: 17px;
+    color: #fff;
+  }
+  .f-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .f-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .f-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--on-navy-2);
+  }
+  .f-input {
+    background: var(--navy-2);
+    border: 1px solid var(--navy-line);
+    border-radius: 8px;
+    color: #fff;
+    padding: 13px 15px;
+    font-family: var(--sans);
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .f-input::placeholder {
+    color: #6b7a8c;
+  }
+  .f-input:focus {
+    border-color: var(--teal-2);
+  }
+  textarea.f-input {
+    resize: vertical;
+    min-height: 96px;
+  }
+  .f-consent {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 14px;
+    color: var(--on-navy-2);
+    line-height: 1.5;
+  }
+  .f-consent input {
+    margin-top: 3px;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    accent-color: var(--teal);
+  }
+  .f-consent a {
+    color: var(--teal-2);
+  }
+  .sb-politica {
+    font-size: 13px;
+    color: var(--on-navy-2);
+  }
+  .sb-form .btn {
+    align-self: flex-start;
+  }
+  .sb-exito .sb-exito-fecha {
+    font-family: var(--head);
+    font-weight: 700;
+    font-size: 19px;
+    color: #fff;
+    margin-top: 14px;
+  }
+  .sb-exito .sb-exito-video {
+    margin-top: 10px;
+    font-size: 15px;
+  }
+  .sb-exito .sb-exito-video span {
+    color: var(--on-navy-2);
+    margin-right: 6px;
+  }
+  .sb-exito .sb-ics {
+    margin-top: 16px;
+  }
+  .sb-exito .sb-exito-nota {
+    margin-top: 16px;
+    font-size: 14px;
+    color: var(--on-navy-2);
+  }
+  .sb .form-msg {
+    font-size: 15px;
+    line-height: 1.6;
+    padding: 14px 16px;
+    border-radius: 8px;
+    background: rgba(255, 90, 90, 0.12);
+    color: #ffd2d2;
+    border: 1px solid rgba(255, 90, 90, 0.4);
+    margin-bottom: 18px;
+  }
+  .sb .form-ok-box {
+    background: var(--navy-2);
+    border: 1px solid var(--navy-line);
+    border-radius: var(--radius);
+    padding: 32px 30px;
+  }
+  .sb .form-ok-box h3 {
+    font-family: var(--head);
+    font-weight: 700;
+    font-size: 22px;
+    color: #fff;
+    margin-bottom: 8px;
+  }
+  .sb .form-ok-box p {
+    color: var(--on-navy-2);
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  .sb .form-ok-box a:not(.btn) {
+    color: var(--teal-2);
+    word-break: break-all;
+  }
+  @media (max-width: 560px) {
+    .f-row {
+      grid-template-columns: 1fr;
+    }
+    .sb-dias {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 6px;
+    }
+  }
+</style>

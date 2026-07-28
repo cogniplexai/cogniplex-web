@@ -11,7 +11,8 @@ export default defineConfig({
     sitemap({
       // Páginas accesibles solo por URL directa: fuera del sitemap
       // mientras no se decida enlazarlas públicamente.
-      filter: (page) => !page.includes('/organizacion') && !page.includes('/colabora'),
+      filter: (page) =>
+        !page.includes('/organizacion') && !page.includes('/colabora') && !page.includes('/sesion'),
     }),
   ],
   i18n: {
