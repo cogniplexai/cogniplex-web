@@ -1,0 +1,36 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SessionBooking from '@/components/SessionBooking.astro';
+---
+
+<BaseLayout
+  title="Reserva tu sesión"
+  description="Reserva una sesión inicial de 30 minutos con Cogniplex."
+  path="/sesion"
+  noindex
+>
+  <section class="block dark sesion-block">
+    <div class="wrap">
+      <div class="sesion-cab">
+        <p class="eyebrow">Sesión inicial · 30 minutos</p>
+        <h1 class="sec-h">Reserva tu sesión</h1>
+        <p class="sec-lead">
+          Una conversación de 30 minutos por videollamada para entender tu situación y confirmar el
+          encaje con franqueza. Elige el día y la hora que mejor te vengan.
+        </p>
+      </div>
+      <SessionBooking />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .sesion-block {
+    min-height: calc(100vh - var(--nav-h));
+    border-top: none;
+  }
+  .sesion-cab {
+    max-width: 720px;
+    margin-bottom: 44px;
+  }
+</style>
