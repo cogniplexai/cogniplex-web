@@ -254,6 +254,13 @@ const t =
     return fechaISO(d);
   }
   const hoy = fechaISO(new Date());
+  // Semanas naturales de lunes a domingo (los días ya pasados se deshabilitan)
+  function lunesDe(iso: string): string {
+    const d = new Date(iso + 'T12:00:00Z');
+    d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7));
+    return fechaISO(d);
+  }
+  const base = lunesDe(hoy);
 
   async function cargarRango(desde: string, hasta: string): Promise<boolean> {
     const r = await fetch(`${api}/slots?t=${encodeURIComponent(token)}&desde=${desde}&hasta=${hasta}`);
@@ -295,7 +302,7 @@ const t =
 
   // ── Render ──
   function diasDePagina(): string[] {
-    const inicio = sumarDias(hoy, pagina * 7);
+    const inicio = sumarDias(base, pagina * 7);
     return Array.from({ length: 7 }, (_, i) => sumarDias(inicio, i)).filter(
       (f) => !maximo || f <= maximo,
     );
@@ -306,7 +313,7 @@ const t =
     const rango = `${fmtDiaCorto.format(new Date(dias[0] + 'T12:00:00'))} — ${fmtDiaCorto.format(new Date(dias[dias.length - 1] + 'T12:00:00'))}`;
     $('sb-rango').textContent = rango;
     ($('sb-ant') as HTMLButtonElement).disabled = pagina === 0;
-    ($('sb-sig') as HTMLButtonElement).disabled = !!maximo && sumarDias(hoy, (pagina + 1) * 7) > maximo;
+    ($('sb-sig') as HTMLButtonElement).disabled = !!maximo && sumarDias(base, (pagina + 1) * 7) > maximo;
 
     const contDias = $('sb-dias');
     contDias.innerHTML = '';
@@ -480,6 +487,7 @@ const t =
 
   async function asegurarPagina() {
     const dias = diasDePagina();
+    dias.filter((d) => d < hoy).forEach((d) => (franjas[d] = franjas[d] || []));
     const faltan = dias.filter((d) => !(d in franjas));
     if (faltan.length) {
       ver('sb-cargando');

@@ -196,6 +196,13 @@ const t =
     d.setUTCDate(d.getUTCDate() + n);
     return d.toISOString().slice(0, 10);
   };
+  // Semanas naturales de lunes a domingo (los días ya pasados se deshabilitan)
+  const lunesDe = (iso: string) => {
+    const d = new Date(iso + 'T12:00:00Z');
+    d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7));
+    return d.toISOString().slice(0, 10);
+  };
+  const base = lunesDe(hoy);
 
   async function iniciar() {
     if (!g) return alerta(t.invalidaT, t.invalidaP);
@@ -252,14 +259,14 @@ const t =
     maximo = datos.maximo;
   }
   function diasDePagina(): string[] {
-    const inicio = sumarDias(hoy, pagina * 7);
+    const inicio = sumarDias(base, pagina * 7);
     return Array.from({ length: 7 }, (_, i) => sumarDias(inicio, i)).filter((f) => !maximo || f <= maximo);
   }
   function pintarSelector() {
     const dias = diasDePagina();
     $('gr-rango').textContent = `${fmtDiaCorto.format(new Date(dias[0] + 'T12:00:00'))} — ${fmtDiaCorto.format(new Date(dias[dias.length - 1] + 'T12:00:00'))}`;
     ($('gr-ant') as HTMLButtonElement).disabled = pagina === 0;
-    ($('gr-sig') as HTMLButtonElement).disabled = !!maximo && sumarDias(hoy, (pagina + 1) * 7) > maximo;
+    ($('gr-sig') as HTMLButtonElement).disabled = !!maximo && sumarDias(base, (pagina + 1) * 7) > maximo;
     if (!diaActivo || !dias.includes(diaActivo)) {
       diaActivo = dias.find((d) => (franjas[d] || []).length > 0) || dias[0];
     }
@@ -304,6 +311,7 @@ const t =
   $('gr-ant').addEventListener('click', () => { pagina = Math.max(0, pagina - 1); diaActivo = ''; asegurar(); });
   $('gr-sig').addEventListener('click', () => { pagina += 1; diaActivo = ''; asegurar(); });
   async function asegurar() {
+    diasDePagina().filter((d) => d < hoy).forEach((d) => (franjas[d] = franjas[d] || []));
     const faltan = diasDePagina().filter((d) => !(d in franjas));
     if (faltan.length) {
       ver('gr-cargando');
