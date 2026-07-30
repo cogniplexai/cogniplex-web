@@ -1,0 +1,36 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import CalendariosPanel from '@/components/CalendariosPanel.astro';
+---
+
+<BaseLayout
+  title="Calendarios conectados"
+  description="Uso interno: calendarios externos que bloquean la disponibilidad."
+  path="/sesion/calendarios"
+  noindex
+>
+  <section class="block dark sesion-block">
+    <div class="wrap">
+      <div class="sesion-cab">
+        <p class="eyebrow">Uso interno</p>
+        <h1 class="sec-h">Connected calendars</h1>
+        <p class="sec-lead">
+          Los compromisos de estos calendarios bloquean automáticamente la disponibilidad
+          publicada. Solo se leen las horas ocupadas: nunca los asuntos ni los asistentes.
+        </p>
+      </div>
+      <CalendariosPanel />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .sesion-block {
+    min-height: calc(100vh - var(--nav-h));
+    border-top: none;
+  }
+  .sesion-cab {
+    max-width: 720px;
+    margin-bottom: 40px;
+  }
+</style>
