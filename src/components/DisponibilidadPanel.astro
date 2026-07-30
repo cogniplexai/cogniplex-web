@@ -1,0 +1,236 @@
+---
+/**
+ * Uso interno: disponibilidad efectiva, la que vería un cliente, con el
+ * motivo de cada hora bloqueada. No consume ningún enlace de reserva.
+ */
+import { agendaApi } from '@/config/agenda';
+---
+
+<div class="dp" id="dp" data-api={agendaApi}>
+  <form class="dp-form" id="dp-clave-form">
+    <div class="f-field">
+      <label class="f-label" for="dp-clave">Clave interna</label>
+      <input class="f-input" type="password" id="dp-clave" autocomplete="current-password"
+        placeholder="La misma de /sesion/nueva" required />
+    </div>
+    <button type="submit" class="btn btn-primary" id="dp-continuar">Continuar</button>
+    <p class="dp-error" id="dp-clave-error" role="alert" hidden></p>
+  </form>
+
+  <div id="dp-panel" hidden>
+    <div class="dp-nav">
+      <button type="button" class="dp-nav-btn" id="dp-ant" aria-label="Semana anterior">‹</button>
+      <span class="dp-rango" id="dp-rango" aria-live="polite"></span>
+      <button type="button" class="dp-nav-btn" id="dp-sig" aria-label="Semana siguiente">›</button>
+      <button type="button" class="dp-hoy" id="dp-hoy">Hoy</button>
+    </div>
+    <p class="dp-reglas" id="dp-reglas"></p>
+    <div class="dp-dias" id="dp-dias"></div>
+    <p class="dp-error" id="dp-error" role="alert" hidden></p>
+  </div>
+</div>
+
+<script>
+  const raiz = document.getElementById('dp') as HTMLElement;
+  const api = raiz.dataset.api!;
+  const ALMACEN = 'cgx-agenda-clave';
+  const $ = (id: string) => document.getElementById(id) as HTMLElement;
+  const clave = () => localStorage.getItem(ALMACEN) || '';
+  const formClave = $('dp-clave-form') as unknown as HTMLFormElement;
+
+  const fmtDia = new Intl.DateTimeFormat('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+  const fmtCorto = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short' });
+  const fmtHora = new Intl.DateTimeFormat('es-ES', {
+    timeZone: 'Europe/Madrid', hour: '2-digit', minute: '2-digit', hour12: false,
+  });
+
+  const iso = (d: Date) => d.toISOString().slice(0, 10);
+  /** Desfase de Madrid ese día ('+02:00' en verano, '+01:00' en invierno). */
+  function desfase(fecha: string): string {
+    const mediodia = new Date(`${fecha}T12:00:00Z`);
+    const enMadrid = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Europe/Madrid', hour: '2-digit', hour12: false,
+    }).format(mediodia);
+    const horas = parseInt(enMadrid, 10) - 12;
+    return `+0${horas}:00`;
+  }
+  function lunesDe(fecha: Date): Date {
+    const d = new Date(fecha);
+    d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+    return d;
+  }
+  let lunes = lunesDe(new Date());
+
+  function vista(aviso?: string) {
+    const hay = !!clave();
+    formClave.toggleAttribute('hidden', hay);
+    $('dp-panel').toggleAttribute('hidden', !hay);
+    const err = $('dp-clave-error');
+    err.textContent = aviso || '';
+    err.toggleAttribute('hidden', !aviso);
+  }
+
+  async function cargar() {
+    const desde = new Date(lunes);
+    const hasta = new Date(lunes);
+    hasta.setDate(hasta.getDate() + 6);
+    $('dp-rango').textContent = `${fmtCorto.format(desde)} — ${fmtCorto.format(hasta)}`;
+    $('dp-error').setAttribute('hidden', '');
+    $('dp-dias').innerHTML = '<p class="dp-cargando">Calculando disponibilidad…</p>';
+    try {
+      const r = await fetch(`${api}/disponibilidad?desde=${iso(desde)}&hasta=${iso(hasta)}`, {
+        headers: { 'X-Clave-Interna': clave() },
+      });
+      if (r.status === 401) {
+        localStorage.removeItem(ALMACEN);
+        vista('La clave ya no es válida. Vuelve a introducirla.');
+        return;
+      }
+      if (!r.ok) throw new Error(String(r.status));
+      pintar(await r.json());
+    } catch {
+      $('dp-dias').innerHTML = '';
+      const el = $('dp-error');
+      el.textContent = 'No se pudo cargar la disponibilidad. Inténtalo de nuevo.';
+      el.removeAttribute('hidden');
+    }
+  }
+
+  function pintar(datos: any) {
+    $('dp-reglas').textContent =
+      `Sesiones de ${datos.duracion_minutos} min · buffer de ${datos.buffer_minutos} min · ` +
+      `antelación mínima ${datos.antelacion_min_horas} h · reservable hasta el ${datos.maximo} · horas de Madrid`;
+
+    // Los bloqueos vienen en UTC. Un bloqueo puede abarcar varios días (un
+    // viaje, por ejemplo): debe aparecer en TODOS los días que ocupa, y con
+    // una etiqueta que no haga pensar que empieza y acaba el mismo día.
+    const fechas = Object.keys(datos.franjas).sort();
+    const porDia: Record<string, string[]> = {};
+    for (const fecha of fechas) {
+      const desdeDia = new Date(`${fecha}T00:00:00${desfase(fecha)}`);
+      const hastaDia = new Date(desdeDia.getTime() + 24 * 3600 * 1000);
+      porDia[fecha] = [];
+      for (const b of datos.bloqueos) {
+        const ini = new Date(b.inicio);
+        const fin = new Date(b.fin);
+        if (!(ini < hastaDia && fin > desdeDia)) continue;
+        const empiezaAntes = ini <= desdeDia;
+        const acabaDespues = fin >= hastaDia;
+        const etiqueta = empiezaAntes && acabaDespues
+          ? 'Todo el día'
+          : empiezaAntes
+            ? `hasta ${fmtHora.format(fin)}`
+            : acabaDespues
+              ? `desde ${fmtHora.format(ini)}`
+              : `${fmtHora.format(ini)}–${fmtHora.format(fin)}`;
+        porDia[fecha].push(`<li><span class="dp-hora">${etiqueta}</span> ${b.origen}</li>`);
+      }
+    }
+
+    const cont = $('dp-dias');
+    cont.innerHTML = '';
+    for (const fecha of fechas) {
+      const libres = datos.franjas[fecha] as string[];
+      const bloques = porDia[fecha] || [];
+      const tarjeta = document.createElement('div');
+      tarjeta.className = 'dp-dia' + (libres.length ? '' : ' sin-huecos');
+      const crudo = fmtDia.format(new Date(fecha + 'T12:00:00'));
+      const titulo = crudo.charAt(0).toUpperCase() + crudo.slice(1);
+      tarjeta.innerHTML = `
+        <div class="dp-dia-cab">
+          <strong>${titulo}</strong>
+          <span class="${libres.length ? 'dp-si' : 'dp-no'}">${libres.length} ${libres.length === 1 ? 'hueco' : 'huecos'}</span>
+        </div>
+        ${libres.length ? `<div class="dp-huecos">${libres.map((h) => `<span>${h}</span>`).join('')}</div>` : ''}
+        ${bloques.length
+          ? `<ul class="dp-bloqueos">${bloques.join('')}</ul>`
+          : '<p class="dp-vacio">Sin compromisos externos ese día.</p>'}`;
+      cont.appendChild(tarjeta);
+    }
+  }
+
+  formClave.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const campo = document.getElementById('dp-clave') as HTMLInputElement;
+    const valor = campo.value.trim();
+    if (!valor) return;
+    const btn = $('dp-continuar') as HTMLButtonElement;
+    btn.disabled = true;
+    try {
+      const r = await fetch(`${api}/clave`, { method: 'POST', headers: { 'X-Clave-Interna': valor } });
+      if (r.ok) {
+        localStorage.setItem(ALMACEN, valor);
+        campo.value = '';
+        vista();
+        cargar();
+      } else {
+        campo.value = '';
+        vista(r.status === 429 ? 'Demasiados intentos; espera unos minutos.' : 'Clave incorrecta.');
+      }
+    } catch {
+      vista('No se pudo comprobar la clave. Revisa la conexión.');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  $('dp-ant').addEventListener('click', () => { lunes.setDate(lunes.getDate() - 7); cargar(); });
+  $('dp-sig').addEventListener('click', () => { lunes.setDate(lunes.getDate() + 7); cargar(); });
+  $('dp-hoy').addEventListener('click', () => { lunes = lunesDe(new Date()); cargar(); });
+
+  vista();
+  if (clave()) cargar();
+</script>
+
+<style is:global>
+  .dp { max-width: 780px; }
+  .dp [hidden] { display: none !important; }
+  .dp .dp-form { display: flex; flex-direction: column; gap: 16px; }
+  .dp .dp-form > .btn { align-self: flex-start; }
+  .dp .f-field { display: flex; flex-direction: column; gap: 7px; }
+  .dp .f-label { font-size: 14px; font-weight: 500; color: var(--on-navy-2); }
+  .dp .f-input {
+    background: var(--navy-2); border: 1px solid var(--navy-line); border-radius: 8px;
+    color: #fff; padding: 13px 15px; font-family: var(--sans); font-size: 15px;
+    outline: none; transition: border-color 0.2s; width: 100%;
+  }
+  .dp .f-input:focus { border-color: var(--teal-2); }
+  .dp .dp-nav { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
+  .dp .dp-nav-btn {
+    width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--navy-line);
+    background: var(--navy-2); color: var(--on-navy); font-size: 18px;
+  }
+  .dp .dp-nav-btn:hover { border-color: var(--teal-2); }
+  .dp .dp-rango { font-family: var(--head); font-weight: 600; font-size: 16px; color: #fff; }
+  .dp .dp-hoy {
+    margin-left: auto; background: none; border: 1px solid var(--navy-line); border-radius: 8px;
+    color: var(--on-navy); font-family: var(--head); font-weight: 600; font-size: 13px; padding: 8px 14px;
+  }
+  .dp .dp-hoy:hover { border-color: var(--teal-2); }
+  .dp .dp-reglas { font-size: 13px; color: var(--on-navy-2); margin-bottom: 20px; }
+  .dp .dp-cargando { color: var(--on-navy-2); font-size: 15px; padding: 20px 0; }
+  .dp .dp-dias { display: flex; flex-direction: column; gap: 10px; }
+  .dp .dp-dia {
+    background: var(--navy-2); border: 1px solid var(--navy-line);
+    border-radius: var(--radius); padding: 16px 20px;
+  }
+  .dp .dp-dia.sin-huecos { opacity: 0.72; }
+  .dp .dp-dia-cab { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .dp .dp-dia-cab strong { font-family: var(--head); font-size: 16px; color: #fff; }
+  .dp .dp-si { color: var(--teal-2); font-weight: 600; font-size: 14px; }
+  .dp .dp-no { color: var(--on-navy-2); font-weight: 600; font-size: 14px; }
+  .dp .dp-huecos { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .dp .dp-huecos span {
+    background: rgba(92, 198, 198, 0.14); border: 1px solid rgba(92, 198, 198, 0.4);
+    border-radius: 6px; padding: 5px 10px; font-family: var(--head);
+    font-weight: 600; font-size: 14px; color: #fff;
+  }
+  .dp .dp-bloqueos { margin-top: 12px; display: flex; flex-direction: column; gap: 4px; }
+  .dp .dp-bloqueos li { font-size: 13px; color: var(--on-navy-2); }
+  .dp .dp-hora { color: var(--on-navy); font-variant-numeric: tabular-nums; margin-right: 6px; }
+  .dp .dp-vacio { margin-top: 10px; font-size: 13px; color: var(--on-navy-2); }
+  .dp .dp-error {
+    font-size: 15px; padding: 14px 16px; border-radius: 8px; margin-top: 14px;
+    background: rgba(255, 90, 90, 0.12); color: #ffd2d2; border: 1px solid rgba(255, 90, 90, 0.4);
+  }
+</style>

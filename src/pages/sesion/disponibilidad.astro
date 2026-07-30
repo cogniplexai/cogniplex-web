@@ -1,0 +1,36 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import DisponibilidadPanel from '@/components/DisponibilidadPanel.astro';
+---
+
+<BaseLayout
+  title="Disponibilidad efectiva"
+  description="Uso interno: la disponibilidad que ve un cliente."
+  path="/sesion/disponibilidad"
+  noindex
+>
+  <section class="block dark sesion-block">
+    <div class="wrap">
+      <div class="sesion-cab">
+        <p class="eyebrow">Uso interno</p>
+        <h1 class="sec-h">Disponibilidad efectiva</h1>
+        <p class="sec-lead">
+          Lo que vería un cliente al abrir su enlace, y el motivo de cada hora bloqueada.
+          Consultarlo no gasta ningún enlace de reserva.
+        </p>
+      </div>
+      <DisponibilidadPanel />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .sesion-block {
+    min-height: calc(100vh - var(--nav-h));
+    border-top: none;
+  }
+  .sesion-cab {
+    max-width: 780px;
+    margin-bottom: 36px;
+  }
+</style>
