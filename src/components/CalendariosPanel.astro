@@ -29,6 +29,26 @@ import { agendaApi } from '@/config/agenda';
     </div>
     <p class="cal-error" id="cal-error" role="alert" hidden></p>
 
+    <section class="cal-feed" id="cal-feed" hidden>
+      <h2>Ver tus sesiones en otro calendario</h2>
+      <p class="cal-nota">
+        Suscribe este enlace desde Outlook, Google o el Calendario de Apple para que tus
+        sesiones de Cogniplex aparezcan junto al resto de tu agenda. La URL es la llave:
+        quien la tenga verá tus sesiones, así que trátala como una contraseña.
+      </p>
+      <code id="cal-feed-url"></code>
+      <label class="cal-check">
+        <input type="checkbox" id="cal-feed-detalle" />
+        <span>Incluir nombre y empresa del cliente en el título
+          <em>(si el calendario destino es de otra empresa, esos datos acabarán en su sistema)</em></span>
+      </label>
+      <div class="cal-acciones">
+        <button type="button" class="btn btn-primary" id="cal-feed-copiar">Copiar enlace</button>
+        <button type="button" class="btn btn-light-ghost" id="cal-feed-regenerar">Regenerar</button>
+        <button type="button" class="btn btn-light-ghost cal-peligro-btn" id="cal-feed-desactivar">Desactivar</button>
+      </div>
+    </section>
+
     <form class="cal-form cal-nuevo" id="cal-nuevo" hidden>
       <div class="f-field">
         <label class="f-label" for="cal-nombre">Nombre</label>
@@ -151,7 +171,58 @@ import { agendaApi } from '@/config/agenda';
     });
   }
 
+  function pintarFeed(datos: { url: string | null; detalle: boolean }) {
+    const seccion = $('cal-feed');
+    seccion.removeAttribute('hidden');
+    $('cal-feed-url').textContent = datos.url || 'Desactivado. Pulsa «Regenerar» para volver a activarlo.';
+    (document.getElementById('cal-feed-detalle') as HTMLInputElement).checked = datos.detalle;
+    ($('cal-feed-copiar') as HTMLButtonElement).disabled = !datos.url;
+  }
+
+  async function cargarFeed() {
+    try {
+      pintarFeed(await pedir('/feed'));
+    } catch (e) {
+      if ((e as Error).message !== '401') fallo('No se pudo cargar el enlace de suscripción.');
+    }
+  }
+
+  $('cal-feed-copiar').addEventListener('click', async () => {
+    await navigator.clipboard.writeText($('cal-feed-url').textContent || '');
+    const b = $('cal-feed-copiar');
+    b.textContent = 'Copiado ✓';
+    setTimeout(() => (b.textContent = 'Copiar enlace'), 1600);
+  });
+
+  $('cal-feed-regenerar').addEventListener('click', async () => {
+    if (!confirm('Se generará un enlace nuevo y el anterior dejará de funcionar. Tendrás que volver a suscribirte donde lo usaras. ¿Continuar?')) return;
+    try {
+      pintarFeed(await pedir('/feed/regenerar', { method: 'POST' }));
+    } catch (e) {
+      if ((e as Error).message !== '401') fallo((e as Error).message);
+    }
+  });
+
+  $('cal-feed-desactivar').addEventListener('click', async () => {
+    if (!confirm('El enlace dejará de servir el calendario. ¿Continuar?')) return;
+    try {
+      pintarFeed(await pedir('/feed/desactivar', { method: 'POST' }));
+    } catch (e) {
+      if ((e as Error).message !== '401') fallo((e as Error).message);
+    }
+  });
+
+  document.getElementById('cal-feed-detalle')!.addEventListener('change', async (e) => {
+    const marcado = (e.target as HTMLInputElement).checked;
+    try {
+      pintarFeed(await pedir(`/feed/detalle?detalle=${marcado}`, { method: 'POST' }));
+    } catch (err) {
+      if ((err as Error).message !== '401') fallo((err as Error).message);
+    }
+  });
+
   async function cargar() {
+    cargarFeed();
     try {
       pintar((await pedir('/calendarios')).fuentes);
     } catch (e) {
@@ -282,6 +353,19 @@ import { agendaApi } from '@/config/agenda';
     font-size: 15px; padding: 14px 16px; border-radius: 8px; margin-top: 14px;
     background: rgba(255, 90, 90, 0.12); color: #ffd2d2; border: 1px solid rgba(255, 90, 90, 0.4);
   }
+  .cal .cal-feed {
+    margin-top: 26px; padding-top: 24px; border-top: 1px solid var(--navy-line);
+  }
+  .cal .cal-feed h2 {
+    font-family: var(--head); font-weight: 700; font-size: 18px; color: #fff; margin-bottom: 8px;
+  }
+  .cal .cal-feed code {
+    display: block; font-size: 13px; color: #fff; word-break: break-all;
+    background: var(--navy-2); border: 1px solid var(--navy-line);
+    border-radius: 8px; padding: 12px 14px; margin: 14px 0;
+  }
+  .cal .cal-feed .cal-check em { color: var(--on-navy-2); font-style: normal; opacity: 0.85; }
+  .cal .cal-peligro-btn:hover { border-color: #ff8a8a; color: #ffb4b4; }
   .cal .cal-nuevo {
     margin-top: 22px; padding-top: 22px; border-top: 1px solid var(--navy-line);
   }
