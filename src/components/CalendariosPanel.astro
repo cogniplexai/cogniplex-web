@@ -1,0 +1,291 @@
+---
+/**
+ * Uso interno: calendarios externos que bloquean la disponibilidad.
+ * Mismo patrón de clave interna que GeneradorEnlace.astro (validada contra
+ * POST /api/clave y guardada solo en este navegador).
+ */
+import { agendaApi } from '@/config/agenda';
+---
+
+<div class="cal" id="cal" data-api={agendaApi}>
+  <!-- Paso 1: clave interna -->
+  <form class="cal-form" id="cal-clave-form">
+    <div class="f-field">
+      <label class="f-label" for="cal-clave">Clave interna</label>
+      <input class="f-input" type="password" id="cal-clave" autocomplete="current-password"
+        placeholder="La misma de /sesion/nueva" required />
+    </div>
+    <button type="submit" class="btn btn-primary" id="cal-continuar">Continuar</button>
+    <p class="cal-error" id="cal-clave-error" role="alert" hidden></p>
+  </form>
+
+  <!-- Panel -->
+  <div id="cal-panel" hidden>
+    <div class="cal-lista" id="cal-lista"></div>
+
+    <div class="cal-acciones">
+      <button type="button" class="btn btn-primary" id="cal-sincronizar">Sincronizar ahora</button>
+      <button type="button" class="btn btn-light-ghost" id="cal-anadir">Añadir calendario</button>
+    </div>
+    <p class="cal-error" id="cal-error" role="alert" hidden></p>
+
+    <form class="cal-form cal-nuevo" id="cal-nuevo" hidden>
+      <div class="f-field">
+        <label class="f-label" for="cal-nombre">Nombre</label>
+        <input class="f-input" type="text" id="cal-nombre" placeholder="Alten, Google, Zoho…" required />
+      </div>
+      <div class="f-field">
+        <label class="f-label" for="cal-url">Enlace iCal (solo ocupación)</label>
+        <input class="f-input" type="url" id="cal-url" placeholder="https://…/basic.ics" required />
+        <p class="cal-nota">
+          Usa siempre el enlace <strong>de solo libre/ocupado</strong>: los enlaces "privados" o
+          "secretos" incluyen asuntos y asistentes, y no deben salir de su calendario.
+        </p>
+      </div>
+      <label class="cal-check">
+        <input type="checkbox" id="cal-provisionales" checked />
+        <span>Bloquear también las reuniones provisionales (sin confirmar)</span>
+      </label>
+      <label class="cal-check">
+        <input type="checkbox" id="cal-todo-dia" checked />
+        <span>Bloquear los eventos de todo el día</span>
+      </label>
+      <div class="cal-acciones">
+        <button type="submit" class="btn btn-primary" id="cal-guardar">Comprobar y añadir</button>
+        <button type="button" class="btn btn-light-ghost" id="cal-cancelar">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  const raiz = document.getElementById('cal') as HTMLElement;
+  const api = raiz.dataset.api!;
+  const ALMACEN = 'cgx-agenda-clave'; // la misma clave que /sesion/nueva
+  const $ = (id: string) => document.getElementById(id) as HTMLElement;
+  const clave = () => localStorage.getItem(ALMACEN) || '';
+
+  const formClave = $('cal-clave-form') as unknown as HTMLFormElement;
+  const formNuevo = $('cal-nuevo') as unknown as HTMLFormElement;
+
+  function vista(aviso?: string) {
+    const hay = !!clave();
+    formClave.toggleAttribute('hidden', hay);
+    $('cal-panel').toggleAttribute('hidden', !hay);
+    const err = $('cal-clave-error');
+    err.textContent = aviso || '';
+    err.toggleAttribute('hidden', !aviso);
+  }
+
+  function fallo(texto: string) {
+    const el = $('cal-error');
+    el.textContent = texto;
+    el.removeAttribute('hidden');
+  }
+
+  async function pedir(ruta: string, opciones: RequestInit = {}) {
+    const r = await fetch(`${api}${ruta}`, {
+      ...opciones,
+      headers: { 'Content-Type': 'application/json', 'X-Clave-Interna': clave(), ...(opciones.headers || {}) },
+    });
+    if (r.status === 401) {
+      localStorage.removeItem(ALMACEN);
+      vista('La clave ya no es válida. Vuelve a introducirla.');
+      throw new Error('401');
+    }
+    if (!r.ok) {
+      const cuerpo = await r.json().catch(() => ({}));
+      throw new Error(cuerpo?.detail?.detalle || cuerpo?.detail?.codigo || `error ${r.status}`);
+    }
+    return r.status === 204 ? null : r.json();
+  }
+
+  function hace(iso: string | null): string {
+    if (!iso) return 'nunca';
+    const minutos = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+    if (minutos < 1) return 'hace un momento';
+    if (minutos < 60) return `hace ${minutos} min`;
+    const horas = Math.round(minutos / 60);
+    return horas < 24 ? `hace ${horas} h` : `hace ${Math.round(horas / 24)} días`;
+  }
+
+  function pintar(fuentes: any[]) {
+    const lista = $('cal-lista');
+    lista.innerHTML = '';
+    if (!fuentes.length) {
+      lista.innerHTML = '<p class="cal-nota">No hay calendarios conectados: la disponibilidad solo tiene en cuenta las citas ya reservadas.</p>';
+      return;
+    }
+    for (const f of fuentes) {
+      const fila = document.createElement('div');
+      fila.className = 'cal-fila' + (f.error ? ' con-error' : '') + (f.activa ? '' : ' inactiva');
+      const estado = f.error
+        ? `<span class="cal-mal">Error ${hace(f.ultimo_intento)}</span> · último dato correcto ${hace(f.ultimo_ok)}`
+        : `<span class="cal-bien">Al día</span> · ${hace(f.ultimo_ok)}`;
+      fila.innerHTML = `
+        <div class="cal-datos">
+          <strong>${f.nombre}</strong>
+          <span class="cal-estado">${f.activa ? estado : 'Desactivado'}</span>
+          <span class="cal-nota">${f.n_intervalos} bloqueos${f.error ? ' (se mantienen los últimos conocidos)' : ''}</span>
+        </div>
+        <div class="cal-botones">
+          <button type="button" data-accion="activa" data-id="${f.id}" data-valor="${f.activa ? 0 : 1}">${f.activa ? 'Desactivar' : 'Activar'}</button>
+          <button type="button" data-accion="borrar" data-id="${f.id}" class="cal-peligro">Borrar</button>
+        </div>`;
+      lista.appendChild(fila);
+    }
+    lista.querySelectorAll<HTMLButtonElement>('button[data-accion]').forEach((b) => {
+      b.addEventListener('click', async () => {
+        const id = b.dataset.id;
+        try {
+          if (b.dataset.accion === 'borrar') {
+            if (!confirm('¿Borrar este calendario? Sus bloqueos desaparecerán de la disponibilidad.')) return;
+            pintar((await pedir(`/calendarios/${id}`, { method: 'DELETE' })).fuentes);
+          } else {
+            pintar((await pedir(`/calendarios/${id}/activa?activa=${b.dataset.valor === '1'}`, { method: 'POST' })).fuentes);
+          }
+        } catch (e) {
+          if ((e as Error).message !== '401') fallo((e as Error).message);
+        }
+      });
+    });
+  }
+
+  async function cargar() {
+    try {
+      pintar((await pedir('/calendarios')).fuentes);
+    } catch (e) {
+      if ((e as Error).message !== '401') fallo('No se pudo cargar el estado de los calendarios.');
+    }
+  }
+
+  formClave.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const campo = document.getElementById('cal-clave') as HTMLInputElement;
+    const valor = campo.value.trim();
+    if (!valor) return;
+    const btn = $('cal-continuar') as HTMLButtonElement;
+    btn.disabled = true;
+    try {
+      const r = await fetch(`${api}/clave`, { method: 'POST', headers: { 'X-Clave-Interna': valor } });
+      if (r.ok) {
+        localStorage.setItem(ALMACEN, valor);
+        campo.value = '';
+        vista();
+        cargar();
+      } else {
+        campo.value = '';
+        vista(r.status === 429 ? 'Demasiados intentos; espera unos minutos.' : 'Clave incorrecta.');
+      }
+    } catch {
+      vista('No se pudo comprobar la clave. Revisa la conexión.');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  $('cal-sincronizar').addEventListener('click', async () => {
+    const btn = $('cal-sincronizar') as HTMLButtonElement;
+    const texto = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Sincronizando…';
+    $('cal-error').setAttribute('hidden', '');
+    try {
+      const r = await pedir('/calendarios/sincronizar', { method: 'POST' });
+      pintar(r.fuentes);
+      if (r.resultado.error.length) fallo(`No se pudieron leer: ${r.resultado.error.join(' · ')}`);
+    } catch (e) {
+      if ((e as Error).message !== '401') fallo((e as Error).message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = texto;
+    }
+  });
+
+  $('cal-anadir').addEventListener('click', () => formNuevo.removeAttribute('hidden'));
+  $('cal-cancelar').addEventListener('click', () => formNuevo.setAttribute('hidden', ''));
+
+  formNuevo.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = $('cal-guardar') as HTMLButtonElement;
+    btn.disabled = true;
+    btn.textContent = 'Comprobando el enlace…';
+    $('cal-error').setAttribute('hidden', '');
+    try {
+      const r = await pedir('/calendarios', {
+        method: 'POST',
+        body: JSON.stringify({
+          nombre: (document.getElementById('cal-nombre') as HTMLInputElement).value.trim(),
+          url: (document.getElementById('cal-url') as HTMLInputElement).value.trim(),
+          bloquear_provisionales: (document.getElementById('cal-provisionales') as HTMLInputElement).checked,
+          bloquear_todo_el_dia: (document.getElementById('cal-todo-dia') as HTMLInputElement).checked,
+        }),
+      });
+      pintar(r.fuentes);
+      formNuevo.reset();
+      formNuevo.setAttribute('hidden', '');
+    } catch (err) {
+      if ((err as Error).message !== '401') fallo(`No se pudo añadir: ${(err as Error).message}`);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Comprobar y añadir';
+    }
+  });
+
+  vista();
+  if (clave()) cargar();
+</script>
+
+<style is:global>
+  .cal { max-width: 720px; }
+  .cal [hidden] { display: none !important; }
+  .cal .cal-form { display: flex; flex-direction: column; gap: 16px; }
+  .cal .cal-form > .btn { align-self: flex-start; }
+  .cal .f-field { display: flex; flex-direction: column; gap: 7px; }
+  .cal .f-label { font-size: 14px; font-weight: 500; color: var(--on-navy-2); }
+  .cal .f-input {
+    background: var(--navy-2); border: 1px solid var(--navy-line); border-radius: 8px;
+    color: #fff; padding: 13px 15px; font-family: var(--sans); font-size: 15px;
+    outline: none; transition: border-color 0.2s; width: 100%;
+  }
+  .cal .f-input::placeholder { color: #6b7a8c; }
+  .cal .f-input:focus { border-color: var(--teal-2); }
+  .cal .cal-nota { font-size: 13px; color: var(--on-navy-2); line-height: 1.5; }
+  .cal .cal-check { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; color: var(--on-navy-2); }
+  .cal .cal-check input { margin-top: 3px; width: 16px; height: 16px; accent-color: var(--teal); }
+  .cal .cal-acciones { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 6px; }
+  .cal button.btn { background: none; }
+  .cal button.btn-primary { background: var(--teal); }
+  .cal button.btn-primary:hover { background: var(--teal-deep); }
+  .cal .cal-lista { display: flex; flex-direction: column; gap: 10px; margin-bottom: 22px; }
+  .cal .cal-fila {
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    background: var(--navy-2); border: 1px solid var(--navy-line);
+    border-radius: var(--radius); padding: 16px 20px;
+  }
+  .cal .cal-fila.con-error { border-color: rgba(255, 120, 120, 0.5); }
+  .cal .cal-fila.inactiva { opacity: 0.55; }
+  .cal .cal-datos { display: flex; flex-direction: column; gap: 3px; }
+  .cal .cal-datos strong { font-family: var(--head); font-size: 16px; color: #fff; }
+  .cal .cal-estado { font-size: 14px; color: var(--on-navy-2); }
+  .cal .cal-bien { color: var(--teal-2); font-weight: 600; }
+  .cal .cal-mal { color: #ffb4b4; font-weight: 600; }
+  .cal .cal-botones { display: flex; gap: 8px; flex-shrink: 0; }
+  .cal .cal-botones button {
+    background: none; border: 1px solid var(--navy-line); border-radius: 8px;
+    color: var(--on-navy); font-family: var(--head); font-weight: 600; font-size: 13px;
+    padding: 8px 14px; transition: border-color var(--dur-fast);
+  }
+  .cal .cal-botones button:hover { border-color: var(--teal-2); }
+  .cal .cal-botones .cal-peligro:hover { border-color: #ff8a8a; color: #ffb4b4; }
+  .cal .cal-error {
+    font-size: 15px; padding: 14px 16px; border-radius: 8px; margin-top: 14px;
+    background: rgba(255, 90, 90, 0.12); color: #ffd2d2; border: 1px solid rgba(255, 90, 90, 0.4);
+  }
+  .cal .cal-nuevo {
+    margin-top: 22px; padding-top: 22px; border-top: 1px solid var(--navy-line);
+  }
+  @media (max-width: 560px) {
+    .cal .cal-fila { flex-direction: column; align-items: flex-start; }
+  }
+</style>
